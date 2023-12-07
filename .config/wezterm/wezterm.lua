@@ -1,11 +1,9 @@
-local wezterm = require 'wezterm'
+local wezterm = require("wezterm")
+local visuals = require("visuals")
 local config = {}
 
-if wezterm.config_builder then
-  config = wezterm.config_builder()
-end
+config = wezterm.config_builder()
 
-config.font_size = 14.0
-config.color_scheme = 'Atom'
+visuals.apply_to_config(config)
 
 return config
