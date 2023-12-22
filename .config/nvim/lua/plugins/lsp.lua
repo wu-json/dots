@@ -4,6 +4,8 @@ return {
     opts = {
       servers = {
         gopls = {},
+        pyright = {},
+        ruff_lsp = {},
         svelte = {},
         tailwindcss = {},
         yamlls = {},
