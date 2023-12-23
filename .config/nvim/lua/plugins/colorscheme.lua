@@ -5,6 +5,11 @@ return {
       options = {
         transparent = true,
       },
+      groups = {
+        all = {
+          NormalFloat = { fg = "fg1", bg = "NONE" },
+        },
+      },
     },
   },
   {
