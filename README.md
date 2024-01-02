@@ -30,7 +30,7 @@ brew install fish
 # install fisher
 brew install fisher
 
-# set up fish as the default shell
+# set up fish as default shell
 fish_add_path /opt/homebrew/bin
 echo "/opt/homebrew/bin/fish" | sudo tee -a /etc/shells
 chsh -s /opt/homebrew/bin/fish
