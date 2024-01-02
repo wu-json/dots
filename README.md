@@ -27,6 +27,9 @@ From there, you will need [Fish Shell](https://github.com/fish-shell/fish-shell)
 # install fish
 brew install fish
 
+# install fisher
+brew install fisher
+
 # set up fish as the default shell
 fish_add_path /opt/homebrew/bin
 echo "/opt/homebrew/bin/fish" | sudo tee -a /etc/shells
