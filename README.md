@@ -27,6 +27,9 @@ From there, you will need [Fish Shell](https://github.com/fish-shell/fish-shell)
 brew install fish
 brew install fisher
 
+# install fisher plugins
+fisher update
+
 # add homebrew to path
 fish_add_path /opt/homebrew/bin
 
