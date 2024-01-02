@@ -24,14 +24,13 @@ brew install fd
 From there, you will need [Fish Shell](https://github.com/fish-shell/fish-shell).
 
 ```
-# install fish
 brew install fish
-
-# install fisher
 brew install fisher
 
-# set up fish as default shell
+# add homebrew to path
 fish_add_path /opt/homebrew/bin
+
+# set up fish as default shell
 echo "/opt/homebrew/bin/fish" | sudo tee -a /etc/shells
 chsh -s /opt/homebrew/bin/fish
 ```
