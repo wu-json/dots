@@ -21,6 +21,18 @@ brew install ripgrep
 brew install fd
 ```
 
+From there, you will need [Fish Shell](https://github.com/fish-shell/fish-shell).
+
+```
+# install fish
+brew install fish
+
+# set up fish as the default shell
+fish_add_path /opt/homebrew/bin
+echo "/opt/homebrew/bin/fish" | sudo tee -a /etc/shells
+chsh -s /opt/homebrew/bin/fish
+```
+
 After installing the above, you will just need [WezTerm](https://wezfurlong.org/wezterm/index.html).
 
 ### SymLink Configs
