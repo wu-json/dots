@@ -1,1 +1,11 @@
 .config/fish/fish_variables
+
+# fisher nvm
+.config/fish/completions/nvm.fish
+.config/fish/conf.d/nvm.fish
+.config/fish/functions/_nvm_index_update.fish
+.config/fish/functions/_nvm_list.fish
+.config/fish/functions/_nvm_version_activate.fish
+.config/fish/functions/_nvm_version_deactivate.fish
+.config/fish/functions/nvm.fish
+
