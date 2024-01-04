@@ -8,6 +8,7 @@ return {
         ruff_lsp = {},
         svelte = {},
         tailwindcss = {},
+        terraformls = {},
         yamlls = {},
       },
     },
