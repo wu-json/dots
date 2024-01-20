@@ -6,6 +6,7 @@ return {
         gopls = {},
         pyright = {},
         ruff_lsp = {},
+        rust_analyzer = {},
         svelte = {},
         tailwindcss = {},
         terraformls = {},
