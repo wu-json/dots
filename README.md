@@ -19,6 +19,9 @@ brew install lazygit
 # for telescope
 brew install ripgrep
 brew install fd
+
+# maintained version of exa, which is a modern ls replacement
+brew install eza
 ```
 
 From there, you will need [Fish Shell](https://github.com/fish-shell/fish-shell).
