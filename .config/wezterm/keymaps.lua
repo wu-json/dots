@@ -6,8 +6,8 @@ local module = {}
 local keymaps = {
 	-- close the current pane
 	{
-		key = "w",
-		mods = "CMD|SHIFT",
+		key = "e",
+		mods = "CMD",
 		action = act.CloseCurrentPane({ confirm = true }),
 	},
 	-- split pane vertically
