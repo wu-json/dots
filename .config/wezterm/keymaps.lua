@@ -8,6 +8,11 @@ local keymaps = {
 		mods = "CMD|SHIFT",
 		action = wezterm.action.CloseCurrentPane({ confirm = true }),
 	},
+	{
+		key = "d",
+		mods = "CMD",
+		action = wezterm.action.SplitVertical({ domain = "CurrentPaneDomain" }),
+	},
 }
 
 function module.apply_to_config(config)
