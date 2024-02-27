@@ -6,9 +6,15 @@ local module = {}
 local keymaps = {
 	-- close the current pane
 	{
-		key = "e",
+		key = "w",
 		mods = "CMD",
 		action = act.CloseCurrentPane({ confirm = true }),
+	},
+	-- close the current tab
+	{
+		key = "e",
+		mods = "CMD",
+		action = act.CloseCurrentTab({ confirm = true }),
 	},
 	-- split pane vertically
 	{
@@ -24,7 +30,7 @@ local keymaps = {
 	},
 	-- navigate between panes
 	{
-		key = "j",
+		key = "h",
 		mods = "CMD",
 		action = act.ActivatePaneDirection("Left"),
 	},
@@ -34,12 +40,12 @@ local keymaps = {
 		action = act.ActivatePaneDirection("Right"),
 	},
 	{
-		key = "i",
+		key = "k",
 		mods = "CMD",
 		action = act.ActivatePaneDirection("Up"),
 	},
 	{
-		key = "k",
+		key = "j",
 		mods = "CMD",
 		action = act.ActivatePaneDirection("Down"),
 	},
