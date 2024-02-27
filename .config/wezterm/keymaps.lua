@@ -1,22 +1,47 @@
 local wezterm = require("wezterm")
+local act = wezterm.action
 
 local module = {}
 
 local keymaps = {
+	-- close the current pane
 	{
 		key = "w",
 		mods = "CMD|SHIFT",
-		action = wezterm.action.CloseCurrentPane({ confirm = true }),
+		action = act.CloseCurrentPane({ confirm = true }),
 	},
+	-- split pane vertically
 	{
 		key = "d",
 		mods = "CMD",
-		action = wezterm.action.SplitVertical({ domain = "CurrentPaneDomain" }),
+		action = act.SplitVertical({ domain = "CurrentPaneDomain" }),
 	},
+	-- split pane horizontally
 	{
 		key = "f",
 		mods = "CMD",
-		action = wezterm.action.SplitHorizontal({ domain = "CurrentPaneDomain" }),
+		action = act.SplitHorizontal({ domain = "CurrentPaneDomain" }),
+	},
+	-- navigate between panes
+	{
+		key = "j",
+		mods = "CMD",
+		action = act.ActivatePaneDirection("Left"),
+	},
+	{
+		key = "l",
+		mods = "CMD",
+		action = act.ActivatePaneDirection("Right"),
+	},
+	{
+		key = "i",
+		mods = "CMD",
+		action = act.ActivatePaneDirection("Up"),
+	},
+	{
+		key = "k",
+		mods = "CMD",
+		action = act.ActivatePaneDirection("Down"),
 	},
 }
 
