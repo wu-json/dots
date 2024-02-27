@@ -13,6 +13,11 @@ local keymaps = {
 		mods = "CMD",
 		action = wezterm.action.SplitVertical({ domain = "CurrentPaneDomain" }),
 	},
+	{
+		key = "f",
+		mods = "CMD",
+		action = wezterm.action.SplitHorizontal({ domain = "CurrentPaneDomain" }),
+	},
 }
 
 function module.apply_to_config(config)
