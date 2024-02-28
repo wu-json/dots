@@ -49,6 +49,27 @@ local keymaps = {
 		mods = "CMD",
 		action = act.ActivatePaneDirection("Down"),
 	},
+	-- adjust pane size
+	{
+		key = "h",
+		mods = "CMD|SHIFT",
+		action = act.AdjustPaneSize({ "Left", 1 }),
+	},
+	{
+		key = "l",
+		mods = "CMD|SHIFT",
+		action = act.AdjustPaneSize({ "Right", 1 }),
+	},
+	{
+		key = "k",
+		mods = "CMD|SHIFT",
+		action = act.AdjustPaneSize({ "Up", 1 }),
+	},
+	{
+		key = "j",
+		mods = "CMD|SHIFT",
+		action = act.AdjustPaneSize({ "Down", 1 }),
+	},
 }
 
 function module.apply_to_config(config)
