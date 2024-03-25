@@ -48,6 +48,7 @@ After installing the above, you will just need [WezTerm](https://wezfurlong.org/
 After installing the above prerequisites, you can clone this repo somewhere and then make symbolic links to the directories in `.config` like so:
 
 ```bash
+ln -s $HOME/GitHub/personal/dotfiles/.config/karabiner $HOME/.config/karabiner
 ln -s $HOME/GitHub/personal/dotfiles/.config/fish $HOME/.config/fish
 ln -s $HOME/GitHub/personal/dotfiles/.config/nvim $HOME/.config/nvim
 ln -s $HOME/GitHub/personal/dotfiles/.config/wezterm $HOME/.config/wezterm
