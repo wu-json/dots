@@ -4,3 +4,4 @@
 local map = vim.keymap.set
 
 map("n", "<leader>E", "<cmd>Explore<cr>", { desc = "Open netrw explorer" })
+map("n", "<leader>bk", "<cmd>BWipeout other<cr>", { desc = "Delete all other buffers" })
