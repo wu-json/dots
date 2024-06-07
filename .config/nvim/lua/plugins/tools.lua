@@ -9,4 +9,6 @@ return {
       })
     end,
   },
+  { "iamcco/markdown-preview.nvim" },
+  { "rhysd/git-messenger.vim" },
 }
