@@ -1,9 +1,7 @@
 return {
   {
     "LazyVim/LazyVim",
-    opts = {
-      colorscheme = "kanagawa",
-    },
+    opts = { colorscheme = "kanagawa" },
   },
   {
     "rebelot/kanagawa.nvim",
@@ -25,7 +23,8 @@ return {
             NormalFloat = { bg = "none" },
             FloatBorder = { bg = "none" },
             FloatTitle = { bg = "none" },
-            TelescopeTitle = { fg = theme.ui.special, bold = true },
+            TelescopeTitle = { fg = theme.ui.special, bg = "none", bold = true },
+            TelescopeBorder = { bg = "none" },
             TelescopePromptNormal = { bg = "none" },
             TelescopePromptBorder = { fg = "none", bg = "none" },
             TelescopeResultsNormal = { fg = "none", bg = "none" },
