@@ -4,7 +4,7 @@ These are my dotfiles for my WezTerm + Fish + Neovim (LazyVim) development setup
 
 > I decided to go down the NeoVim rabbit-hole early December 2023 after seeing some really pretty setups on YouTube. I gave LunarVim a try in November 2023 very unsuccessfully, but the second time around I chose LazyVim and fell in love.
 
-![Screenshot 2023-12-23 at 2 08 10 PM](https://github.com/wu-json/dotfiles/assets/45532884/5db8b27b-a226-4f17-b306-c61671314711)
+![Screenshot 2024-08-03 at 3 57 08 PM](https://github.com/user-attachments/assets/eb14b207-4261-4612-8fbe-3f91ea3b4264)
 
 ## Setup
 
