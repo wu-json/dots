@@ -5,5 +5,5 @@ return {
     "akinsho/bufferline.nvim",
     version = "*",
   },
-  { "kazhala/close-buffers.nvim" },
+  { "schickling/vim-bufonly" },
 }
