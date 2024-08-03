@@ -60,5 +60,3 @@ ln -s $HOME/GitHub/personal/dotfiles/.config/wezterm $HOME/.config/wezterm
   - Allows you to preview markdown files in your browser with `:MarkdownPreview` command.
 - [Git Messenger](https://github.com/rhysd/git-messenger.vim)
   - Gives you git blame with `<Leader>gm` in a nice hovering window.
-- [Nightfox Theme](https://github.com/EdenEast/nightfox.nvim)
-  - So freaking pretty.
