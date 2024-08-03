@@ -1,16 +1,21 @@
 return {
   {
-    "rose-pine/neovim",
-    name = "rose-pine",
+    "LazyVim/LazyVim",
     opts = {
-      dark_variant = "moon",
-      styles = { transparency = true },
+      colorscheme = "terafox",
     },
   },
   {
-    "LazyVim/LazyVim",
+    "EdenEast/nightfox.nvim",
     opts = {
-      colorscheme = "rose-pine",
+      options = {
+        transparent = true,
+      },
+      groups = {
+        all = {
+          NormalFloat = { fg = "fg1", bg = "NONE" },
+        },
+      },
     },
   },
   {
