@@ -2,16 +2,24 @@ return {
   {
     "LazyVim/LazyVim",
     opts = {
-      colorscheme = "kanagawabones",
+      colorscheme = "kanagawa",
     },
   },
   {
-    "zenbones-theme/zenbones.nvim",
-    init = function()
-      vim.g.kanagawabones_transparent_background = true
-    end,
-    dependencies = {
-      "rktjmp/lush.nvim",
+    "rebelot/kanagawa.nvim",
+    opts = {
+      transparent = true,
+      colors = {
+        theme = {
+          all = {
+            ui = {
+              float = {
+                bg = "none",
+              },
+            },
+          },
+        },
+      },
     },
   },
   {
