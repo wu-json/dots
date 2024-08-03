@@ -2,20 +2,16 @@ return {
   {
     "LazyVim/LazyVim",
     opts = {
-      colorscheme = "nordfox",
+      colorscheme = "kanagawabones",
     },
   },
   {
-    "EdenEast/nightfox.nvim",
-    opts = {
-      options = {
-        transparent = true,
-      },
-      groups = {
-        all = {
-          NormalFloat = { fg = "fg1", bg = "NONE" },
-        },
-      },
+    "zenbones-theme/zenbones.nvim",
+    init = function()
+      vim.g.kanagawabones_transparent_background = true
+    end,
+    dependencies = {
+      "rktjmp/lush.nvim",
     },
   },
   {
