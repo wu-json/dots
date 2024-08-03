@@ -13,6 +13,7 @@ return {
         theme = {
           all = {
             ui = {
+              bg_gutter = "none",
               float = {
                 bg = "none",
               },
