@@ -1,12 +1,9 @@
 return {
   {
-    "kylechui/nvim-surround",
-    version = "*", -- Use for stability; omit to use `main` branch for the latest features
-    event = "VeryLazy",
+    "echasnovski/mini.nvim",
+    version = "*",
     config = function()
-      require("nvim-surround").setup({
-        -- Configuration here, or leave empty to use defaults
-      })
+      require("mini.surround").setup()
     end,
   },
   { "iamcco/markdown-preview.nvim" },
