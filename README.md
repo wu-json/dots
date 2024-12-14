@@ -16,9 +16,8 @@ You will first need to install some prerequisites for LazyVim:
 brew install neovim
 brew install lazygit
 
-# for telescope
-brew install ripgrep
-brew install fd
+# for fzf-lua
+brew install fzf
 
 # maintained version of exa, which is a modern ls replacement
 brew install eza
