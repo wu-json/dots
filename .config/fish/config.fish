@@ -1,4 +1,5 @@
 alias ghcl="github_clean"
+alias tabby_up="tabby_up"
 alias ls="eza"
 alias tree="eza --tree"
 
