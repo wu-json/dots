@@ -18,6 +18,8 @@ brew install lazygit
 
 # for fzf-lua
 brew install fzf
+brew install ripgrep
+brew install fd
 
 # maintained version of exa, which is a modern ls replacement
 brew install eza
