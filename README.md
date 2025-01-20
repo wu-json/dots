@@ -43,9 +43,6 @@ chsh -s /opt/homebrew/bin/fish
 ```
 
 Now it's time to install my terminal of choice: [WezTerm](https://wezfurlong.org/wezterm/index.html).
-
-For AI code completion, install [Tabby ML](https://tabby.tabbyml.com/docs/quick-start/installation/apple/). This runs models locally so no need for security concerns! You will also want to specify a configuration like so in `~/.tabby-client/agent/config.toml`.
-
 ```toml
 [server]
 endpoint = "http://localhost:8085"
