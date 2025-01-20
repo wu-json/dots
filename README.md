@@ -43,15 +43,12 @@ chsh -s /opt/homebrew/bin/fish
 ```
 
 Now it's time to install my terminal of choice: [WezTerm](https://wezfurlong.org/wezterm/index.html).
-```toml
-[server]
-endpoint = "http://localhost:8085"
-token = "some-token"
 
-[anonymousUsageTracking]
-disable = true
+Finally, you will want to set your Anthropic API key in Fish to be able to use [avante.nvim](https://github.com/yetone/avante.nvim) for a Cursor-like Neovim experience.
+
+```bash
+set -Ux ANTHROPIC_API_KEY some-api-key
 ```
-
 
 ### SymLink Configs
 
