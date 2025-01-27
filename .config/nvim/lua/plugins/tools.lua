@@ -27,38 +27,6 @@ return {
           api_key_name = "",
           endpoint = "http://127.0.0.1:11434/v1",
           model = "deepseek-r1:14b",
-          -- This is to let us parse out the "think" content. I stole this from: https://github.com/yetone/avante.nvim/issues/1115
-          parse_stream_data = function(data, handler_opts)
-            local json_data = vim.fn.json_decode(data)
-
-            if json_data then
-              -- Check for final message with "done: true"
-              if json_data.done then
-                handler_opts.on_complete(nil) -- Signal completion
-                return
-              end
-
-              if json_data.message and json_data.message.content then
-                local content = json_data.message.content
-
-                -- Track and accumulate content after <think> tag
-                if not handler_opts.in_think_block and content:match("<think>") then
-                  handler_opts.in_think_block = true
-                  return
-                end
-
-                if handler_opts.in_think_block and content:match("</think>") then
-                  handler_opts.in_think_block = false
-                  return
-                end
-
-                -- Only pass content when not in think block
-                if not handler_opts.in_think_block and content ~= "" then
-                  handler_opts.on_chunk(content)
-                end
-              end
-            end
-          end,
         },
       },
     },
