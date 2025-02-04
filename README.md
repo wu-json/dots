@@ -61,9 +61,3 @@ ln -s $HOME/GitHub/personal/dotfiles/.config/nvim $HOME/.config/nvim
 ln -s $HOME/GitHub/personal/dotfiles/.config/wezterm $HOME/.config/wezterm
 ```
 
-## What's Included?
-
-- [Markdown Preview](https://github.com/iamcco/markdown-preview.nvim)
-  - Allows you to preview markdown files in your browser with `:MarkdownPreview` command.
-- [Git Messenger](https://github.com/rhysd/git-messenger.vim)
-  - Gives you git blame with `<Leader>gm` in a nice hovering window.
