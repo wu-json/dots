@@ -12,8 +12,19 @@ return {
         tailwindcss = {},
         terraformls = {},
         yamlls = {},
+
+        -- These are all for TypeScript but we disable them because they are hella slow.
+        -- Instead we opt to use typescript-tools: https://github.com/pmizio/typescript-tools.nvim
+        tsserver = { enabled = false },
+        ts_ls = { enabled = false },
+        vtsls = { enabled = false },
       },
     },
+  },
+  {
+    "pmizio/typescript-tools.nvim",
+    dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
+    opts = {},
   },
   {
     "akinsho/flutter-tools.nvim",
