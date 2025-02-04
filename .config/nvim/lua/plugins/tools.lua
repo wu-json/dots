@@ -6,7 +6,6 @@ return {
       require("mini.surround").setup()
     end,
   },
-  { "iamcco/markdown-preview.nvim" },
   { "rhysd/git-messenger.vim" },
   {
     "yetone/avante.nvim",
