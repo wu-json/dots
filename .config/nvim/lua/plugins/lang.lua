@@ -36,11 +36,6 @@ return {
     end,
   },
   {
-    -- Format TS/JS files with Biome
-    "williamboman/mason.nvim",
-    opts = { ensure_installed = { "biome" } },
-  },
-  {
     "akinsho/flutter-tools.nvim",
     lazy = false,
     dependencies = {
