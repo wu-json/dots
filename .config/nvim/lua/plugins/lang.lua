@@ -24,7 +24,16 @@ return {
   {
     "pmizio/typescript-tools.nvim",
     dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
-    opts = {},
+    config = function()
+      require("typescript-tools").setup({
+        on_attach = function(client)
+          -- Disable formatting from typescript-tools since lazyvim uses conform for
+          -- formatting making this redundant.
+          client.server_capabilities.documentFormattingProvider = false
+          client.server_capabilities.documentRangeFormattingProvider = false
+        end,
+      })
+    end,
   },
   {
     -- Format TS/JS files with Biome
