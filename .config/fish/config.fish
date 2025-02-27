@@ -1,5 +1,5 @@
 # GitHub
-alias ghcl="github_clean"
+alias gtc="github_clean"
 alias gtss="graphite_sync_and_submit"
 
 # Eza
