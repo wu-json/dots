@@ -1,7 +1,18 @@
 local module = {}
 
 function module.apply_to_config(config)
-	config.color_scheme = "nightfox"
+	config.color_schemes = {
+		["nier"] = {
+			background = "#cdc8b0",
+			foreground = "#4f4c43",
+			brights = { "#4f4c43", "#4f4c43", "#4f4c43", "#4f4c43", "#4f4c43", "#4f4c43", "#4f4c43", "#4f4c43" },
+			ansi = { "#4f4c43", "#4f4c43", "#4f4c43", "#4f4c43", "#4f4c43", "#4f4c43", "#4f4c43", "#4f4c43" },
+			cursor_bg = "#686458",
+			cursor_fg = "#c7c2aa",
+		},
+	}
+
+	config.color_scheme = "nier"
 	config.enable_tab_bar = false
 	config.font_size = 16.0
 	config.hide_tab_bar_if_only_one_tab = true
