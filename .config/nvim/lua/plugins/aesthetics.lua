@@ -1,8 +1,11 @@
 return {
   {
     "rktjmp/lush.nvim",
-    -- if you wish to use your own colorscheme:
-    -- { dir = '/absolute/path/to/colorscheme', lazy = true },
+    { dir = "/Users/jasonwu/GitHub/personal/automata", lazy = true },
+  },
+  {
+    "LazyVim/LazyVim",
+    opts = { colorscheme = "automata" },
   },
   {
     "rcarriga/nvim-notify",
