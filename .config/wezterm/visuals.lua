@@ -3,31 +3,21 @@ local module = {}
 local desert_sand = "hsl: 48 30 79"
 local machine_rust = "hsl: 48 8 38"
 
+local function generate_single_color_array(color)
+	local colors = {}
+	for i = 1, 8 do
+		colors[i] = color
+	end
+	return colors
+end
+
 function module.apply_to_config(config)
 	config.color_schemes = {
 		["nier"] = {
 			background = desert_sand,
 			foreground = machine_rust,
-			brights = {
-				machine_rust,
-				machine_rust,
-				machine_rust,
-				machine_rust,
-				machine_rust,
-				machine_rust,
-				machine_rust,
-				machine_rust,
-			},
-			ansi = {
-				machine_rust,
-				machine_rust,
-				machine_rust,
-				machine_rust,
-				machine_rust,
-				machine_rust,
-				machine_rust,
-				machine_rust,
-			},
+			brights = generate_single_color_array(machine_rust),
+			ansi = generate_single_color_array(machine_rust),
 			cursor_bg = machine_rust,
 			cursor_fg = desert_sand,
 		},
