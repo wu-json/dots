@@ -1,7 +1,7 @@
 local module = {}
 
 local desert_sand = "hsl: 48 30 79"
-local machine_rust = "hsl: 48 8 32"
+local machine_rust = "hsl: 48 8 38"
 
 function module.apply_to_config(config)
 	config.color_schemes = {
@@ -28,8 +28,8 @@ function module.apply_to_config(config)
 				machine_rust,
 				machine_rust,
 			},
-			cursor_bg = "#686458",
-			cursor_fg = "#c7c2aa",
+			cursor_bg = machine_rust,
+			cursor_fg = desert_sand,
 		},
 	}
 
