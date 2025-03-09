@@ -8,7 +8,6 @@ return {
         pyright = {},
         ruff_lsp = {},
         rust_analyzer = {},
-        svelte = {},
         tailwindcss = {},
         terraformls = {},
         yamlls = {},
@@ -36,19 +35,6 @@ return {
     end,
   },
   {
-    "akinsho/flutter-tools.nvim",
-    lazy = false,
-    dependencies = {
-      "nvim-lua/plenary.nvim",
-      "stevearc/dressing.nvim", -- optional for vim.ui.select
-    },
-    config = function()
-      require("flutter-tools").setup({
-        closing_tags = { enabled = false },
-      })
-    end,
-  },
-  {
     "nvim-treesitter/nvim-treesitter",
     opts = {
       ensure_installed = {
@@ -59,7 +45,6 @@ return {
         "hcl",
         "python",
         "rst",
-        "svelte",
         "terraform",
         "toml",
         "yaml",
