@@ -1,12 +1,33 @@
 local module = {}
 
+local desert_sand = "hsl: 48 30 79"
+local machine_rust = "hsl: 48 8 32"
+
 function module.apply_to_config(config)
 	config.color_schemes = {
 		["nier"] = {
-			background = "#cdc8b0",
-			foreground = "#4f4c43",
-			brights = { "#4f4c43", "#4f4c43", "#4f4c43", "#4f4c43", "#4f4c43", "#4f4c43", "#4f4c43", "#4f4c43" },
-			ansi = { "#4f4c43", "#4f4c43", "#4f4c43", "#4f4c43", "#4f4c43", "#4f4c43", "#4f4c43", "#4f4c43" },
+			background = desert_sand,
+			foreground = machine_rust,
+			brights = {
+				machine_rust,
+				machine_rust,
+				machine_rust,
+				machine_rust,
+				machine_rust,
+				machine_rust,
+				machine_rust,
+				machine_rust,
+			},
+			ansi = {
+				machine_rust,
+				machine_rust,
+				machine_rust,
+				machine_rust,
+				machine_rust,
+				machine_rust,
+				machine_rust,
+				machine_rust,
+			},
 			cursor_bg = "#686458",
 			cursor_fg = "#c7c2aa",
 		},
