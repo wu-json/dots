@@ -1,6 +1,7 @@
 # GitHub
 alias gtc="github_clean"
-alias gtss="graphite_sync_and_submit"
+alias gtss="gt sync && gt submit"
+alias gtcr="gr create"
 
 # Eza
 alias ls="eza"
