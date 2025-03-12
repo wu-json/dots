@@ -1,7 +1,7 @@
 # GitHub
 alias gtc="github_clean"
 alias gtss="gt sync && gt submit"
-alias gtcr="gr create"
+alias gtcr="gt create"
 
 # Eza
 alias ls="eza"
