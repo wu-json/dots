@@ -3,6 +3,7 @@ alias gtc="github_clean"
 alias gtss="gt sync && gt submit"
 alias gtcr="gt create"
 alias gtr="gt restack"
+alias tc="terminal_cross"
 
 # Eza
 alias ls="eza"
