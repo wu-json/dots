@@ -14,6 +14,6 @@
 .config/karabiner/automatic_backups
 
 # local fish files that I don't want to reveal to the world
-**/*.local.fish
+forge_code.fish
 forge_launch.fish
 
