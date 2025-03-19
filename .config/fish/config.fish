@@ -6,6 +6,9 @@ alias gtss="gt sync && gt submit"
 alias gtcr="gt create"
 alias gtr="gt restack"
 
+# Dotfiles
+alias dc="dotfiles_config"
+
 # Forge
 alias fc="forge_code"
 alias fl="forge_launch"
