@@ -71,7 +71,7 @@ local keymaps = {
 		action = act.AdjustPaneSize({ "Down", 1 }),
 	},
 	{
-		key = "m",
+		key = "q",
 		mods = "CMD",
 		action = wezterm.action.CloseCurrentTab({ confirm = true }),
 	},
