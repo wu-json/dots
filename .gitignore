@@ -13,3 +13,6 @@
 .config/karabiner/assets
 .config/karabiner/automatic_backups
 
+# local fish files that I don't want to reveal to the world
+**/*.local.fish
+
