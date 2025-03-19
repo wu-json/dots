@@ -70,6 +70,11 @@ local keymaps = {
 		mods = "CMD|SHIFT",
 		action = act.AdjustPaneSize({ "Down", 1 }),
 	},
+	{
+		key = "m",
+		mods = "CMD",
+		action = wezterm.action.CloseCurrentTab({ confirm = true }),
+	},
 }
 
 function module.apply_to_config(config)
