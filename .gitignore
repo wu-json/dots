@@ -15,4 +15,5 @@
 
 # local fish files that I don't want to reveal to the world
 **/*.local.fish
+forge_launch.fish
 
