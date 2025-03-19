@@ -1,8 +1,14 @@
 # GitHub
 alias gtc="github_clean"
+
+# Graphite
 alias gtss="gt sync && gt submit"
 alias gtcr="gt create"
 alias gtr="gt restack"
+
+# Forge
+alias fc="forge_code"
+alias fl="forge_launch"
 
 # Eza
 alias ls="eza"
