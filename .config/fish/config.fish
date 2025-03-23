@@ -6,6 +6,8 @@ alias gtss="gt sync && gt submit"
 alias gtcr="gt create"
 alias gtr="gt restack"
 alias gtl="gt ls"
+alias gtmod="gt modify"
+alias gtmov="gt move"
 
 # Dotfiles
 alias dc="dotfiles_config"
