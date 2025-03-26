@@ -13,7 +13,7 @@ alias dc="dotfiles_config"
 
 # Forge
 alias fc="forge_code"
-alias fl="forge_launch"
+alias fl="forge_launch_v2"
 alias forgectl="/Users/jasonwu/GitHub/forge/monorepo/tools/forgectl/forgectl"
 
 # Eza
