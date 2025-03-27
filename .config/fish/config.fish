@@ -7,6 +7,7 @@ alias gtcr="gt create"
 alias gtr="gt restack"
 alias gtl="gt ls"
 alias gtm="gt modify"
+alias gta="gt absorb"
 
 # Dotfiles
 alias dc="dotfiles_config"
