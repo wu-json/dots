@@ -1,11 +1,4 @@
 return {
-  {
-    "echasnovski/mini.nvim",
-    version = "*",
-    config = function()
-      require("mini.surround").setup()
-    end,
-  },
   { "rhysd/git-messenger.vim" },
   {
     "yetone/avante.nvim",
