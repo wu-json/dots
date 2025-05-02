@@ -39,7 +39,4 @@ return {
       },
     },
   },
-  {
-    "LunarVim/bigfile.nvim",
-  },
 }
