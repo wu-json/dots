@@ -1,5 +1,5 @@
 # GitHub
-alias gtc="github_clean"
+alias gtc="clean_graphite_branches"
 
 # Graphite
 alias gtss="gt sync && gt submit"
