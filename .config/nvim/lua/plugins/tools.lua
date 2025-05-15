@@ -12,6 +12,7 @@ return {
         model = "claude-3-5-sonnet-20241022",
         temperature = 0,
         max_tokens = 4096,
+        disable_tools = true, -- disable tools!
       },
     },
     build = "make",
