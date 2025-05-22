@@ -9,10 +9,10 @@ return {
       provider = "claude",
       claude = {
         endpoint = "https://api.anthropic.com",
-        model = "claude-3-5-sonnet-20241022",
+        model = "claude-sonnet-4-20250514",
         temperature = 0,
         max_tokens = 4096,
-        disable_tools = true, -- disable tools!
+        disable_tools = true,
       },
     },
     build = "make",
