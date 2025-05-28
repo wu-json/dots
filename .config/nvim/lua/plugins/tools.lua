@@ -3,8 +3,8 @@ return {
   {
     "yetone/avante.nvim",
     event = "VeryLazy",
+    version = "v0.0.23", -- Fix version because latest is buggy af
     lazy = false,
-    version = false,
     opts = {
       provider = "claude",
       claude = {
