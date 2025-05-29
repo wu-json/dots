@@ -17,9 +17,6 @@ return {
     opts = { colorscheme = "nightfox" },
   },
   {
-    "rcarriga/nvim-notify",
-    opts = {
-      background_colour = "#000000",
-    },
+    "j-hui/fidget.nvim",
   },
 }
