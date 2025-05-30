@@ -5,7 +5,7 @@ return {
   root_markers = { ".sand" },
   handlers = {
     -- Surface messages from LSP as notifications
-    ["window/showMessage"] = function(_, result, ctx)
+    ["window/showMessage"] = function(_, result)
       local message = result.message or "Unknown message"
       local message_type = result.type or 1
 
