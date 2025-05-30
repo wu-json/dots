@@ -4,7 +4,7 @@ return {
   filetypes = { "sand" },
   root_markers = { ".sand" },
   handlers = {
-    -- handle rename request for certain code actions like extracting functions / types
+    -- Surface messages from LSP as notifications
     ["window/showMessage"] = function(_, result, ctx)
       local message = result.message or "Unknown message"
       local message_type = result.type or 1
