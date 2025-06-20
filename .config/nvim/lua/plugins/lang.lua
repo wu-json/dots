@@ -51,4 +51,26 @@ return {
       },
     },
   },
+  {
+    -- Need this to set up biome v2
+    "stevearc/conform.nvim",
+    opts = {
+      formatters_by_ft = {
+        javascript = { "biome" },
+        javascriptreact = { "biome" },
+        typescript = { "biome" },
+        typescriptreact = { "biome" },
+        json = { "biome" },
+        jsonc = { "biome" },
+      },
+      formatters = {
+        biome = {
+          command = "./node_modules/.bin/biome",
+          args = { "format", "--stdin-file-path", "$FILENAME" },
+          stdin = true,
+          require_cwd = true, -- Requires biome.json in project root
+        },
+      },
+    },
+  },
 }
