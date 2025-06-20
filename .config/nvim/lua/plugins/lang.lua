@@ -17,7 +17,6 @@ return {
         tsserver = { enabled = false },
         ts_ls = { enabled = false },
         vtsls = { enabled = false },
-        biome = {},
       },
     },
   },
