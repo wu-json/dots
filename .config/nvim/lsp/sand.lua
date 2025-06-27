@@ -1,8 +1,8 @@
 return {
   name = "sand",
-  cmd = { "sand", "--stdio" },
+  cmd = { "sand", "lsp", "--stdio" },
   filetypes = { "sand" },
-  root_markers = { ".sand" },
+  root_markers = { "sand.mod.json" },
   handlers = {
     -- Surface messages from LSP as notifications
     ["window/showMessage"] = function(_, result)
