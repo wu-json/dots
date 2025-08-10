@@ -3,7 +3,7 @@ local module = {}
 function module.apply_to_config(config)
 	config.color_scheme = "terafox"
 	config.enable_tab_bar = false
-	config.font_size = 16.0
+	config.font_size = 18.0
 	config.hide_tab_bar_if_only_one_tab = true
 	config.macos_window_background_blur = 10
 	config.max_fps = 240
