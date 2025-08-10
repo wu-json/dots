@@ -19,4 +19,5 @@ forge_launch.fish
 forge_launch_v2.fish
 forgectl.fish
 quicksand_vs_cc.fish
+.config/fish/functions/sand_agent_*
 
