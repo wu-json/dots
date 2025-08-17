@@ -36,8 +36,9 @@ return {
   },
   {
     "nvim-treesitter/nvim-treesitter",
-    opts = {
-      ensure_installed = {
+    opts = function(_, opts)
+      opts.ensure_installed = opts.ensure_installed or {}
+      vim.list_extend(opts.ensure_installed, {
         "go",
         "gomod",
         "gowork",
@@ -48,8 +49,21 @@ return {
         "terraform",
         "toml",
         "yaml",
-      },
-    },
+      })
+      
+      -- Configure custom sand parser
+      local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
+      parser_config.sand = {
+        install_info = {
+          url = "/Users/jasonwu/GitHub/forge/treesitter-sand",
+          files = {"src/parser.c"},
+          generate_requires_npm = false,
+          requires_generate_from_grammar = false,
+        },
+        filetype = "sand",
+        used_by = {"sand"},
+      }
+    end,
   },
   {
     -- Need this to set up biome v2
@@ -72,6 +86,47 @@ return {
         },
       },
     },
+  },
+  {
+    "neovim/nvim-lspconfig",
+    ft = "sand",
+    config = function()
+      local lspconfig = require("lspconfig")
+      local configs = require("lspconfig.configs")
+      
+      -- Register custom sand LSP
+      if not configs.sand then
+        configs.sand = {
+          default_config = {
+            cmd = { "sand", "lsp", "--stdio" },
+            filetypes = { "sand" },
+            root_dir = lspconfig.util.root_pattern("sand.mod.json"),
+            handlers = {
+              ["window/showMessage"] = function(_, result)
+                local message = result.message or "Unknown message"
+                local message_type = result.type or 1
+
+                if message_type == 1 then
+                  require("snacks").notify.error(message)
+                elseif message_type == 2 then
+                  require("snacks").notify.warn(message)
+                elseif message_type == 3 then
+                  require("snacks").notify.info(message)
+                elseif message_type == 4 then
+                  require("snacks").notify(message)
+                else
+                  require("snacks").notify(message)
+                end
+
+                return vim.NIL
+              end,
+            },
+          },
+        }
+      end
+      
+      lspconfig.sand.setup({})
+    end,
   },
   {
     "apple/pkl-neovim",
