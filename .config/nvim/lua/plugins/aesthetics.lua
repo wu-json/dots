@@ -14,7 +14,7 @@ return {
   },
   {
     "LazyVim/LazyVim",
-    opts = { colorscheme = "terafox" },
+    opts = { colorscheme = "carbonfox" },
   },
   {
     "j-hui/fidget.nvim",
