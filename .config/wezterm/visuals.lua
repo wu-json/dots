@@ -1,7 +1,7 @@
 local module = {}
 
 function module.apply_to_config(config)
-	config.color_scheme = "terafox"
+	config.color_scheme = "carbonfox"
 	config.enable_tab_bar = false
 	config.font_size = 18.0
 	config.hide_tab_bar_if_only_one_tab = true
