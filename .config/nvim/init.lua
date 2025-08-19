@@ -5,4 +5,3 @@ require("config.lazy")
 vim.filetype.add({
   extension = { sand = "sand" },
 })
-vim.lsp.enable("sand")
