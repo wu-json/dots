@@ -1,6 +1,44 @@
 return {
   {
     "neovim/nvim-lspconfig",
+    config = function()
+      -- Register custom sand LSP server
+      local lspconfig = require("lspconfig")
+      local configs = require("lspconfig.configs")
+
+      if not configs.sand then
+        configs.sand = {
+          default_config = {
+            cmd = { "sand", "lsp", "--stdio" },
+            filetypes = { "sand" },
+            root_dir = lspconfig.util.root_pattern("sand.mod.json"),
+            handlers = {
+              ["window/showMessage"] = function(_, result)
+                local message = result.message or "Unknown message"
+                local message_type = result.type or 1
+
+                if message_type == 1 then
+                  require("snacks").notify.error(message)
+                elseif message_type == 2 then
+                  require("snacks").notify.warn(message)
+                elseif message_type == 3 then
+                  require("snacks").notify.info(message)
+                elseif message_type == 4 then
+                  require("snacks").notify(message)
+                else
+                  require("snacks").notify(message)
+                end
+
+                return vim.NIL
+              end,
+            },
+          },
+        }
+      end
+
+      -- Start sand LSP for sand filetypes
+      lspconfig.sand.setup({})
+    end,
     opts = {
       inlay_hints = { enabled = false },
       servers = {
@@ -11,33 +49,7 @@ return {
         tailwindcss = {},
         terraformls = {},
         yamlls = {},
-        sand = {
-          cmd = { "sand", "lsp", "--stdio" },
-          filetypes = { "sand" },
-          root_dir = function(fname)
-            return require("lspconfig").util.root_pattern("sand.mod.json")(fname)
-          end,
-          handlers = {
-            ["window/showMessage"] = function(_, result)
-              local message = result.message or "Unknown message"
-              local message_type = result.type or 1
-
-              if message_type == 1 then
-                require("snacks").notify.error(message)
-              elseif message_type == 2 then
-                require("snacks").notify.warn(message)
-              elseif message_type == 3 then
-                require("snacks").notify.info(message)
-              elseif message_type == 4 then
-                require("snacks").notify(message)
-              else
-                require("snacks").notify(message)
-              end
-
-              return vim.NIL
-            end,
-          },
-        },
+        sand = {},
 
         -- These are all for TypeScript but we disable them because they are hella slow.
         -- Instead we opt to use typescript-tools: https://github.com/pmizio/typescript-tools.nvim
@@ -77,18 +89,17 @@ return {
         "toml",
         "yaml",
       })
-      
       -- Configure custom sand parser
       local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
       parser_config.sand = {
         install_info = {
           url = "/Users/jasonwu/GitHub/forge/treesitter-sand",
-          files = {"src/parser.c"},
+          files = { "src/parser.c" },
           generate_requires_npm = false,
           requires_generate_from_grammar = false,
         },
         filetype = "sand",
-        used_by = {"sand"},
+        used_by = { "sand" },
       }
     end,
   },
