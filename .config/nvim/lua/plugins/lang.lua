@@ -1,46 +1,47 @@
 return {
   {
     "neovim/nvim-lspconfig",
-    config = function()
-      -- Register custom sand LSP server
-      local lspconfig = require("lspconfig")
-      local configs = require("lspconfig.configs")
-
-      if not configs.sand then
-        configs.sand = {
-          default_config = {
-            cmd = { "sand", "lsp", "--stdio" },
-            filetypes = { "sand" },
-            root_dir = lspconfig.util.root_pattern("sand.mod.json"),
-            handlers = {
-              ["window/showMessage"] = function(_, result)
-                local message = result.message or "Unknown message"
-                local message_type = result.type or 1
-
-                if message_type == 1 then
-                  require("snacks").notify.error(message)
-                elseif message_type == 2 then
-                  require("snacks").notify.warn(message)
-                elseif message_type == 3 then
-                  require("snacks").notify.info(message)
-                elseif message_type == 4 then
-                  require("snacks").notify(message)
-                else
-                  require("snacks").notify(message)
-                end
-
-                return vim.NIL
-              end,
-            },
-          },
-        }
-      end
-
-      -- Start sand LSP for sand filetypes
-      lspconfig.sand.setup({})
-    end,
     opts = {
       inlay_hints = { enabled = false },
+      setup = {
+        -- Custom setup for sand LSP
+        sand = function()
+          local lspconfig = require("lspconfig")
+          local configs = require("lspconfig.configs")
+
+          if not configs.sand then
+            configs.sand = {
+              default_config = {
+                cmd = { "sand", "lsp", "--stdio" },
+                filetypes = { "sand" },
+                root_dir = lspconfig.util.root_pattern("sand.mod.json"),
+                handlers = {
+                  ["window/showMessage"] = function(_, result)
+                    local message = result.message or "Unknown message"
+                    local message_type = result.type or 1
+
+                    if message_type == 1 then
+                      require("snacks").notify.error(message)
+                    elseif message_type == 2 then
+                      require("snacks").notify.warn(message)
+                    elseif message_type == 3 then
+                      require("snacks").notify.info(message)
+                    elseif message_type == 4 then
+                      require("snacks").notify(message)
+                    else
+                      require("snacks").notify(message)
+                    end
+
+                    return vim.NIL
+                  end,
+                },
+              },
+            }
+          end
+
+          lspconfig.sand.setup({})
+        end,
+      },
       servers = {
         gopls = {},
         pyright = {},
