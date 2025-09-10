@@ -75,6 +75,16 @@ local keymaps = {
 		mods = "CMD",
 		action = wezterm.action.CloseCurrentTab({ confirm = true }),
 	},
+	{
+		key = "LeftArrow",
+		mods = "CMD|SHIFT",
+		action = wezterm.action.MoveTabRelative(-1),
+	},
+	{
+		key = "RightArrow",
+		mods = "CMD|SHIFT",
+		action = wezterm.action.MoveTabRelative(1),
+	},
 }
 
 function module.apply_to_config(config)
