@@ -6,7 +6,7 @@ alias gtss="gt sync && gt submit"
 alias gtcr="gt create"
 alias gtr="gt restack"
 alias gtl="gt ls"
-alias gtm="gt modify"
+alias gtm="gt add -A && gt modify"
 alias gta="gt absorb"
 
 # Dotfiles
