@@ -131,12 +131,7 @@ return {
     lazy = true,
     ft = "pkl",
     dependencies = {
-      {
-        "nvim-treesitter/nvim-treesitter",
-        build = function(_)
-          vim.cmd("TSUpdate")
-        end,
-      },
+      "nvim-treesitter/nvim-treesitter",
       "L3MON4D3/LuaSnip",
     },
     build = function()
