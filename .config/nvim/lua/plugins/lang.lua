@@ -89,7 +89,6 @@ return {
         "terraform",
         "toml",
         "yaml",
-        "pkl",
       })
       -- Configure custom sand parser
       local parser_config = require("nvim-treesitter.parsers").get_parser_configs()

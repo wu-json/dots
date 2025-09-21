@@ -3,5 +3,5 @@ require("config.lazy")
 
 -- Sand stuffles
 vim.filetype.add({
-  extension = { sand = "sand" },
+  extension = { sand = "sand", pkl = "pkl" },
 })
