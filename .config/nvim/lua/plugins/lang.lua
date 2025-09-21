@@ -142,7 +142,7 @@ return {
     build = function()
       require("pkl-neovim").init()
       -- Set up syntax highlighting.
-      vim.cmd("TSInstall! pkl")
+      vim.cmd("TSInstall pkl")
     end,
     config = function()
       -- Set up snippets.
