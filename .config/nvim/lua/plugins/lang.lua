@@ -136,17 +136,13 @@ return {
     },
     build = function()
       require("pkl-neovim").init()
-      -- Set up syntax highlighting.
       vim.cmd("TSInstall pkl")
     end,
     config = function()
-      -- Set up snippets.
       require("luasnip.loaders.from_snipmate").lazy_load()
-
-      -- Configure pkl-lsp
       vim.g.pkl_neovim = {
         start_command = { "pkl-lsp" },
-        pkl_cli_path = "/Users/jasonwu/.local/share/aquaproj-aqua/bin/pkl",
+        pkl_cli_path = "/Users/jasonwu/.local/share/aquapr j-aqua/bin/pkl",
       }
     end,
   },
