@@ -21,6 +21,9 @@ alias fctl="forgectl"
 alias ls="eza"
 alias tree="eza --tree"
 
+# Claudius Codius
+alias cl="claude"
+
 # OrbStack
 source ~/.orbstack/shell/init.fish 2>/dev/null || :
 
