@@ -41,7 +41,7 @@ fish_add_path /opt/homebrew/bin
 echo "/opt/homebrew/bin/fish" | sudo tee -a /etc/shells
 chsh -s /opt/homebrew/bin/fish
 
-set -Ux AQUA_GLOBAL_CONFIG '$HOME/GitHub/personal/dotfiles/.aqua'
+set -Ux AQUA_GLOBAL_CONFIG '/Users/jasonwu/GitHub/personal/dotfiles/.aqua/aqua.yaml'
 ```
 
 Now it's time to install my terminal of choice: [WezTerm](https://wezfurlong.org/wezterm/index.html).
