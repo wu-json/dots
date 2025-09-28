@@ -21,3 +21,4 @@ forgectl.fish
 quicksand_vs_cc.fish
 .config/fish/functions/sand_agent_*
 
+*.local.*
