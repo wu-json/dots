@@ -12,5 +12,5 @@ registries:
     type: local
     path: aqua-registry.yaml
 packages:
-  - name: wu-json/curse@v0.0.2
+  - name: wu-json/curse@v0.0.3
     registry: wu-json
