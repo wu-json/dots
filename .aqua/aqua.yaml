@@ -8,9 +8,12 @@ checksum:
 registries:
   - type: standard
     ref: v4.418.0 # renovate: depName=aquaproj/aqua-registry
-  - name: wu-json
-    type: local
-    path: aqua-registry.yaml
+  - name: cursed-tools
+    type: github_content
+    repo_owner: wu-json
+    repo_name: cursed-tools
+    ref: v0.0.0
+    path: aqua/registry.yaml
 packages:
   - name: wu-json/curse@v0.0.3
-    registry: wu-json
+    registry: cursed-tools
