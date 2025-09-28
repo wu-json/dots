@@ -1,0 +1,17 @@
+packages:
+  - type: github_release
+    repo_owner: wu-json
+    repo_name: curse
+    asset: curse_{{trimV .Version}}_{{.OS}}_{{.Arch}}.tar.gz
+    description: Incantations in your terminal.
+    checksum:
+      type: github_release
+      asset: curse_{{trimV .Version}}_{{.OS}}_{{.Arch}}.tar.gz.sha256
+    files:
+      - name: curse
+        src: curse
+    supported_envs:
+      - darwin/arm64
+      - darwin/amd64
+      - linux/arm64
+      - linux/amd64

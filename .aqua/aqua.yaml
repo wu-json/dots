@@ -5,14 +5,12 @@
 checksum:
   enabled: true
   require_checksum: true
-  supported_envs:
-    - all
 registries:
   - type: standard
     ref: v4.418.0 # renovate: depName=aquaproj/aqua-registry
   - name: wu-json
     type: local
-    path: registry.yaml
+    path: aqua-registry.yaml
 packages:
-  - name: wu-json/curse@v0.0.1
+  - name: wu-json/curse@v0.0.2
     registry: wu-json
