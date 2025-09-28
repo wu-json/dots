@@ -3,7 +3,7 @@ registries:
     ref: semver(">= 3.0.0")
   - name: wu-json
     type: local
-    path: registry.yaml
+    path: aqua-registry.yaml
 packages:
   - registry: standard
   - registry: wu-json
