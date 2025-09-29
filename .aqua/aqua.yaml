@@ -17,3 +17,5 @@ registries:
 packages:
   - name: wu-json/curse@v0.0.5
     registry: cursed-tools
+  - name: wu-json/curse@v0.0.6
+    registry: cursed-tools
