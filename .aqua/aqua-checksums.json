@@ -41,6 +41,26 @@
       "algorithm": "sha256"
     },
     {
+      "id": "github_release/github.com/wu-json/curse/v0.0.5/curse_0.0.5_darwin_amd64.tar.gz",
+      "checksum": "A0DD97BF9D4059B303E79C70827C1B42AD3EE0100C23082644244D069601C6D1",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/wu-json/curse/v0.0.5/curse_0.0.5_darwin_arm64.tar.gz",
+      "checksum": "7E24CB99421F683F9B63AEEC5E0B597FC26D2E7A0FFA80B0A18FB759159CA5E9",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/wu-json/curse/v0.0.5/curse_0.0.5_linux_amd64.tar.gz",
+      "checksum": "47D8C7AD4EB51665C297EEEB0C8EF29AB40F79B8EA490F27DA77AE0FAC71A9CA",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/wu-json/curse/v0.0.5/curse_0.0.5_linux_arm64.tar.gz",
+      "checksum": "BA559B30800DB334D31DC2DF6EC9B8EB19D99AC4C7C6DB7C72FD911C33358D77",
+      "algorithm": "sha256"
+    },
+    {
       "id": "registries/github_content/github.com/aquaproj/aqua-registry/v4.418.0/registry.yaml",
       "checksum": "A388A9445DBB89721022D840C42A73106650FB0536C4ED6F0C38537C7AC32701",
       "algorithm": "sha256"
