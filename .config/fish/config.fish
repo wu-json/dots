@@ -3,11 +3,14 @@ alias gtc="clean_graphite_branches"
 
 # Graphite
 alias gtss="gt sync && gt submit"
-alias gtc="gt create"
 alias gtr="gt restack"
 alias gtl="gt ls"
 alias gtm="gt add -A && gt modify"
 alias gta="gt absorb"
+
+function gtc
+    gt create $argv
+end
 
 # Dotfiles
 alias dc="dotfiles_config"
