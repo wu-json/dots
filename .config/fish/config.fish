@@ -27,6 +27,9 @@ alias cl="claude"
 # OrbStack
 source ~/.orbstack/shell/init.fish 2>/dev/null || :
 
+# Autojump
+[ -f /opt/homebrew/share/autojump/autojump.fish ]; and source /opt/homebrew/share/autojump/autojump.fish
+
 if status is-interactive
     # Commands to run in interactive sessions can go here
 end
