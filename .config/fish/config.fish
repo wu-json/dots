@@ -41,3 +41,8 @@ source ~/.orbstack/shell/init2.fish 2>/dev/null || :
 # Used for Granted CLI:
 # https://docs.commonfate.io/granted/troubleshooting#manually-configuring-your-shell-profile
 alias assume="source ~/.config/fish/assume.fish"
+
+# Load local machine-specific config (not committed)
+if test -f ~/.config/fish/config.local.fish
+    source ~/.config/fish/config.local.fish
+end
