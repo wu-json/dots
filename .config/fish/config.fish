@@ -1,6 +1,3 @@
-# GitHub
-alias gtc="clean_graphite_branches"
-
 # Graphite
 alias gtss="gt sync && gt submit"
 alias gtr="gt restack"
