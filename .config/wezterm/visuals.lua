@@ -7,7 +7,7 @@ function module.apply_to_config(config)
 	config.hide_tab_bar_if_only_one_tab = true
 	config.macos_window_background_blur = 10
 	config.max_fps = 240
-	config.window_background_opacity = 0.95
+	config.window_background_opacity = 0.97
 	config.window_decorations = "RESIZE"
 end
 
