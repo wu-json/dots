@@ -142,8 +142,9 @@ return {
       require("luasnip.loaders.from_snipmate").lazy_load()
       vim.g.pkl_neovim = {
         start_command = { "pkl-lsp" },
-        pkl_cli_path = "/Users/jasonwu/.local/share/aquapr j-aqua/bin/pkl",
+        pkl_cli_path = "/Users/jasonwu/.local/share/aquaproj-aqua/bin/pkl",
       }
+      require('pkl-neovim').sync_projects()
     end,
   },
 }
