@@ -144,7 +144,6 @@ return {
         start_command = { "pkl-lsp" },
         pkl_cli_path = "/Users/jasonwu/.local/share/aquaproj-aqua/bin/pkl",
       }
-      require('pkl-neovim').sync_projects()
     end,
   },
 }
