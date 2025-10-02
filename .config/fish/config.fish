@@ -9,6 +9,10 @@ function gtc
     gt create $argv
 end
 
+function gtch
+    gt create $argv
+end
+
 # Dotfiles
 alias dc="dotfiles_config"
 
