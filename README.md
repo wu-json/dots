@@ -1,14 +1,6 @@
 # Dotfiles
 
-These are my dotfiles for my WezTerm + Fish + Neovim (LazyVim) development setup. Feel free to clone or steal.
-
-> I decided to go down the Neovim rabbit-hole early December 2023 after seeing some really pretty setups on YouTube. I gave LunarVim a try in November 2023 very unsuccessfully, but the second time around I chose LazyVim and fell in love.
-
-![Screenshot 2024-08-03 at 3 57 08 PM](https://github.com/user-attachments/assets/eb14b207-4261-4612-8fbe-3f91ea3b4264)
-
 ## Setup
-
-### Prerequisites
 
 ```bash
 brew install neovim lazygit fzf ripgrep fd eza autojump
