@@ -15,5 +15,5 @@ registries:
     ref: v0.0.0
     path: aqua/registry.yaml
 packages:
-  - name: wu-json/curse@v0.0.10
+  - name: wu-json/curse@v0.0.11
     registry: cursed-tools
