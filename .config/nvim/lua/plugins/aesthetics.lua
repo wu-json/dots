@@ -52,4 +52,5 @@ return {
       },
     },
   },
+  { "rktjmp/lush.nvim" },
 }
