@@ -42,5 +42,6 @@ return {
       },
     },
   },
-  { "rktjmp/lush.nvim" },
+  { "rktjmp/lush.nvim", { dir = "/Users/jasonwu/GitHub/personal/reze", lazy = true } },
+  { "rktjmp/shipwright.nvim" },
 }
