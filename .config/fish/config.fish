@@ -26,7 +26,7 @@ alias ls="eza"
 alias tree="eza --tree"
 
 # Claudius Codius
-# alias c="claude"
+alias cl="claude"
 
 # Cursor
 alias c="cursor-agent"
