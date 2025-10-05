@@ -1,20 +1,10 @@
 return {
   {
-    "EdenEast/nightfox.nvim",
-    opts = {
-      options = {
-        transparent = true,
-      },
-      groups = {
-        all = {
-          NormalFloat = { fg = "fg1", bg = "NONE" },
-        },
-      },
-    },
+    "wu-json/chainsaw.nvim",
   },
   {
     "LazyVim/LazyVim",
-    opts = { colorscheme = "carbonfox" },
+    opts = { colorscheme = "reze" },
   },
   {
     "j-hui/fidget.nvim",
