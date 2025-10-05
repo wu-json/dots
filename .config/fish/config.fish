@@ -53,3 +53,5 @@ alias assume="source ~/.config/fish/assume.fish"
 if test -f ~/.config/fish/config.local.fish
     source ~/.config/fish/config.local.fish
 end
+
+set fish_greeting ""
