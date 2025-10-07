@@ -16,11 +16,6 @@ end
 # Dotfiles
 alias dc="dotfiles_config"
 
-# Forge
-alias fc="forge_code"
-alias fl="forge_launch_v2"
-alias fctl="forgectl"
-
 # Eza
 alias ls="eza"
 alias tree="eza --tree"
