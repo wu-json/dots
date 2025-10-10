@@ -3,7 +3,7 @@
 ## Setup
 
 ```bash
-brew install lazygit fzf ripgrep fd eza autojump
+brew install fzf ripgrep fd autojump
 ```
 
 From there, you will need [Fish Shell](https://github.com/fish-shell/fish-shell).
