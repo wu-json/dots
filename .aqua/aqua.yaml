@@ -18,3 +18,4 @@ packages:
   - name: wu-json/curse@v0.0.13
     registry: cursed-tools
   - name: rclone/rclone@v1.71.1
+  - name: neovim/neovim@v0.11.4

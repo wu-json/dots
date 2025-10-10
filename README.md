@@ -3,7 +3,7 @@
 ## Setup
 
 ```bash
-brew install neovim lazygit fzf ripgrep fd eza autojump
+brew install lazygit fzf ripgrep fd eza autojump
 ```
 
 From there, you will need [Fish Shell](https://github.com/fish-shell/fish-shell).
