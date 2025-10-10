@@ -4,17 +4,9 @@ alias gtr="gt restack"
 alias gtl="gt ls"
 alias gtm="gt add -A && gt modify"
 alias gta="gt absorb"
-
 function gtc
     gt create $argv
 end
-
-function gtch
-    gt create $argv
-end
-
-# Dotfiles
-alias dc="dotfiles_config"
 
 # Eza
 alias ls="eza"
