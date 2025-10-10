@@ -17,3 +17,4 @@ registries:
 packages:
   - name: wu-json/curse@v0.0.13
     registry: cursed-tools
+  - name: rclone/rclone@v1.71.1
