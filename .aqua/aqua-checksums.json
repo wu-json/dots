@@ -1,6 +1,36 @@
 {
   "checksums": [
     {
+      "id": "github_release/github.com/rclone/rclone/v1.71.1/rclone-v1.71.1-linux-amd64.zip",
+      "checksum": "417E3DA236F3A12D292DA4E7287D67B1DF558B8C2B280D092E563958ED724BE7",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/rclone/rclone/v1.71.1/rclone-v1.71.1-linux-arm64.zip",
+      "checksum": "CD0EB0D6FAF1FDB697F191A316BBC6552770FAFA097BAF326CE61C04AB89F783",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/rclone/rclone/v1.71.1/rclone-v1.71.1-osx-amd64.zip",
+      "checksum": "A2D635EF69785C889381460A16EF20255B07EF17A67C84C81FB4CB8AAF1A280F",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/rclone/rclone/v1.71.1/rclone-v1.71.1-osx-arm64.zip",
+      "checksum": "8B7A2C57680D769E33D8616CABC214831D3BDDCDB4DA0D40A263EDE63B15ACCE",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/rclone/rclone/v1.71.1/rclone-v1.71.1-windows-amd64.zip",
+      "checksum": "A36B5E4CE336BEAC1349644F43374628ADD9FE1AE5AB7A3ED3CEC5B8550CE041",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/rclone/rclone/v1.71.1/rclone-v1.71.1-windows-arm64.zip",
+      "checksum": "B7A754589144F1BE6A60EEFA08901D6D7C4F325AAEA6A82EE1C98F57D939E165",
+      "algorithm": "sha256"
+    },
+    {
       "id": "github_release/github.com/wu-json/curse/v0.0.10/curse_0.0.10_darwin_amd64.tar.gz",
       "checksum": "9E54F338009DF5D0A54C6E3258884141EA82B9D9E7B98C2810DE1C3AD1A4A477",
       "algorithm": "sha256"
