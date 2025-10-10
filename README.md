@@ -3,7 +3,7 @@
 ## Setup
 
 ```bash
-brew install fzf ripgrep fd autojump
+brew install autojump
 ```
 
 From there, you will need [Fish Shell](https://github.com/fish-shell/fish-shell).
