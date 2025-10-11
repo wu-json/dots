@@ -1,13 +1,9 @@
----
-# yaml-language-server: $schema=https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/aqua-yaml.json
-# aqua - Declarative CLI Version Manager
-# https://aquaproj.github.io/
 checksum:
   enabled: true
   require_checksum: true
 registries:
   - type: standard
-    ref: v4.418.0 # renovate: depName=aquaproj/aqua-registry
+    ref: v4.418.0
   - name: cursed-tools
     type: github_content
     repo_owner: wu-json
