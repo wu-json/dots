@@ -25,7 +25,6 @@ set -Ux AQUA_GLOBAL_CONFIG '/Users/jasonwu/GitHub/personal/dotfiles/.aqua/aqua.y
 ### SymLink Configs
 
 ```bash
-ln -s $HOME/GitHub/personal/dotfiles/.config/karabiner $HOME/.config/karabiner
 ln -s $HOME/GitHub/personal/dotfiles/.config/fish $HOME/.config/fish
 ln -s $HOME/GitHub/personal/dotfiles/.config/nvim $HOME/.config/nvim
 ln -s $HOME/GitHub/personal/dotfiles/.config/wezterm $HOME/.config/wezterm
