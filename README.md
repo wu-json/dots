@@ -15,7 +15,7 @@ brew install aqua
 set -Ux AQUA_GLOBAL_CONFIG '/Users/jasonwu/GitHub/personal/dotfiles/.aqua/aqua.yaml'
 ```
 
-[WezTerm](https://wezfurlong.org/wezterm/index.html)
+Clone this repo then run `setup.fish`
 
 ### SymLink Configs
 
