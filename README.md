@@ -10,11 +10,6 @@ From there, you will need [Fish Shell](https://github.com/fish-shell/fish-shell)
 
 ```
 brew install fish
-brew install fisher
-
-# install fisher plugins
-fisher update
-fish_add_path /opt/homebrew/bin
 
 # set up fish as default shell
 echo "/opt/homebrew/bin/fish" | sudo tee -a /etc/shells
