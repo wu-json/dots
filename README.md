@@ -3,11 +3,6 @@
 ## Setup
 
 ```bash
-brew install autojump
-```
-
-From there, you will need [Fish Shell](https://github.com/fish-shell/fish-shell).
-
 ```
 brew install fish
 
