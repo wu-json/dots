@@ -26,6 +26,26 @@
       "algorithm": "sha256"
     },
     {
+      "id": "github_release/github.com/Schniz/fnm/v1.38.1/fnm-arm64.zip",
+      "checksum": "69FEDA9455931C26C84BE9F95F5E6F69E8B64686E68069FAB7CFC34756CD2944",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/Schniz/fnm/v1.38.1/fnm-linux.zip",
+      "checksum": "B69E5C9A05C1E17E4A7DE9A17DF14BA430D049F2591AF791A6F850A170296069",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/Schniz/fnm/v1.38.1/fnm-macos.zip",
+      "checksum": "80DEB3DB3DB45598F25AEA594C10936A7658F70826104FE37E33B4072A5E11F9",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/Schniz/fnm/v1.38.1/fnm-windows.zip",
+      "checksum": "377796E8F2F51EB8B5DE8983974CAA8922B83C167197B68B33962775703AD4A0",
+      "algorithm": "sha256"
+    },
+    {
       "id": "github_release/github.com/ajeetdsouza/zoxide/v0.9.8/zoxide-0.9.8-aarch64-apple-darwin.tar.gz",
       "checksum": "3D1EC4AF7F3D351629F500B432E6C735CAF3216AB3EAA76DBE8FFBC8F3006F5A",
       "algorithm": "sha256"
