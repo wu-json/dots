@@ -10,13 +10,6 @@ registries:
     repo_name: cursed-tools
     ref: v0.0.0
     path: aqua/registry.yaml
-  - name: local
-    type: local
-    path: aqua-registry.yaml
 packages:
   - name: wu-json/curse@v0.0.13
     registry: cursed-tools
-  - name: neovim/neovim@v0.11.4
-  - name: jesseduffield/lazygit@v0.55.1
-  - name: BurntSushi/ripgrep@14.1.1
-  - name: ajeetdsouza/zoxide@v0.9.8
