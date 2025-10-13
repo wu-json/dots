@@ -11,6 +11,7 @@ init-fish:
 
 stow:
   echo placeholder
+  stow -t ~ fish
   stow -t ~ nvim
   stow -t ~ wezterm
 
