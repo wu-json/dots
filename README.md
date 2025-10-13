@@ -15,12 +15,6 @@ echo "/opt/homebrew/bin/fish" | sudo tee -a /etc/shells
 chsh -s /opt/homebrew/bin/fish
 ```
 
-### Set up fisher and nvm
-
-```bash
-set --universal nvm_default_version jod
-```
-
 ### Set up aqua
 
 ```bash
