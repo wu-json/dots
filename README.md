@@ -2,24 +2,37 @@
 
 ## Setup
 
-`brew bundle install`
+### Install homebrew packages
 
 ```bash
+brew bundle install
 ```
-# set up fish as default shell
+
+### Set up Fish as default shell
+
+```bash
 echo "/opt/homebrew/bin/fish" | sudo tee -a /etc/shells
 chsh -s /opt/homebrew/bin/fish
+```
 
-# get some aqua going
+### Set up fisher and nvm
+
+```bash
+fisher install jorgebucaran/nvm.fish
+set --universal nvm_default_version jod
+```
+
+### Set up aqua
+
+```bash
 brew install aqua
 set -Ux AQUA_GLOBAL_CONFIG '/Users/jasonwu/GitHub/personal/dotfiles/.aqua/aqua.yaml'
 ```
 
-### SymLink Configs
+### SymLink configs
 
 ```bash
 ln -s $HOME/GitHub/personal/dotfiles/.config/fish $HOME/.config/fish
 ln -s $HOME/GitHub/personal/dotfiles/.config/nvim $HOME/.config/nvim
 ln -s $HOME/GitHub/personal/dotfiles/.config/wezterm $HOME/.config/wezterm
 ```
-
