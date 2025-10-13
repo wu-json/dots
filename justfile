@@ -9,4 +9,3 @@ init-fish:
   echo "/opt/homebrew/bin/fish" | sudo tee -a /etc/shells
   chsh -s /opt/homebrew/bin/fish
 
-init: brew init-fish init-aqua
