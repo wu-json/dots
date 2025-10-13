@@ -2,4 +2,16 @@ packages:
   - type: github_release
     repo_owner: eza-community
     repo_name: eza
-    asset: "eza_arm-unknown-linux-gnueabihf.tar.gz"
+    asset: "eza_{{.Arch}}-unknown-linux-gnu.tar.gz"
+    replacements:
+      amd64: x86_64
+      arm64: aarch64
+      arm: arm
+    overrides:
+      - goos: windows
+        asset: "eza.exe_x86_64-pc-windows-gnu.zip"
+      - goos: darwin
+        asset: "eza_{{.Arch}}-unknown-linux-gnu.tar.gz"
+      - goos: linux
+        goarch: arm
+        asset: "eza_arm-unknown-linux-gnueabihf.tar.gz"
