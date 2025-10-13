@@ -18,7 +18,6 @@ chsh -s /opt/homebrew/bin/fish
 ### Set up fisher and nvm
 
 ```bash
-fisher install jorgebucaran/nvm.fish
 set --universal nvm_default_version jod
 ```
 
