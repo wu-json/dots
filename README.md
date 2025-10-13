@@ -1,5 +1,8 @@
 # Dots
 
+![10d1d033-882c-4e25-b427-9b6c0ff7985b](https://github.com/user-attachments/assets/c0c99a76-39bc-4618-8a29-741b0904e2b6)
+
+
 ## Setup
 
 ```bash
