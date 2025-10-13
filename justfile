@@ -1,5 +1,5 @@
 brew:
-  cd homebrew && brew bundle install
+  brew bundle install --file=homebrew/Brewfile
 
 init-aqua:
   fish_add_path $(aqua root-dir)/bin
