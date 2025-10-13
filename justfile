@@ -15,3 +15,4 @@ stow:
   stow -t ~ wezterm
 
 init: brew stow init-fish init-aqua
+  @echo "✓ Initialization complete!"
