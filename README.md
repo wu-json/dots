@@ -19,7 +19,7 @@ chsh -s /opt/homebrew/bin/fish
 
 ```bash
 brew install aqua
-set -Ux AQUA_GLOBAL_CONFIG "$(git rev-parse --show-toplevel)/.aqua/aqua.yaml"
+set -Ux AQUA_GLOBAL_CONFIG "$(git rev-parse --show-toplevel)/aqua/aqua.yaml"
 ```
 
 ### SymLink configs
