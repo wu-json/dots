@@ -1,3 +1,5 @@
+brew_prefix := if os() == "macos" { "/opt/homebrew" } else { "/home/linuxbrew/.linuxbrew" }
+
 brew:
   brew bundle install --file=homebrew/Brewfile
 
@@ -5,8 +7,8 @@ init-aqua:
   fish scripts/init-aqua.fish
 
 init-fish:
-  grep -qxF "/opt/homebrew/bin/fish" /etc/shells || echo "/opt/homebrew/bin/fish" | sudo tee -a /etc/shells
-  chsh -s /opt/homebrew/bin/fish
+  grep -qxF "{{brew_prefix}}/bin/fish" /etc/shells || echo "{{brew_prefix}}/bin/fish" | sudo tee -a /etc/shells
+  chsh -s {{brew_prefix}}/bin/fish
 
 stow:
   echo placeholder
