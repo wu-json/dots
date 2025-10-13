@@ -3,12 +3,10 @@ brew_prefix := if os() == "macos" { "/opt/homebrew" } else { "/home/linuxbrew/.l
 brew:
   brew bundle install --file=homebrew/Brewfile
 
-init-aqua:
-  fish scripts/init-aqua.fish
-
 init-fish:
   grep -qxF "{{brew_prefix}}/bin/fish" /etc/shells || echo "{{brew_prefix}}/bin/fish" | sudo tee -a /etc/shells
   chsh -s {{brew_prefix}}/bin/fish
+  fish scripts/init-fish.fish
 
 stow:
   echo placeholder
@@ -16,5 +14,5 @@ stow:
   stow -t ~ nvim
   stow -t ~ wezterm
 
-init: brew stow init-fish init-aqua
+init: brew stow init-fish
   @echo "✓ Initialization complete!"
