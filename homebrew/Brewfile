@@ -1,3 +1,6 @@
 brew "aqua"
 brew "eza"
+brew "fd"
 brew "fish"
+brew "fnm"
+brew "fzf"
