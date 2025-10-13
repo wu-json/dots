@@ -16,7 +16,6 @@ registries:
 packages:
   - name: wu-json/curse@v0.0.13
     registry: cursed-tools
-  - name: rclone/rclone@v1.71.1
   - name: neovim/neovim@v0.11.4
   - name: jesseduffield/lazygit@v0.55.1
   - name: junegunn/fzf@v0.65.2
