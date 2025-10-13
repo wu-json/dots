@@ -21,10 +21,6 @@ source ~/.orbstack/shell/init.fish 2>/dev/null || :
 # Zoxide
 zoxide init fish | source
 
-if status is-interactive
-    # Commands to run in interactive sessions can go here
-end
-
 # Added by OrbStack: command-line tools and integration
 source ~/.orbstack/shell/init2.fish 2>/dev/null || :
 
