@@ -5,7 +5,7 @@
 ### Install homebrew packages
 
 ```bash
-brew bundle install
+cd homebrew && brew bundle install
 ```
 
 ### Set up Fish as default shell
@@ -18,7 +18,6 @@ chsh -s /opt/homebrew/bin/fish
 ### Set up aqua
 
 ```bash
-brew install aqua
 set -Ux AQUA_GLOBAL_CONFIG "$(git rev-parse --show-toplevel)/aqua/aqua.yaml"
 ```
 
