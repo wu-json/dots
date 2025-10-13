@@ -9,8 +9,8 @@ init-fish:
   echo "/opt/homebrew/bin/fish" | sudo tee -a /etc/shells
   chsh -s /opt/homebrew/bin/fish
 
-init-stow:
+stow:
   echo placeholder
   stow -t ~ wezterm
 
-init: brew init-stow init-fish init-aqua
+init: brew stow init-fish init-aqua
