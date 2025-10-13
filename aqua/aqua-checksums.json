@@ -86,6 +86,11 @@
       "algorithm": "sha256"
     },
     {
+      "id": "github_release/github.com/eza-community/eza/v0.23.4/eza_arm-unknown-linux-gnueabihf.tar.gz",
+      "checksum": "645B41B853C774D94A72AE2846CD71E94583D94603FF60B9936DBEB40B55AEA1",
+      "algorithm": "sha256"
+    },
+    {
       "id": "github_release/github.com/eza-community/eza/v0.23.4/eza_x86_64-unknown-linux-musl.tar.gz",
       "checksum": "D231BB3EE33B08C76279B5888845DCEB7034D055C42BB9BE46DBE0DAE39394DF",
       "algorithm": "sha256"

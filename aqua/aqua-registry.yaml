@@ -1,0 +1,5 @@
+packages:
+  - type: github_release
+    repo_owner: eza-community
+    repo_name: eza
+    asset: "eza_arm-unknown-linux-gnueabihf.tar.gz"
