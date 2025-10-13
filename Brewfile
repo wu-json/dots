@@ -1,0 +1,2 @@
+brew "aqua"
+brew "fish"
