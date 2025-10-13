@@ -6,6 +6,10 @@ registries:
     repo_owner: wu-json
     repo_name: cursed-tools
     path: aqua/registry.yaml
+  - name: local
+    type: local
+    path: aqua-registry.yaml
 packages:
   - registry: standard
   - registry: cursed-tools
+  - registry: local
