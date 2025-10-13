@@ -2,10 +2,10 @@
 
 ## Setup
 
+`brew bundle install`
+
 ```bash
 ```
-brew install fish
-
 # set up fish as default shell
 echo "/opt/homebrew/bin/fish" | sudo tee -a /etc/shells
 chsh -s /opt/homebrew/bin/fish
