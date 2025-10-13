@@ -11,5 +11,6 @@ init-fish:
 
 init-stow:
   echo placeholder
+  stow -t ~ wezterm
 
 init: brew init-stow init-fish init-aqua
