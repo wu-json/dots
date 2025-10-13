@@ -1,24 +1,4 @@
 .config/fish/fish_variables
-
-# fisher nvm
 .config/fish/completions
-.config/fish/conf.d/nvm.fish
-.config/fish/functions/_nvm_index_update.fish
-.config/fish/functions/_nvm_list.fish
-.config/fish/functions/_nvm_version_activate.fish
-.config/fish/functions/_nvm_version_deactivate.fish
-.config/fish/functions/nvm.fish
-
-# karabiner
-.config/karabiner/assets
-.config/karabiner/automatic_backups
-
-# local fish files that I don't want to reveal to the world
-forge_code.fish
-forge_launch.fish
-forge_launch_v2.fish
-forgectl.fish
-quicksand_vs_cc.fish
-.config/fish/functions/sand_agent_*
 
 *.local.*
