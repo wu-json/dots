@@ -27,5 +27,5 @@ set -Ux AQUA_GLOBAL_CONFIG "$(git rev-parse --show-toplevel)/.aqua/aqua.yaml"
 ```bash
 ln -s "$(git rev-parse --show-toplevel)/.config/fish" $HOME/.config/fish
 ln -s "$(git rev-parse --show-toplevel)/.config/nvim" $HOME/.config/nvim
-ln -s "$(git rev-parse --show-toplevel)/.config/wezterm" $HOME/.config/wezterm
+ln -s "$(git rev-parse --show-toplevel)/wezterm" $HOME/.config/wezterm
 ```
