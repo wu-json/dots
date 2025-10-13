@@ -22,3 +22,4 @@ packages:
   - name: sharkdp/fd@v10.3.0
   - name: rust-lang/rustup@1.28.2
   - name: ajeetdsouza/zoxide@v0.9.8
+  - name: Schniz/fnm@v1.38.1
