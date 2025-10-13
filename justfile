@@ -6,7 +6,7 @@ init-aqua:
   set -Ux AQUA_GLOBAL_CONFIG "$(git rev-parse --show-toplevel)/aqua/aqua.yaml"
 
 init-fish:
-  echo "/opt/homebrew/bin/fish" | sudo tee -a /etc/shells
+  grep -qxF "/opt/homebrew/bin/fish" /etc/shells || echo "/opt/homebrew/bin/fish" | sudo tee -a /etc/shells
   chsh -s /opt/homebrew/bin/fish
 
 stow:
