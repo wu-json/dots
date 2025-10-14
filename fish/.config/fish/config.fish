@@ -20,6 +20,7 @@ source ~/.orbstack/shell/init.fish 2>/dev/null || :
 
 # Zoxide
 zoxide init fish | source
+alias j="z"
 
 # Added by OrbStack: command-line tools and integration
 source ~/.orbstack/shell/init2.fish 2>/dev/null || :
