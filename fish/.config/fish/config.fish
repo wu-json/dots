@@ -15,6 +15,9 @@ alias tree="eza --tree"
 # Claudius Codius
 alias c="claude"
 
+# Cursor
+alias cursor="cursor-agent"
+
 # OrbStack
 source ~/.orbstack/shell/init.fish 2>/dev/null || :
 
