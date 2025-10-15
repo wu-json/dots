@@ -361,6 +361,26 @@
       "algorithm": "sha256"
     },
     {
+      "id": "github_release/github.com/wu-json/curse/v0.0.15/curse_0.0.15_darwin_amd64.tar.gz",
+      "checksum": "AC3955E81BF327E193D6F3763DA0D488B0C1C7A1F3B3A670CDFAE800441BAA5C",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/wu-json/curse/v0.0.15/curse_0.0.15_darwin_arm64.tar.gz",
+      "checksum": "19B92829453576A413DCA8A57DBEB0E5076ABFC7E7CE7DCBFE09B030E703B153",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/wu-json/curse/v0.0.15/curse_0.0.15_linux_amd64.tar.gz",
+      "checksum": "3A164CAB0B63F099DC1CAFEFC7554FA53D31FFB73097E04B18279417C5A44015",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/wu-json/curse/v0.0.15/curse_0.0.15_linux_arm64.tar.gz",
+      "checksum": "7E73D6DCC54FB3878A2BC544B6FCA803FBEA5C1C991E0378CB8DDDC08B69CF29",
+      "algorithm": "sha256"
+    },
+    {
       "id": "github_release/github.com/wu-json/curse/v0.0.3/curse_0.0.3_darwin_amd64.tar.gz",
       "checksum": "B70AFD608277EB59FA333BCCFE94F5526B1B2E933508F8DD188BACF46DF2C3C7",
       "algorithm": "sha256"
