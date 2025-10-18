@@ -33,3 +33,6 @@ source ~/.orbstack/shell/init2.fish 2>/dev/null || :
 alias assume="source ~/.config/fish/assume.fish"
 
 set fish_greeting ""
+
+# Turn on vi mode by default
+fish_vi_key_bindings
