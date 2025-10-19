@@ -29,3 +29,5 @@ io
 github
 aquaproj
 pkl
+Justfile
+hostname
