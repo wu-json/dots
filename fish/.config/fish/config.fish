@@ -36,3 +36,6 @@ set fish_greeting ""
 
 # Turn on vi mode by default
 fish_vi_key_bindings
+
+# No fish theme because I like monochrome
+fish_config theme save None
