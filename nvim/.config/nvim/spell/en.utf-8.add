@@ -31,3 +31,5 @@ aquaproj
 pkl
 Justfile
 hostname
+JSON
+gitignored
