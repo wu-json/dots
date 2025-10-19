@@ -38,4 +38,4 @@ set fish_greeting ""
 fish_vi_key_bindings
 
 # No fish theme because I like monochrome
-fish_config theme save None
+yes | fish_config theme save None
