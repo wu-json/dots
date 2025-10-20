@@ -38,3 +38,5 @@ JS
 Bool
 Serializable
 Supertype
+FFI
+TSX
