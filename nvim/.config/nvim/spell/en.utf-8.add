@@ -33,3 +33,4 @@ Justfile
 hostname
 JSON
 gitignored
+Todo
