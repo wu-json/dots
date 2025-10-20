@@ -30,6 +30,9 @@ return {
   },
   {
     "vimwiki/vimwiki",
+    keys = {
+      { "<leader>wd", "<cmd>VimwikiMakeDiaryNote<cr>", desc = "Open vimwiki diary" },
+    },
     init = function()
       vim.g.vimwiki_list = {
         {
