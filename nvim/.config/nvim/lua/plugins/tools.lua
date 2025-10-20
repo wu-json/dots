@@ -28,4 +28,18 @@ return {
       kulala_keymaps_prefix = "",
     },
   },
+  {
+    "vimwiki/vimwiki",
+    init = function()
+      vim.g.vimwiki_list = {
+        {
+          path = "~/vimwiki/",
+          syntax = "markdown",
+          ext = ".md",
+          auto_diary_index = 1,
+        },
+      }
+      vim.g.vimwiki_global_ext = 0 -- Don't hijack all .md files
+    end,
+  },
 }
