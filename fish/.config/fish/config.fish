@@ -18,6 +18,9 @@ alias c="claude"
 # Cursor
 alias cursor="cursor-agent"
 
+# Nvim
+alias v="nvim"
+
 # OrbStack
 source ~/.orbstack/shell/init.fish 2>/dev/null || :
 
