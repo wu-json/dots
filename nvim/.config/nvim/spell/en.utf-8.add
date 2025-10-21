@@ -40,3 +40,9 @@ Serializable
 Supertype
 FFI
 TSX
+async
+destructure
+json
+bool
+IIFE
+destructuring
