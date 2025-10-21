@@ -31,7 +31,9 @@ return {
   {
     "vimwiki/vimwiki",
     keys = {
+      { "<leader>ww", desc = "Open vimwiki index" },
       { "<leader>wd", "<cmd>VimwikiMakeDiaryNote<cr>", desc = "Open vimwiki diary" },
+      { "<leader>wi", "<cmd>VimwikiDiaryIndex<cr>", desc = "Open vimwiki diary index" },
     },
     init = function()
       vim.g.vimwiki_list = {
