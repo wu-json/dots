@@ -7,6 +7,9 @@ alias gta="gt absorb"
 function gtc
     gt create $argv
 end
+function gtch
+    gt checkout $argv
+end
 
 # Git
 alias ghc="git reset --hard && git clean -fd"
