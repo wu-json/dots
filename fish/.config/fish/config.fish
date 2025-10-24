@@ -8,6 +8,9 @@ function gtc
     gt create $argv
 end
 
+# Git
+alias ghc="git reset --hard && git clean -fd"
+
 # Eza
 alias ls="eza"
 alias tree="eza --tree"
