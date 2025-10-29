@@ -28,6 +28,15 @@ local keymaps = {
 		mods = "CMD",
 		action = act.SplitHorizontal({ domain = "CurrentPaneDomain" }),
 	},
+	-- split pane horizontally (half size)
+	{
+		key = "g",
+		mods = "CMD",
+		action = act.SplitPane({
+			direction = "Right",
+			size = { Percent = 25 },
+		}),
+	},
 	-- navigate between panes
 	{
 		key = "h",
