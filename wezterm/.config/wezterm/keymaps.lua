@@ -12,7 +12,7 @@ local keymaps = {
 	},
 	-- split pane vertically (25% height)
 	{
-		key = "e",
+		key = "d",
 		mods = "CMD",
 		action = act.SplitPane({
 			direction = "Down",
@@ -21,13 +21,13 @@ local keymaps = {
 	},
 	-- split pane vertically
 	{
-		key = "d",
+		key = "e",
 		mods = "CMD",
 		action = act.SplitVertical({ domain = "CurrentPaneDomain" }),
 	},
 	-- split pane horizontally (25% width)
 	{
-		key = "r",
+		key = "f",
 		mods = "CMD",
 		action = act.SplitPane({
 			direction = "Right",
@@ -36,7 +36,7 @@ local keymaps = {
 	},
 	-- split pane horizontally
 	{
-		key = "f",
+		key = "r",
 		mods = "CMD",
 		action = act.SplitHorizontal({ domain = "CurrentPaneDomain" }),
 	},
