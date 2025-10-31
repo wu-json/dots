@@ -48,3 +48,8 @@ fish_vi_key_bindings
 
 # No fish theme because I like monochrome
 yes | fish_config theme save None
+
+# FNM cleanup on exit
+function fnm_clean_up --on-event fish_exit
+    rm -r $FNM_MULTISHELL_PATH
+end
