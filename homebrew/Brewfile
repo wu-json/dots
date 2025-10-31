@@ -1,5 +1,4 @@
 brew "aqua"
-brew "codex"
 brew "eza"
 brew "fd"
 brew "fish"
