@@ -10,13 +10,13 @@ local keymaps = {
 		mods = "CMD",
 		action = act.CloseCurrentPane({ confirm = true }),
 	},
-	-- split pane vertically (25% height)
+	-- split pane vertically (30% height)
 	{
 		key = "d",
 		mods = "CMD",
 		action = act.SplitPane({
 			direction = "Down",
-			size = { Percent = 25 },
+			size = { Percent = 30 },
 		}),
 	},
 	-- split pane vertically
@@ -25,13 +25,13 @@ local keymaps = {
 		mods = "CMD",
 		action = act.SplitVertical({ domain = "CurrentPaneDomain" }),
 	},
-	-- split pane horizontally (25% width)
+	-- split pane horizontally (30% width)
 	{
 		key = "f",
 		mods = "CMD",
 		action = act.SplitPane({
 			direction = "Right",
-			size = { Percent = 25 },
+			size = { Percent = 30 },
 		}),
 	},
 	-- split pane horizontally
