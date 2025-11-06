@@ -53,3 +53,13 @@ yes | fish_config theme save None
 function fnm_clean_up --on-event fish_exit
     rm -r $FNM_MULTISHELL_PATH
 end
+
+# Auto-source local config files
+function __source_local_config --on-variable PWD --description 'Source config.local.fish if present in current directory'
+    if test -f config.local.fish
+        source config.local.fish
+    end
+end
+
+# Run once on shell startup
+__source_local_config
