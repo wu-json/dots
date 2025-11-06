@@ -19,7 +19,7 @@ alias ls="eza"
 alias tree="eza --tree"
 
 # Claudius Codius
-alias c="claude"
+alias c="FORCE_COLOR=0 claude"
 
 # Cursor
 alias cursor="cursor-agent"
