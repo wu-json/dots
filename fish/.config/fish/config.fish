@@ -1,14 +1,14 @@
 # Graphite
-alias gtss="FORCE_COLOR=0 gt sync && FORCE_COLOR=0 gt submit"
-alias gtr="FORCE_COLOR=0 gt restack"
-alias gtl="FORCE_COLOR=0 gt ls"
-alias gtm="FORCE_COLOR=0 gt add -A && FORCE_COLOR=0 gt modify"
-alias gta="FORCE_COLOR=0 gt absorb"
+alias gtss="gt sync && gt submit"
+alias gtr="gt restack"
+alias gtl="gt ls"
+alias gtm="gt add -A && gt modify"
+alias gta="gt absorb"
 function gtc
-    FORCE_COLOR=0 gt create $argv
+    gt create $argv
 end
 function gtch
-    FORCE_COLOR=0 gt checkout $argv
+    gt checkout $argv
 end
 
 # Git
@@ -19,7 +19,7 @@ alias ls="eza"
 alias tree="eza --tree"
 
 # Claudius Codius
-alias c="FORCE_COLOR=0 claude"
+alias c="claude"
 
 # Codex 
 alias cx="codex"
