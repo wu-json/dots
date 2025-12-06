@@ -73,3 +73,6 @@ end
 
 # Run once on shell startup
 __source_local_config
+
+# Add local bin to path
+export PATH="$HOME/.local/bin:$PATH"
