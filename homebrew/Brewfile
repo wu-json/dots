@@ -20,3 +20,5 @@ brew "just"
 brew "k9s"
 brew "yt-dlp"
 brew "zoxide"
+
+cask "claude-code"
