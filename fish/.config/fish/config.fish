@@ -51,9 +51,9 @@ fish_vi_key_bindings
 
 # Custom key bindings for word-by-word completion
 function fish_user_key_bindings
-    # Cmd-; to accept one word from autosuggestion
-    bind -M insert \e\; forward-word
-    bind -M default \e\; forward-word
+    # Alt-q to accept one word from autosuggestion
+    bind -M insert \eq forward-word
+    bind -M default \eq forward-word
 end
 
 # No fish theme because I like monochrome
