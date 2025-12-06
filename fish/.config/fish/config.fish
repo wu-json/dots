@@ -25,7 +25,7 @@ alias c="claude"
 alias cx="codex"
 
 # Cursor
-alias cursor="cursor-agent"
+alias cr="cursor-agent"
 
 # Nvim
 alias v="nvim"
