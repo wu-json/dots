@@ -22,3 +22,5 @@ brew "yt-dlp"
 brew "zoxide"
 
 cask "claude-code"
+cask "codex"
+cask "cursor-cli"
