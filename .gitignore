@@ -1,4 +1,5 @@
 **/fish/fish_variables
 **/fish/completions
 
+**/nvim/queries/sand
 *.local.*
