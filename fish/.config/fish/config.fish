@@ -11,6 +11,9 @@ function gtch
     gt checkout $argv
 end
 
+# Brew
+alias pour="brew update && brew upgrade"
+
 # Git
 alias ghc="git reset --hard && git clean -fd"
 
