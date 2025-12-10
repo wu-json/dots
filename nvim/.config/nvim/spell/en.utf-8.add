@@ -53,3 +53,6 @@ LLMs
 JSX
 decl
 SoFi
+Builtins
+sqlite
+Metatable
