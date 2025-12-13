@@ -1,9 +1,5 @@
 brew_prefix := if os() == "macos" { "/opt/homebrew" } else { "/home/linuxbrew/.linuxbrew" }
 
-aqua:
-  aqua update-checksum
-  aqua install
-
 brew:
   brew bundle install --file=homebrew/Brewfile
 
