@@ -40,6 +40,11 @@ return {
           ]],
         },
       },
+      terminal = {
+        win = {
+          position = "float",
+        },
+      },
     },
   },
   -- { "rktjmp/lush.nvim", { dir = "/Users/jasonwu/GitHub/personal/chainsaw.nvim", lazy = true } },
