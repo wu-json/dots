@@ -33,6 +33,9 @@ alias cr="cursor-agent"
 # Nvim
 alias v="nvim"
 
+# Review fish function
+alias r="review"
+
 # OrbStack
 source ~/.orbstack/shell/init.fish 2>/dev/null || :
 
