@@ -1,39 +1,28 @@
 function review
-    # Default to claude if no argument provided
-    set -l tool claude
-    set -l command 'claude /review Review the PR for the checked out branch'
+    # Define the 4 review prompts
+    set -l prompt1 'Review the PR for the checked out branch. Focus on finding critical bugs, security vulnerabilities, and logic errors.'
+    set -l prompt2 'Review the PR for the checked out branch. Focus on finding dead code, unused imports, and unreachable code paths.'
+    set -l prompt3 'Review the PR for the checked out branch. Provide a general code review covering style, readability, and best practices.'
+    set -l prompt4 'Review the PR for the checked out branch. Provide a general code review covering architecture, design patterns, and maintainability.'
 
-    # Check if an argument was provided
-    if test (count $argv) -gt 0
-        set tool $argv[1]
-        if test "$tool" = "claude"
-            set command 'claude /review Review the PR for the checked out branch'
-        else if test "$tool" = "codex"
-            set command 'codex /review'
-        else
-            echo "Unknown tool: $tool. Use 'codex' or 'claude'."
-            return 1
-        end
-    end
+    # Get current pane ID
+    set -l current_pane (wezterm cli list --format json | jq -r '.[] | select(.is_active) | .pane_id')
 
-    # Store the current pane ID
-    set current_pane (wezterm cli get-pane-direction here)
+    # Create 2x2 grid layout
+    # Split right to create right column
+    set -l right_pane (wezterm cli split-pane --pane-id $current_pane --right --percent 50 -- fish -c "claude /review $prompt2")
 
-    # Split the pane and run the appropriate command in the new pane
-    wezterm cli split-pane --right -- fish -c "$command"
+    # Split current (left) pane down to create bottom-left
+    set -l bottom_left_pane (wezterm cli split-pane --pane-id $current_pane --bottom --percent 50 -- fish -c "claude /review $prompt3")
 
-    # Clear the current pane to align both panes vertically
-    # The new pane starts fresh without a prompt, so we clear this pane too
-    # to avoid height offset from the shell prompt appearing at the top
+    # Split right pane down to create bottom-right
+    set -l bottom_right_pane (wezterm cli split-pane --pane-id $right_pane --bottom --percent 50 -- fish -c "claude /review $prompt4")
+
+    # Clear the current pane
     clear
-    # Clear any pending input in the command line buffer
     commandline -r ''
     commandline -f repaint
 
-    # Run the appropriate command in the current pane
-    if test "$tool" = "claude"
-        claude /review Review the PR for the checked out branch
-    else
-        codex /review
-    end
+    # Run the first reviewer (critical bugs) in the current pane (top-left)
+    claude /review $prompt1
 end
