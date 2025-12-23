@@ -1,13 +1,13 @@
 function review
-    # Default to codex if no argument provided
-    set -l tool codex
-    set -l command 'codex /review'
+    # Default to claude if no argument provided
+    set -l tool claude
+    set -l command 'claude /review Review the PR for the checked out branch'
 
     # Check if an argument was provided
     if test (count $argv) -gt 0
         set tool $argv[1]
         if test "$tool" = "claude"
-            set command 'c /code-review'
+            set command 'claude /review Review the PR for the checked out branch'
         else if test "$tool" = "codex"
             set command 'codex /review'
         else
@@ -32,7 +32,7 @@ function review
 
     # Run the appropriate command in the current pane
     if test "$tool" = "claude"
-        c /code-review
+        claude /review Review the PR for the checked out branch
     else
         codex /review
     end
