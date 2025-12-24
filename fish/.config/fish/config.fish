@@ -24,6 +24,9 @@ alias tree="eza --tree"
 # Claudius Codius
 alias c="claude"
 
+# OpenCode
+alias o="opencode"
+
 # Codex 
 alias cx="codex"
 
