@@ -4,5 +4,3 @@
 **/nvim/queries/sand
 *.local.*
 
-claude/.claude/*
-!claude/.claude/settings.json
