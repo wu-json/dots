@@ -17,4 +17,4 @@ This is where I tweak config files till 4am like a goblin. It's pretty cozy in h
 ```bash
 brew install just
 just init
-
+```
