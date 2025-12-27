@@ -17,7 +17,28 @@
       "Bash(git shortlog:*)",
       "Bash(git stash list:*)",
       "Bash(git tag:*)",
-      "Bash(git reflog:*)"
+      "Bash(git reflog:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr diff:*)",
+      "Bash(gh pr checks:*)",
+      "Bash(gh pr status:*)",
+      "Bash(gh issue list:*)",
+      "Bash(gh issue view:*)",
+      "Bash(gh issue status:*)",
+      "Bash(gh repo view:*)",
+      "Bash(gh repo list:*)",
+      "Bash(gh release list:*)",
+      "Bash(gh release view:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)",
+      "Bash(gh workflow list:*)",
+      "Bash(gh workflow view:*)",
+      "Bash(gh api:*)",
+      "Bash(gh browse:*)",
+      "Bash(gh search:*)",
+      "Bash(gh gist list:*)",
+      "Bash(gh gist view:*)"
     ]
   }
 }
