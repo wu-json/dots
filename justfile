@@ -6,7 +6,6 @@ brew:
 init-fish:
   grep -qxF "{{brew_prefix}}/bin/fish" /etc/shells || echo "{{brew_prefix}}/bin/fish" | sudo tee -a /etc/shells
   chsh -s {{brew_prefix}}/bin/fish
-  fish scripts/init-fish.fish
 
 stow:
   stow -t ~ claude
