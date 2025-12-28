@@ -4,3 +4,8 @@
 **/nvim/queries/sand
 *.local.*
 
+# Ignore Claude Code files except commands and settings for security reasons
+# (prevents committing session data, logs, and potentially sensitive information)
+claude/.claude/*
+!claude/.claude/commands/
+!claude/.claude/settings.json
