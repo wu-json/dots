@@ -1,10 +1,6 @@
 return {
   { "rhysd/git-messenger.vim" },
   {
-    "OXY2DEV/markview.nvim",
-    lazy = false,
-  },
-  {
     "wallpants/github-preview.nvim",
     cmd = { "GithubPreviewToggle" },
     keys = { "<leader>mpt" },
