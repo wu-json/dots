@@ -3,6 +3,7 @@ tap "withgraphite/tap"
 tap "wu-json/asahi"
 
 brew "aqua"
+brew "bun"
 brew "eza"
 brew "fd"
 brew "fish"
