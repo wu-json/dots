@@ -19,8 +19,8 @@ function review
     set -l pane_1 (wezterm cli split-pane --pane-id $pane_0 --right)
 
     # send review commands to each pane
-    echo -e "claude 'Use /review to review PR #$pr_number.'" | wezterm cli send-text --no-paste --pane-id $pane_0
-    echo -e "claude 'Use /review to review PR #$pr_number.'" | wezterm cli send-text --no-paste --pane-id $pane_1
-    echo -e "claude 'Use /review to review PR #$pr_number. Focus on critical bugs, security vulnerabilities, and logic errors.'" | wezterm cli send-text --no-paste --pane-id $pane_2
-    echo -e "claude 'Use /review to review PR #$pr_number. Focus on dead code, unused imports, and unreachable code paths.'" | wezterm cli send-text --no-paste --pane-id $pane_3
+    echo -e "claude 'Use /review to review PR #$pr_number. Do not mutate the PR in any way, just provide a review.'" | wezterm cli send-text --no-paste --pane-id $pane_0
+    echo -e "claude 'Use /review to review PR #$pr_number. Do not mutate the PR in any way, just provide a review.'" | wezterm cli send-text --no-paste --pane-id $pane_1
+    echo -e "claude 'Use /review to review PR #$pr_number. Focus on critical bugs, security vulnerabilities, and logic errors. Do not mutate the PR in any way, just provide a review.'" | wezterm cli send-text --no-paste --pane-id $pane_2
+    echo -e "claude 'Use /review to review PR #$pr_number. Focus on dead code, unused imports, and unreachable code paths. Do not mutate the PR in any way, just provide a review.'" | wezterm cli send-text --no-paste --pane-id $pane_3
 end
