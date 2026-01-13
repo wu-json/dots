@@ -1,6 +1,31 @@
 return {
   { "rhysd/git-messenger.vim" },
   {
+    "rktjmp/fwatch.nvim",
+    config = function()
+      local fwatch = require("fwatch")
+      -- Watch for .sand file changes and reload buffer
+      vim.api.nvim_create_autocmd("BufEnter", {
+        pattern = "*.sand",
+        callback = function()
+          local bufnr = vim.api.nvim_get_current_buf()
+          local filepath = vim.api.nvim_buf_get_name(bufnr)
+          if filepath ~= "" and vim.fn.filereadable(filepath) == 1 then
+            fwatch.watch(filepath, {
+              on_event = vim.schedule_wrap(function()
+                if vim.api.nvim_buf_is_valid(bufnr) then
+                  vim.api.nvim_buf_call(bufnr, function()
+                    vim.cmd("checktime")
+                  end)
+                end
+              end),
+            })
+          end
+        end,
+      })
+    end,
+  },
+  {
     "wallpants/github-preview.nvim",
     cmd = { "GithubPreviewToggle" },
     keys = { "<leader>mpt" },
