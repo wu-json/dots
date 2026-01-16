@@ -72,4 +72,12 @@ return {
       vim.g.vimwiki_global_ext = 0 -- Don't hijack all .md files
     end,
   },
+  {
+    "sotte/presenting.nvim",
+    opts = {
+      -- fill in your options here
+      -- see :help Presenting.config
+    },
+    cmd = { "Presenting" },
+  },
 }
