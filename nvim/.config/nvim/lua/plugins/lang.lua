@@ -4,6 +4,42 @@ return {
     opts = {
       inlay_hints = { enabled = false },
       setup = {
+        -- Bazel LSP using starpls (Starlark Language Server)
+        starpls = function()
+          local lspconfig = require("lspconfig")
+          local configs = require("lspconfig.configs")
+
+          if not configs.starpls then
+            configs.starpls = {
+              default_config = {
+                cmd = { "starpls" },
+                filetypes = { "bzl", "starlark" },
+                root_dir = lspconfig.util.root_pattern("WORKSPACE", "WORKSPACE.bazel", "MODULE.bazel", ".git"),
+              },
+            }
+          end
+
+          lspconfig.starpls.setup({})
+        end,
+
+        -- Buck2 LSP
+        buck2_lsp = function()
+          local lspconfig = require("lspconfig")
+          local configs = require("lspconfig.configs")
+
+          if not configs.buck2_lsp then
+            configs.buck2_lsp = {
+              default_config = {
+                cmd = { "buck2", "lsp" },
+                filetypes = { "bzl", "starlark" },
+                root_dir = lspconfig.util.root_pattern(".buckconfig", ".buckroot", "BUCK", "TARGETS", ".git"),
+              },
+            }
+          end
+
+          lspconfig.buck2_lsp.setup({})
+        end,
+
         -- Custom setup for sand LSP
         sand = function()
           local lspconfig = require("lspconfig")
@@ -51,6 +87,8 @@ return {
         terraformls = {},
         yamlls = {},
         sand = {},
+        starpls = {},
+        buck2_lsp = {},
 
         -- These are all for TypeScript but we disable them because they are hella slow.
         -- Instead we opt to use typescript-tools: https://github.com/pmizio/typescript-tools.nvim
@@ -86,6 +124,7 @@ return {
         "hcl",
         "python",
         "rst",
+        "starlark",
         "terraform",
         "toml",
         "yaml",
