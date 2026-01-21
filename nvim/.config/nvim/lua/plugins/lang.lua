@@ -4,24 +4,6 @@ return {
     opts = {
       inlay_hints = { enabled = false },
       setup = {
-        -- Bazel LSP using starpls (Starlark Language Server)
-        starpls = function()
-          local lspconfig = require("lspconfig")
-          local configs = require("lspconfig.configs")
-
-          if not configs.starpls then
-            configs.starpls = {
-              default_config = {
-                cmd = { "starpls" },
-                filetypes = { "bzl", "starlark" },
-                root_dir = lspconfig.util.root_pattern("WORKSPACE", "WORKSPACE.bazel", "MODULE.bazel", ".git"),
-              },
-            }
-          end
-
-          lspconfig.starpls.setup({})
-        end,
-
         -- Buck2 LSP
         buck2_lsp = function()
           local lspconfig = require("lspconfig")
@@ -87,7 +69,6 @@ return {
         terraformls = {},
         yamlls = {},
         sand = {},
-        starpls = {},
         buck2_lsp = {},
 
         -- These are all for TypeScript but we disable them because they are hella slow.

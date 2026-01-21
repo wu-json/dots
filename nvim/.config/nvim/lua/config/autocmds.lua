@@ -10,18 +10,12 @@ vim.api.nvim_create_autocmd({"BufRead", "BufNewFile"}, {
   end,
 })
 
--- Set filetype for Bazel/Buck2 Starlark files
+-- Set filetype for Buck2 Starlark files
 vim.filetype.add({
   extension = {
     bzl = "bzl",
-    bazel = "bzl",
   },
   filename = {
-    ["BUILD"] = "bzl",
-    ["BUILD.bazel"] = "bzl",
-    ["WORKSPACE"] = "bzl",
-    ["WORKSPACE.bazel"] = "bzl",
-    ["MODULE.bazel"] = "bzl",
     ["BUCK"] = "bzl",
     ["TARGETS"] = "bzl",
   },
