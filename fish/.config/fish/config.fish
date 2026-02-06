@@ -1,5 +1,5 @@
 # Graphite
-alias gtss="gt sync && gt submit"
+alias gtss="gt sync && gt submit --stack"
 alias gtr="gt restack"
 alias gtl="gt ls"
 alias gtm="gt add -A && gt modify"
