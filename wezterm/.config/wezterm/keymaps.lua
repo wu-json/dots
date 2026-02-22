@@ -97,6 +97,12 @@ local keymaps = {
 		mods = "CMD|SHIFT",
 		action = wezterm.action.MoveTabRelative(1),
 	},
+	-- toggle pane zoom
+	{
+		key = "z",
+		mods = "CMD",
+		action = act.TogglePaneZoomState,
+	},
 }
 
 function module.apply_to_config(config)
