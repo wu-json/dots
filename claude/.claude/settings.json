@@ -40,5 +40,6 @@
       "Bash(gh gist list:*)",
       "Bash(gh gist view:*)"
     ]
-  }
+  },
+  "model": "opus"
 }
