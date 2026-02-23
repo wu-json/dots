@@ -26,6 +26,7 @@ brew "rsync"
 brew "stow"
 brew "wu-json/asahi/blossom"
 brew "wu-json/asahi/curse"
+brew "wu-json/asahi/pickpocket"
 brew "yt-dlp"
 brew "zoxide"
 
