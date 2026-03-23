@@ -22,7 +22,7 @@ alias ls="eza"
 alias tree="eza --tree"
 
 # Claudius Codius
-alias c="claude"
+alias c="claude --dangerously-skip-permissions"
 
 # OpenCode
 alias o="opencode"
