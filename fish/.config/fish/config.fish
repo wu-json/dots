@@ -22,7 +22,7 @@ alias ls="eza"
 alias tree="eza --tree"
 
 # Claudius Codius
-alias c="claude --dangerously-skip-permissions"
+alias cl="claude --dangerously-skip-permissions"
 
 # OpenCode
 alias o="opencode"
@@ -32,6 +32,7 @@ alias cx="codex"
 
 # Cursor
 alias cr="cursor-agent --yolo"
+alias c="cr"
 
 # Nvim
 alias v="nvim"
