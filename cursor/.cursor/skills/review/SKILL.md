@@ -77,6 +77,8 @@ Secondary concerns:
 
 Lead with findings. Order them by severity. Keep the overview brief.
 
+**Outcome tags (pick exactly one line; ASCII brackets, no emoji):** `[+]` Ready · `[~]` Ready with follow-ups · `[!]` Needs changes
+
 Use this structure:
 
 ```markdown
@@ -87,20 +89,20 @@ Use this structure:
 ## Open Questions
 - Anything ambiguous or worth confirming
 
-## Merge Recommendation
-Ready, Ready with follow-ups, or Needs changes.
-
 ## Summary
 Short overview of what the PR does and any remaining risk areas.
+
+## Outcome
+`[+]` Ready
 ```
 
 ## Review rules
 
 - Be concise but specific.
-- Respond with exactly these sections in this order: Findings, Open Questions, Merge Recommendation, Summary.
+- Respond with exactly these sections in this order: Findings, Open Questions, Summary, Outcome.
 - Report only concrete, evidence-backed issues.
 - Include file paths or symbols for each finding.
 - Explain why the issue matters, not just what changed.
 - Suggest a concrete fix or follow-up test when possible.
 - If there are no concrete findings, write `None` under Findings.
-- Use exactly one merge recommendation: `Ready`, `Ready with follow-ups`, or `Needs changes`.
+- Use exactly one outcome line with the matching tag: `[+]` Ready, `[~]` Ready with follow-ups, or `[!]` Needs changes.

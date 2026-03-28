@@ -1,6 +1,8 @@
 {
   "permissions": {
     "allow": [
+      "WebFetch(*)",
+      "WebSearch(*)",
       "Shell(ls)",
       "Shell(git)",
       "Shell(gh)",
@@ -9,31 +11,6 @@
     "deny": []
   },
   "version": 1,
-  "editor": {
-    "vimMode": false
-  },
-  "model": {
-    "modelId": "gpt-5.4-high",
-    "displayModelId": "gpt-5.4-high",
-    "displayName": "GPT-5.4 1M High",
-    "displayNameShort": "GPT-5.4 1M High",
-    "aliases": [],
-    "maxMode": false
-  },
-  "hasChangedDefaultModel": true,
-  "maxMode": false,
-  "modelParameters": {
-    "gpt-5.4-high": []
-  },
-  "selectedModel": {
-    "modelId": "gpt-5.4-high",
-    "parameters": []
-  },
-  "privacyCache": {
-    "ghostMode": true,
-    "privacyMode": 1,
-    "updatedAt": 1774676960092
-  },
   "attribution": {
     "attributeCommitsToAgent": false,
     "attributePRsToAgent": false
