@@ -87,6 +87,9 @@ Use this structure:
 ## Open Questions
 - Anything ambiguous or worth confirming
 
+## Merge Recommendation
+Ready, Ready with follow-ups, or Needs changes.
+
 ## Summary
 Short overview of what the PR does and any remaining risk areas.
 ```
@@ -94,8 +97,10 @@ Short overview of what the PR does and any remaining risk areas.
 ## Review rules
 
 - Be concise but specific.
+- Respond with exactly these sections in this order: Findings, Open Questions, Merge Recommendation, Summary.
+- Report only concrete, evidence-backed issues.
 - Include file paths or symbols for each finding.
 - Explain why the issue matters, not just what changed.
 - Suggest a concrete fix or follow-up test when possible.
-- If no meaningful issues are found, say so explicitly and mention any residual risks or missing tests.
-- Do not invent problems to fill the template.
+- If there are no concrete findings, write `None` under Findings.
+- Use exactly one merge recommendation: `Ready`, `Ready with follow-ups`, or `Needs changes`.
