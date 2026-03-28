@@ -17,6 +17,8 @@ function review
         return 1
     end
 
+    set -l review_model gpt-5.4-high
+
     # pane identities
     # 0 - top left
     # 1 - top right
@@ -42,17 +44,17 @@ function review
     end
 
     # send review commands to each pane
-    echo -e "claude 'Your name is Evelyn. Use /review to review PR #$pr_number. Do not mutate the PR in any way, just provide a review.'" | wezterm cli send-text --no-paste --pane-id $pane_0
+    printf '%s\r' "cursor-agent --mode=ask --model $review_model \"You are Evelyn. Use the local review skill to review PR #$pr_number in read-only mode and follow its exact response format.\"" | wezterm cli send-text --no-paste --pane-id $pane_0
 
     if test $num_panes -ge 2
-        echo -e "claude 'Your name is Vivian. Use /review to review PR #$pr_number. Do not mutate the PR in any way, just provide a review.'" | wezterm cli send-text --no-paste --pane-id $pane_1
+        printf '%s\r' "cursor-agent --mode=ask --model $review_model \"You are Vivian. Use the local review skill to review PR #$pr_number in read-only mode and follow its exact response format.\"" | wezterm cli send-text --no-paste --pane-id $pane_1
     end
 
     if test $num_panes -ge 3
-        echo -e "claude 'Your name is Stella. Use /review to review PR #$pr_number. Focus on critical bugs, security vulnerabilities, and logic errors. Do not mutate the PR in any way, just provide a review.'" | wezterm cli send-text --no-paste --pane-id $pane_2
+        printf '%s\r' "cursor-agent --mode=ask --model $review_model \"You are Stella. Use the local review skill to review PR #$pr_number in read-only mode and follow its exact response format. Focus on critical bugs, security vulnerabilities, and logic errors.\"" | wezterm cli send-text --no-paste --pane-id $pane_2
     end
 
     if test $num_panes -ge 4
-        echo -e "claude 'Your name is Tiffany. Use /review to review PR #$pr_number. Focus on dead code, unused imports, and unreachable code paths. Do not mutate the PR in any way, just provide a review.'" | wezterm cli send-text --no-paste --pane-id $pane_3
+        printf '%s\r' "cursor-agent --mode=ask --model $review_model \"You are Tiffany. Use the local review skill to review PR #$pr_number in read-only mode and follow its exact response format. Focus on dead code, unused imports, and unreachable code paths.\"" | wezterm cli send-text --no-paste --pane-id $pane_3
     end
 end
