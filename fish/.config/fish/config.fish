@@ -31,7 +31,7 @@ alias o="opencode"
 alias cx="codex"
 
 # Cursor
-alias cr="cursor-agent"
+alias cr="cursor-agent --yolo"
 
 # Nvim
 alias v="nvim"

@@ -9,6 +9,7 @@ init-fish:
 
 stow:
   stow -t ~ claude
+  stow -t ~ cursor
   stow -t ~ fish
   stow -t ~ nvim
   stow -t ~ wezterm
