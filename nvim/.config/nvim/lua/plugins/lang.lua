@@ -95,6 +95,14 @@ return {
   },
   {
     "nvim-treesitter/nvim-treesitter",
+    init = function()
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = "sand",
+        callback = function(ev)
+          pcall(vim.treesitter.start, ev.buf, "sand")
+        end,
+      })
+    end,
     opts = function(_, opts)
       opts.ensure_installed = opts.ensure_installed or {}
       vim.list_extend(opts.ensure_installed, {
@@ -103,6 +111,7 @@ return {
         "gowork",
         "gosum",
         "hcl",
+        "pkl",
         "python",
         "rst",
         "starlark",
@@ -110,9 +119,9 @@ return {
         "toml",
         "yaml",
       })
-      -- Configure custom sand parser
-      local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
-      parser_config.sand = {
+      -- Configure custom sand parser across old and new nvim-treesitter APIs.
+      local parsers = require("nvim-treesitter.parsers")
+      local sand_parser_config = {
         install_info = {
           url = "/Users/jasonwu/GitHub/forge/treesitter-sand",
           files = { "src/parser.c" },
@@ -122,6 +131,14 @@ return {
         filetype = "sand",
         used_by = { "sand" },
       }
+      if parsers.get_parser_configs then
+        parsers.get_parser_configs().sand = sand_parser_config
+      else
+        parsers.sand = sand_parser_config
+      end
+      if vim.treesitter and vim.treesitter.language then
+        vim.treesitter.language.register("sand", "sand")
+      end
     end,
   },
   {
@@ -150,20 +167,19 @@ return {
     "apple/pkl-neovim",
     lazy = true,
     ft = "pkl",
-    dependencies = {
-      "nvim-treesitter/nvim-treesitter",
-      "L3MON4D3/LuaSnip",
-    },
-    build = function()
-      require("pkl-neovim").init()
-      vim.cmd("TSInstall pkl")
-    end,
-    config = function()
-      require("luasnip.loaders.from_snipmate").lazy_load()
+    init = function()
       vim.g.pkl_neovim = {
         start_command = { "pkl-lsp" },
         pkl_cli_path = "/Users/jasonwu/.local/share/aquaproj-aqua/bin/pkl",
       }
+    end,
+    dependencies = {
+      "nvim-treesitter/nvim-treesitter",
+      "L3MON4D3/LuaSnip",
+    },
+    config = function()
+      require("luasnip.loaders.from_snipmate").lazy_load()
+      require("pkl-neovim").init()
     end,
   },
 }
