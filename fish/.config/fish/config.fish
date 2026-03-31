@@ -38,7 +38,7 @@ alias o="opencode"
 alias cx="codex"
 
 # Cursor
-alias cr="cursor-agent --yolo --model gpt-5.4-xhigh"
+alias cr="cursor-agent --yolo --model claude-4.6-opus-high"
 alias c="cr"
 
 # Nvim
