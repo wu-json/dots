@@ -18,3 +18,5 @@ This is where I tweak config files till 4am like a goblin. It's pretty cozy in h
 brew install just
 just init
 ```
+
+`just brew` (run as part of `just init`) clears macOS quarantine on the **cursor-cli** cask so native addons load correctly. If you use `brew bundle` without Just, run `xattr -rd com.apple.quarantine "$(brew --prefix)/Caskroom/cursor-cli/"` afterward. Background: [Cursor forum — merkle-tree NAPI / “not opened” on darwin-arm64](https://forum.cursor.com/t/cursor-agent-merkle-tree-napi-darwin-arm64-node-not-opened/155056).
