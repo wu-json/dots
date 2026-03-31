@@ -93,7 +93,9 @@ Use this structure:
 Short overview of what the PR does and any remaining risk areas.
 
 ## Outcome
-`[+]` Ready
+`[!]` Needs changes
+- tldr of finding 1
+- tldr of finding 2
 ```
 
 ## Review rules
@@ -106,3 +108,4 @@ Short overview of what the PR does and any remaining risk areas.
 - Suggest a concrete fix or follow-up test when possible.
 - If there are no concrete findings, write `None` under Findings.
 - Use exactly one outcome line with the matching tag: `[+]` Ready, `[~]` Ready with follow-ups, or `[!]` Needs changes.
+- For `[~]` and `[!]` outcomes, add a short bulleted list directly below the outcome line that TLDRs each finding or follow-up item. Keep each bullet to one concise line.
