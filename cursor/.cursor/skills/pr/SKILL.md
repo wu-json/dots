@@ -54,4 +54,4 @@ Brief additional context or implementation notes if needed. Omit if not necessar
 
 Use a HEREDOC for the body to preserve formatting.
 
-Do not include any tool attribution footer such as "Generated with Claude Code".
+Do not attribute the PR to Cursor, any other AI tool, or any assistant in the title or body. Omit footers and phrases like "Generated with Cursor", "Generated with Claude Code", Copilot, or similar.
