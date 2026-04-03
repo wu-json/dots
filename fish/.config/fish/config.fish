@@ -40,7 +40,7 @@ alias cx="codex"
 # Cursor
 alias cr="cursor-agent --yolo --model composer-2"
 alias c="cr"
-alias prdoc="cursor-agent --yolo --model composer-2 /pr"
+alias prdoc="cursor-agent --yolo --model gpt-5.4-high-fast /pr"
 
 # Nvim
 alias v="nvim"
