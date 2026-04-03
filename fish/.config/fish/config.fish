@@ -40,6 +40,7 @@ alias cx="codex"
 # Cursor
 alias cr="cursor-agent --yolo --model composer-2"
 alias c="cr"
+alias prdoc="cursor-agent --yolo --model composer-2 /pr"
 
 # Nvim
 alias v="nvim"
