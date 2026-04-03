@@ -17,7 +17,7 @@ function review
         return 1
     end
 
-    set -l review_model gpt-5.4-high
+    set -l review_model gpt-5.4
 
     # pane identities
     # 0 - top left
