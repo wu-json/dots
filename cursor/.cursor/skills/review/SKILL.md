@@ -79,6 +79,10 @@ Lead with findings. Order them by severity. Keep the overview brief.
 
 **Outcome tags (pick exactly one line; ASCII brackets, no emoji):** `[+]` Ready · `[~]` Ready with follow-ups · `[!]` Needs changes
 
+**`[!]` Needs changes:** Only when you have **verified** a real issue (not a misread or guess). One line each: what breaks / risk, **why merge should wait**. Nits, prefs, or unconfirmed items → findings (lower severity), Open Questions, or omit—not `[!]`.
+
+**`[~]` Ready with follow-ups:** Safe to merge now. Under the outcome line, list each follow-up the same way as `[!]` blockers—**one concise line each**: what to do next and **why it matters** (debt, test gap, perf, etc.). Skip vague bullets.
+
 Use this structure:
 
 ```markdown
@@ -93,9 +97,27 @@ Use this structure:
 Short overview of what the PR does and any remaining risk areas.
 
 ## Outcome
+`[+]` Ready
+```
+
+**Outcome with bullets** (only for `[~]` or `[!]`—one concise line per item):
+
+`[~]` example:
+
+```markdown
+## Outcome
+`[~]` Ready with follow-ups
+- Add regression test for empty `items`—behavior is correct but easy to break silently later
+- Document the new env var in `README`—ops will misconfigure deploys without it
+```
+
+`[!]` example:
+
+```markdown
+## Outcome
 `[!]` Needs changes
-- tldr of finding 1
-- tldr of finding 2
+- `api/handlers.go` `Submit` ignores `ctx.Err()`—in-flight requests can write after cancel; data race / duplicate rows
+- Migration drops `legacy_id` with no backfill—existing rows become unreadable; merge would strand prod data
 ```
 
 ## Review rules
@@ -108,4 +130,4 @@ Short overview of what the PR does and any remaining risk areas.
 - Suggest a concrete fix or follow-up test when possible.
 - If there are no concrete findings, write `None` under Findings.
 - Use exactly one outcome line with the matching tag: `[+]` Ready, `[~]` Ready with follow-ups, or `[!]` Needs changes.
-- For `[~]` and `[!]` outcomes, add a short bulleted list directly below the outcome line that TLDRs each finding or follow-up item. Keep each bullet to one concise line.
+- For `[!]`, bullets = verified blockers (what + why merge waits). For `[~]`, bullets = follow-ups in the **same shape** (what + why it matters). One concise line per bullet.
