@@ -1,8 +1,25 @@
 function review
-    # get number of panes (default 4)
+    # Usage: review [1-4] [openai|anthropic] — args can be in any order.
+    # Default: 4 panes, openai (gpt-5.4-high). anthropic → claude-4.6-opus-high.
     set -l num_panes 4
-    if test (count $argv) -ge 1
-        set num_panes $argv[1]
+    set -l provider openai
+    set -l saw_panes false
+
+    for token in $argv
+        set -l t (string lower $token)
+        if contains -- $t openai anthropic
+            set provider $t
+        else if string match -rq '^[1-4]$' -- $token
+            if test "$saw_panes" = true
+                echo "Pane count specified more than once"
+                return 1
+            end
+            set num_panes $token
+            set saw_panes true
+        else
+            echo "Invalid argument: $token (pane count 1-4, provider openai or anthropic)"
+            return 1
+        end
     end
 
     if test $num_panes -lt 1 -o $num_panes -gt 4
@@ -18,6 +35,10 @@ function review
     end
 
     set -l review_model gpt-5.4-high
+    switch $provider
+        case anthropic
+            set review_model claude-4.6-opus-high
+    end
 
     # pane identities
     # 0 - top left
