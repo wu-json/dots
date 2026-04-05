@@ -1,8 +1,8 @@
 function review
     # Usage: review [1-4] [openai|anthropic] — args can be in any order.
-    # Default: 4 panes, openai (gpt-5.4-high). anthropic → claude-4.6-opus-high.
+    # Default: 4 panes, anthropic (claude-4.6-opus-high). openai → gpt-5.4-high.
     set -l num_panes 4
-    set -l provider openai
+    set -l provider anthropic
     set -l saw_panes false
 
     for token in $argv
