@@ -1,0 +1,10 @@
+{
+  "version": 0,
+  "picks": [
+    {
+      "url": "https://github.com/wezterm/wezterm",
+      "branch": "main",
+      "commit": "577474d89ee61aef4a48145cdec82a638d874751"
+    }
+  ]
+}
