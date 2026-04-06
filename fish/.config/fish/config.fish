@@ -38,7 +38,7 @@ alias o="opencode"
 alias cx="codex"
 
 # Cursor
-alias cr="cursor-agent --yolo --model composer-2"
+alias cr="cursor-agent --yolo --model claude-4.6-opus-high"
 alias c="cr"
 alias prdoc="cursor-agent --yolo --model gpt-5.4-high-fast /pr"
 
