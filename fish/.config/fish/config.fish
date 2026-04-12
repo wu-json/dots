@@ -48,6 +48,7 @@ alias v="nvim"
 
 # Review fish function
 alias r="review"
+alias ra="review_auto"
 
 # OrbStack
 source ~/.orbstack/shell/init.fish 2>/dev/null || :
