@@ -192,7 +192,7 @@ function review_auto
             end
             
             set frame_idx (math "$frame_idx % 10 + 1")
-            sleep 0.5
+            sleep 0.05
         end
         set -l elapsed (math (date +%s) - $round_start)
         set -l mins (math "floor($elapsed / 60)")
