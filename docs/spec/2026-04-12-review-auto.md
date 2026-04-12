@@ -137,7 +137,7 @@ cursor-agent --yolo --model MODEL "Read the prompt at {round_dir}/triage_prompt.
 
 The prompt file contains:
 ```
-You are a senior code-review triage agent. Read the 3 review output files at:
+You are a code-review triage agent. Read the 3 review output files at:
   {round_dir}/review_evelyn.md
   {round_dir}/review_vivian.md
   {round_dir}/review_stella.md
@@ -159,7 +159,7 @@ Your job:
 The fix agent runs in the same work pane after triage completes. Prompt is also written to a file `{round_dir}/fix_prompt.txt`:
 
 ```
-You are a senior engineer. Read the triaged issues at {round_dir}/triage.md.
+Read the triaged issues at {round_dir}/triage.md.
 Fix every issue listed. Do not fix anything not listed. Commit your changes
 with a clear message referencing the fixes. When done, run: touch {round_dir}/.done_fix
 ```
