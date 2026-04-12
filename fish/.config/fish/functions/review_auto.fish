@@ -210,20 +210,9 @@ function review_auto
         set -l file_list (string join ", " $review_files)
 
         set -l triage_sentinel "$round_dir/.done_triage"
-        set -l triage_prompt_file "$round_dir/triage_prompt.txt"
-        echo "You are a senior code-review triage agent. Read the review output files at: $file_list
+        set -l triage_prompt "You are a senior code-review triage agent. Read the review output files at: $file_list. Read all review files using the Read tool. Filter out nitpicks, style-only comments, and false positives. Identify ONLY real bugs, logic errors, security vulnerabilities, or missing error handling. If a review file is empty or contains an error, skip it. Write your verdict to $round_dir/triage.md. If there are NO real issues: write ONLY the text NO_ISSUES_FOUND (nothing else, just that one line). If there ARE real issues: write each issue with file path, line number, severity (critical/high/medium), and description. Do NOT include the string NO_ISSUES_FOUND anywhere."
 
-Your job:
-- Read all review files using the Read tool
-- Filter out nitpicks, style-only comments, and false positives
-- Identify ONLY real bugs, logic errors, security vulnerabilities, or missing error handling
-- If a review file is empty or contains an error, skip it
-
-IMPORTANT - Write your verdict to $round_dir/triage.md:
-- If there are NO real issues: write ONLY the text 'NO_ISSUES_FOUND' (nothing else, just that one line)
-- If there ARE real issues: write each issue with file path, line number, severity (critical/high/medium), and description. Do NOT include the string NO_ISSUES_FOUND anywhere." >$triage_prompt_file
-
-        set -l triage_cmd "cursor-agent --yolo --model $triage_model -p \"(cat $triage_prompt_file)\" && touch $triage_sentinel"
+        set -l triage_cmd "cursor-agent --yolo --model $triage_model \"$triage_prompt\"; touch $triage_sentinel"
         printf '%s\r' "$triage_cmd" | wezterm cli send-text --no-paste --pane-id $work_pane
 
         set frame_idx 1
@@ -263,10 +252,9 @@ IMPORTANT - Write your verdict to $round_dir/triage.md:
         set work_pane (wezterm cli split-pane --pane-id $pane_0 --right)
 
         set -l fix_sentinel "$round_dir/.done_fix"
-        set -l fix_prompt_file "$round_dir/fix_prompt.txt"
-        echo "You are a senior engineer. Read the triaged code-review issues at $round_dir/triage.md using the Read tool. Fix every issue listed. Do not fix anything not listed. After fixing, commit your changes with a clear message referencing what was fixed, then push to the remote branch (git push)." >$fix_prompt_file
+        set -l fix_prompt "You are a senior engineer. Read the triaged code-review issues at $round_dir/triage.md using the Read tool. Fix every issue listed. Do not fix anything not listed. After fixing, commit your changes with a clear message referencing what was fixed, then push to the remote branch with git push."
 
-        set -l fix_cmd "cursor-agent --yolo --model $fix_model -p \"(cat $fix_prompt_file)\" && touch $fix_sentinel"
+        set -l fix_cmd "cursor-agent --yolo --model $fix_model \"$fix_prompt\"; touch $fix_sentinel"
         printf '%s\r' "$fix_cmd" | wezterm cli send-text --no-paste --pane-id $work_pane
 
         set frame_idx 1
