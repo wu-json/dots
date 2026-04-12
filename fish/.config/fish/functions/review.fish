@@ -40,7 +40,7 @@ function review
             set review_model claude-4.6-opus
     end
 
-    set -l review_cmd "FORCE_COLOR=0 claude --dangerously-skip-permissions --model $review_model -p"
+    set -l review_cmd "claude --dangerously-skip-permissions --model $review_model -p"
 
     # pane identities
     # 0 - top left
