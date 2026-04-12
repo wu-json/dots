@@ -34,9 +34,13 @@ alias o="opencode"
 # Codex 
 alias cx="codex"
 
-# Claude Code
-alias c="claude --dangerously-skip-permissions"
-alias prdoc="claude --dangerously-skip-permissions --model gpt-5.4-high-fast /pr"
+# Claudius Codius
+alias cl="claude --dangerously-skip-permissions"
+
+# Cursor
+alias cr="cursor-agent --yolo --model composer-2"
+alias c="cr"
+alias prdoc="cursor-agent --yolo --model gpt-5.4-high-fast /pr"
 
 # Nvim
 alias v="nvim"
