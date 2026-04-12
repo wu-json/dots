@@ -67,36 +67,36 @@ function review_auto
     echo "│  session: $session_dir"
     echo "└─────────────────────────────────────────────┘"
 
-    # --- split panes: orchestrator on top, reviewers on bottom ---
+    # --- split panes: orchestrator + Evelyn on top, rest on bottom ---
+    # Layout:
+    # ┌─────────────────────┬─────────────────────┐
+    # │   ORCHESTRATOR      │      Evelyn         │
+    # ├───────────┬─────────┴───────┬─────────────┤
+    # │ Vivian    │    Stella       │   Tiffany   │
+    # └───────────┴─────────────────┴─────────────┘
     set -l pane_0 $WEZTERM_PANE
     set -l pane_ids
 
-    set pane_ids (wezterm cli split-pane --pane-id $pane_0 --bottom --percent 70)
-    if test $num_panes -ge 2
-        set -a pane_ids (wezterm cli split-pane --pane-id $pane_ids[1] --right)
-    end
-    if test $num_panes -ge 3
-        set -a pane_ids (wezterm cli split-pane --pane-id $pane_ids[1] --right)
-    end
-    if test $num_panes -ge 4
-        set -a pane_ids (wezterm cli split-pane --pane-id $pane_ids[2] --right)
-    end
+    # Evelyn always goes top-right
+    set -l pane_evelyn (wezterm cli split-pane --pane-id $pane_0 --right)
+    set pane_ids $pane_evelyn
 
-    # pane_ids is now: [bottom-left, bottom-right, bottom-left-center, bottom-right-center]
-    # reorder to match reviewer indices 1..num_panes
-    switch $num_panes
-        case 1
-            # pane_ids = [p1]
-        case 2
-            # pane_ids = [p1, p2] — already correct
-        case 3
-            # splits: p1(left full), p2(right half of original), p3(right half of p1)
-            # actual order left→right: p1-remaining, p3, p2
-            set pane_ids $pane_ids[1] $pane_ids[3] $pane_ids[2]
-        case 4
-            # splits: p1(left half), p2(right half), p3(right of p1→center-left), p4(right of p2→center-right)
-            # actual order left→right: p1-remaining, p3, p2-remaining, p4
-            set pane_ids $pane_ids[1] $pane_ids[3] $pane_ids[2] $pane_ids[4]
+    if test $num_panes -ge 2
+        # Vivian: bottom-left (split orchestrator down)
+        set -l pane_vivian (wezterm cli split-pane --pane-id $pane_0 --bottom)
+        set -a pane_ids $pane_vivian
+
+        if test $num_panes -ge 3
+            # Stella: bottom-right (split Vivian right)
+            set -l pane_stella (wezterm cli split-pane --pane-id $pane_vivian --right)
+            set -a pane_ids $pane_stella
+
+            if test $num_panes -ge 4
+                # Tiffany: bottom-far-right (split Stella right)
+                set -l pane_tiffany (wezterm cli split-pane --pane-id $pane_stella --right)
+                set -a pane_ids $pane_tiffany
+            end
+        end
     end
 
     # --- main loop ---
@@ -147,7 +147,7 @@ function review_auto
         end
         echo "  All reviewers finished."
 
-        # --- triage phase ---
+        # --- triage phase (runs in Evelyn's pane) ---
         echo ""
         echo "───────────────────────────────────────────────"
         echo "  ROUND $round / $max_rounds — TRIAGE PHASE"
@@ -160,6 +160,7 @@ function review_auto
         end
         set -l file_list (string join ", " $review_files)
 
+        set -l triage_sentinel "$round_dir/.done_triage"
         set -l triage_prompt "You are a senior code-review triage agent. Read the review output files at: $file_list
 
 Your job:
@@ -169,9 +170,17 @@ Your job:
 - If a review file is empty or contains an error, skip it
 - If there are no real issues, output exactly the string: NO_ISSUES_FOUND
 - Format each real issue as: file path, line number, severity (critical/high/medium), and description
-- IMPORTANT: Write your final verdict to $round_dir/triage.md using the Write tool. Include NO_ISSUES_FOUND in that file if there are none."
+- IMPORTANT: Write your final verdict to $round_dir/triage.md using the Write tool. Include NO_ISSUES_FOUND in that file if there are none.
+- When completely done, run: touch $triage_sentinel"
 
-        cursor-agent --yolo --print --trust --model $triage_model -p "$triage_prompt"
+        set -l triage_cmd "cursor-agent --yolo --model $triage_model \"$triage_prompt\""
+        printf '%s\r' "$triage_cmd" | wezterm cli send-text --no-paste --pane-id $pane_ids[1]
+
+        echo "  Waiting for triage agent..."
+        while not test -f $triage_sentinel
+            sleep 5
+        end
+        echo "  Triage finished."
 
         # check triage result
         if grep -q "NO_ISSUES_FOUND" $round_dir/triage.md
@@ -194,15 +203,23 @@ Your job:
             return 0
         end
 
-        # --- fix phase ---
+        # --- fix phase (runs in Evelyn's pane) ---
         echo ""
         echo "───────────────────────────────────────────────"
         echo "  ROUND $round / $max_rounds — FIX PHASE"
         echo "───────────────────────────────────────────────"
 
-        set -l fix_prompt "You are a senior engineer. Read the triaged code-review issues at $round_dir/triage.md using the Read tool. Fix every issue listed. Do not fix anything not listed. After fixing, commit your changes with a clear message referencing what was fixed."
+        set -l fix_sentinel "$round_dir/.done_fix"
+        set -l fix_prompt "You are a senior engineer. Read the triaged code-review issues at $round_dir/triage.md using the Read tool. Fix every issue listed. Do not fix anything not listed. After fixing, commit your changes with a clear message referencing what was fixed. When completely done, run: touch $fix_sentinel"
 
-        cursor-agent --yolo --print --trust --model $fix_model -p "$fix_prompt"
+        set -l fix_cmd "cursor-agent --yolo --model $fix_model \"$fix_prompt\""
+        printf '%s\r' "$fix_cmd" | wezterm cli send-text --no-paste --pane-id $pane_ids[1]
+
+        echo "  Waiting for fix agent..."
+        while not test -f $fix_sentinel
+            sleep 5
+        end
+        echo "  Fix finished."
 
         set round (math $round + 1)
     end

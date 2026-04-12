@@ -83,43 +83,43 @@ Each agent writes its output to a temp file so downstream agents can read it:
     ...
 ```
 
-Each round gets its own subdirectory so previous rounds are preserved for debugging. `cursor-agent --print` mode writes to stdout, which we tee into these files. This also means each pane shows live output to the user.
+Each round gets its own subdirectory so previous rounds are preserved for debugging. All agents write their output via the Write tool and run in full TUI mode.
 
 ### Wezterm pane layout
 
 Fixed 5-pane layout for the entire session:
 
 ```
-┌─────────────────────────────────────────────┐
-│              ORCHESTRATOR (pane 0)           │
-│  triage agent / fix agent / status output   │
-├──────────┬──────────┬──────────┬────────────┤
-│ Evelyn   │ Vivian   │ Stella   │ Tiffany    │
-│ (pane 1) │ (pane 2) │ (pane 3) │ (pane 4)   │
-└──────────┴──────────┴──────────┴────────────┘
+┌─────────────────────┬─────────────────────┐
+│   ORCHESTRATOR      │      Evelyn         │
+├───────────┬─────────┴───────┬─────────────┤
+│ Vivian    │    Stella       │   Tiffany   │
+└───────────┴─────────────────┴─────────────┘
 ```
 
-- **Top row:** 1 wide pane — the orchestrator. The fish function lives here, running triage and fix agents as direct subprocesses (`cursor-agent --print ... | tee file`). Output streams live to this pane. The function blocks on each subprocess, so there's no conflict between polling and agent output.
-- **Bottom row:** 4 equal panes — the 4 review agents. Run in parallel each round via `send-text`.
+- **Top row:** 2 panes — orchestrator (left) polls and prints status, Evelyn (right) is the first reviewer and later runs triage/fix.
+- **Bottom row:** 3 panes — Vivian, Stella, Tiffany. The remaining reviewers run in parallel.
 
-Split order (verified with `wezterm cli split-pane`):
-1. pane_0 = `$WEZTERM_PANE` (orchestrator, top)
-2. pane_1 = `split-pane --pane-id $pane_0 --bottom --percent 70` (first reviewer, bottom-left)
-3. pane_2 = `split-pane --pane-id $pane_1 --right` (bottom splits 50/50)
-4. pane_3 = `split-pane --pane-id $pane_1 --right` (left half splits again → 25/25)
-5. pane_4 = `split-pane --pane-id $pane_2 --right` (right half splits again → 25/25)
+All agents run in full TUI mode (not `--print`) so you can watch their progress live. The orchestrator pane only shows status text and polls for completion.
 
-Bottom row gets 70% of vertical space since reviewers produce the most output. All panes persist across rounds — review panes are reused each cycle, orchestrator pane runs triage then fix sequentially between review rounds.
+Split order:
+1. pane_0 = `$WEZTERM_PANE` (orchestrator, top-left)
+2. pane_evelyn = `split-pane --pane-id $pane_0 --right` (top-right)
+3. pane_vivian = `split-pane --pane-id $pane_0 --bottom` (bottom-left)
+4. pane_stella = `split-pane --pane-id $pane_vivian --right` (bottom-center)
+5. pane_tiffany = `split-pane --pane-id $pane_stella --right` (bottom-right)
+
+All panes persist across rounds — review panes are reused each cycle. After reviewers finish, triage and fix run in Evelyn's pane (top-right).
 
 ### Waiting for agents to finish
 
 Two complementary mechanisms (both verified working):
 
-**Primary — sentinel files:** Each review command is chained with a `touch`:
-```fish
-cursor-agent --print ... | tee /tmp/review_auto.xxx/round_1/review_evelyn.md; touch /tmp/review_auto.xxx/round_1/.done_evelyn
+**Primary — sentinel files:** Each review agent is instructed to touch a sentinel file via Shell tool when done:
 ```
-The orchestrator polls for all `.done_*` files to exist. Simple, race-free, works even if the agent crashes (the touch still runs because it's `;`-chained, not `&&`-chained). Empty or error output is handled gracefully by the triage agent (it skips empty files).
+cursor-agent --yolo --model MODEL "... Then run this shell command: touch /tmp/review_auto.xxx/round_1/.done_evelyn"
+```
+The orchestrator polls for all `.done_*` files to exist. If an agent crashes before touching the sentinel, the orchestrator will wait indefinitely — but this is rare and the user can Ctrl+C to abort.
 
 **Fallback — TTY process check:** `wezterm cli list --format json` exposes `tty_name` for each pane. We can verify no `cursor-agent` process is running on a pane's TTY:
 ```fish
@@ -129,7 +129,7 @@ Verified: this correctly returns true when an agent is running and false when it
 
 ### Triage agent prompt
 
-The triage agent runs as a direct subprocess in the orchestrator pane. It reads the review output files itself (has `--yolo` tool access) rather than receiving them inline — review outputs can be very long.
+The triage agent runs in Evelyn's pane (top-right) after reviewers finish. It reads the review output files itself (has `--yolo` tool access) rather than receiving them inline — review outputs can be very long.
 
 ```
 You are a senior code-review triage agent. Read the 4 review output files at:
@@ -150,7 +150,7 @@ Your job:
 
 ### Fix agent prompt
 
-The fix agent also runs as a direct subprocess in the orchestrator pane. It reads the triage output file.
+The fix agent also runs in Evelyn's pane (top-right). It reads the triage output file.
 
 ```
 You are a senior engineer. Read the triaged issues at {round_dir}/triage.md.
@@ -176,10 +176,11 @@ review_auto [options]
 
 | Decision | Choice | Rationale |
 |---|---|---|
-| Output format | `--print` to file via tee | Gives visible terminal output AND machine-readable files for the next agent |
-| Triage sentinel | `NO_ISSUES_FOUND` string | Simple, grep-able exit condition |
+| All agents | Full TUI mode (no `--print`) | Live progress visible in all panes |
+| Output files | Agents write via Write tool | Agent controls file output; no pipe buffering |
+| Triage sentinel | `NO_ISSUES_FOUND` in triage.md | Simple, grep-able exit condition |
 | Fix agent mode | `--yolo` (full write access) | Needs to edit files, run shell tools, and commit |
-| Review agents | `--yolo --print` | Without `--yolo`, agents can't run shell tools (gh cli, git, etc.) needed for PR inspection |
+| Review agents | `--yolo` (full TUI) | Without `--yolo`, agents can't run shell tools (gh cli, git, etc.) needed for PR inspection |
 | Loop cap | 3 rounds | Prevents runaway; most real issues resolve in 1-2 rounds |
 
 ## Feasibility findings
@@ -210,11 +211,11 @@ Tested against `cursor-agent` CLI and `wezterm cli` on 2026-04-12. All core mech
 
 ### Confirmed approach
 
-Use `send-text` (matching existing `review.fish` pattern). Each pane has a fish shell. We send commands like:
+Use `send-text` for all agents (matching existing `review.fish` pattern). Each pane has a fish shell. All agents run in full TUI mode (no `--print`) so you can watch agent progress live:
 ```
-cursor-agent --yolo --print --trust --model MODEL -p "PROMPT" 2>&1 | tee /tmp/session/review_NAME.md; touch /tmp/session/.done_NAME\r
+cursor-agent --yolo --model MODEL "PROMPT (write output to FILE, then run: touch SENTINEL)"
 ```
-Orchestrator pane polls for `.done_*` files, then runs triage/fix as direct subprocesses (`cursor-agent --print ... | tee file`) so their output streams live in the orchestrator pane.
+Each agent writes its output via Write tool and touches a sentinel file via Shell tool when done. Orchestrator pane polls for `.done_*` files and prints status. Triage/fix reuse Evelyn's pane (top-right) after reviewers finish.
 
 ### Cleanup
 
