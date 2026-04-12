@@ -124,7 +124,6 @@ function review_auto
         printf "\n\n"
         echo " "(set_color --bold)"review_auto"(set_color normal)"  "(set_color brblack)"·"(set_color normal)"  PR #"(set_color cyan)$pr_number(set_color normal)
         echo " "(set_color brblack)"$provider · $num_panes reviewers · round $round/$max_rounds"(set_color normal)
-        echo ""
         set -l round_start (date +%s)
 
         # On round 2+, recreate reviewer panes (they were killed after the previous review phase)
