@@ -17,6 +17,10 @@ function review_auto
                     echo "Missing value for --max-rounds"
                     return 1
                 end
+                if not string match -qr '^\d+$' -- $argv[$i]; or test $argv[$i] -le 0
+                    echo "Invalid --max-rounds value: '$argv[$i]' (must be a positive integer)"
+                    return 1
+                end
                 set max_rounds $argv[$i]
             case --provider
                 set i (math $i + 1)
@@ -95,10 +99,25 @@ function review_auto
 
     # Step 1: split horizontally to create bottom row
     set -l pane_bottom (wezterm cli split-pane --pane-id $pane_0 --bottom)
+    if test -z "$pane_bottom"
+        echo "Failed to create bottom pane (split-pane returned empty ID)"
+        return 1
+    end
     # Step 2: split top row to create Evelyn (top-right)
     set -l pane_evelyn (wezterm cli split-pane --pane-id $pane_0 --right)
+    if test -z "$pane_evelyn"
+        echo "Failed to create Evelyn pane (split-pane returned empty ID)"
+        wezterm cli kill-pane --pane-id $pane_bottom &>/dev/null
+        return 1
+    end
     # Step 3: split bottom row to create Stella (bottom-right)
     set -l pane_stella (wezterm cli split-pane --pane-id $pane_bottom --right)
+    if test -z "$pane_stella"
+        echo "Failed to create Stella pane (split-pane returned empty ID)"
+        wezterm cli kill-pane --pane-id $pane_evelyn &>/dev/null
+        wezterm cli kill-pane --pane-id $pane_bottom &>/dev/null
+        return 1
+    end
     # pane_bottom is now Vivian (bottom-left)
     set -l pane_vivian $pane_bottom
 
@@ -132,8 +151,23 @@ function review_auto
         # On round 2+, recreate reviewer panes (same quadrant layout as initial)
         if test $round -gt 1
             set -l pb (wezterm cli split-pane --pane-id $pane_0 --bottom)
+            if test -z "$pb"
+                echo "Failed to recreate bottom pane in round $round"
+                return 1
+            end
             set -l pe (wezterm cli split-pane --pane-id $pane_0 --right)
+            if test -z "$pe"
+                echo "Failed to recreate Evelyn pane in round $round"
+                wezterm cli kill-pane --pane-id $pb &>/dev/null
+                return 1
+            end
             set -l ps (wezterm cli split-pane --pane-id $pb --right)
+            if test -z "$ps"
+                echo "Failed to recreate Stella pane in round $round"
+                wezterm cli kill-pane --pane-id $pe &>/dev/null
+                wezterm cli kill-pane --pane-id $pb &>/dev/null
+                return 1
+            end
             set pane_ids $pe $pb $ps
             if test $num_panes -lt 3
                 wezterm cli kill-pane --pane-id $ps &>/dev/null
