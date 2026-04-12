@@ -84,10 +84,7 @@ function review_auto
 
     printf "\n"
     set -l header1 "   "(set_color --bold)"review_auto"(set_color normal)"  "(set_color brblack)"·"(set_color normal)"  PR #"(set_color cyan)$pr_number(set_color normal)
-    set -l header2 "   "(set_color brblack)$provider" · "$num_panes" reviewers · "$max_rounds" rounds max"(set_color normal)
     echo $header1
-    echo $header2
-    echo ""
 
     # --- split panes: 4 quadrants (orchestrator + 3 reviewers) ---
     # Layout:
@@ -128,10 +125,8 @@ function review_auto
         set -l round_dir $session_dir/round_$round
         mkdir -p $round_dir
 
+        echo "   "(set_color brblack)"$provider · $num_panes reviewers · round $round/$max_rounds"(set_color normal)
         echo ""
-        echo "   "(set_color brblack)"round $round / $max_rounds"(set_color normal)
-        echo ""
-
         set -l round_start (date +%s)
 
         # On round 2+, recreate reviewer panes (they were killed after the previous review phase)
