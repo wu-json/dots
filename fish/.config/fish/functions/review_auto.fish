@@ -226,25 +226,22 @@ Your job:
         set -l time_str (printf "%d:%02d" $mins $secs)
         printf "\r                                                           \r"
         echo "   "(set_color white)"●"(set_color normal)"  triage  "(set_color brblack)"$time_str"(set_color normal)
+        echo ""
 
         # check triage result
         if grep -q NO_ISSUES_FOUND $round_dir/triage.md 2>/dev/null
-            echo ""
             echo "   "(set_color green)"●"(set_color normal)"  "(set_color --bold)"clean"(set_color normal)" "(set_color brblack)"— no issues found"(set_color normal)
             echo ""
             return 0
         end
 
         if test "$dry_run" = true
-            echo ""
             echo "   "(set_color yellow)"●"(set_color normal)"  "(set_color --bold)"dry run"(set_color normal)" "(set_color brblack)"— issues found, skipping fix"(set_color normal)
             echo ""
             return 0
         end
 
         # --- fix phase ---
-        echo ""
-        
         # send ctrl-c to kill triage agent, then start fix
         printf '\x03' | wezterm cli send-text --no-paste --pane-id $work_pane
         sleep 1
