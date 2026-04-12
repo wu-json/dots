@@ -61,11 +61,26 @@ function review_auto
         "You are Vivian. Use the local review skill to review PR #$pr_number in read-only mode and follow its exact response format." \
         "You are Stella. Use the local review skill to review PR #$pr_number in read-only mode and follow its exact response format. Focus on dead code, unused imports, and unreachable code paths."
 
-    echo "┌─────────────────────────────────────────────┐"
-    echo "│  review_auto — PR #$pr_number"
-    echo "│  provider: $provider | panes: $num_panes | max rounds: $max_rounds"
-    echo "│  session: $session_dir"
-    echo "└─────────────────────────────────────────────┘"
+    # --- beautiful header ---
+    set -l dim (set_color brblack)
+    set -l reset (set_color normal)
+    set -l bold (set_color --bold)
+    set -l cyan (set_color cyan)
+    set -l green (set_color green)
+    set -l yellow (set_color yellow)
+    set -l magenta (set_color magenta)
+    set -l red (set_color red)
+
+    echo ""
+    echo "$dim───────────────────────────────────────────────────$reset"
+    echo ""
+    echo "  $bold review_auto$reset  $dim·$reset  PR #$cyan$pr_number$reset"
+    echo ""
+    echo "  $dim provider$reset   $provider"
+    echo "  $dim reviewers$reset  $num_panes"
+    echo "  $dim rounds$reset     $max_rounds max"
+    echo ""
+    echo "$dim───────────────────────────────────────────────────$reset"
 
     # --- split panes: 4 quadrants (orchestrator + 3 reviewers) ---
     # Layout:
@@ -103,9 +118,11 @@ function review_auto
         mkdir -p $round_dir
 
         echo ""
-        echo "═══════════════════════════════════════════════"
-        echo "  ROUND $round / $max_rounds — REVIEW PHASE"
-        echo "═══════════════════════════════════════════════"
+        echo ""
+        echo "  $bold ROUND $round$reset$dim / $max_rounds$reset"
+        echo ""
+        echo "  $magenta● REVIEW$reset  $dim────────────────────────────────────$reset"
+        echo ""
 
         # clean sentinel files and kill any lingering agents from previous round
         for j in (seq $num_panes)
@@ -127,28 +144,40 @@ function review_auto
             printf '%s\r' "$cmd" | wezterm cli send-text --no-paste --pane-id $pane_ids[$j]
         end
 
-        # poll for all reviewers to finish
-        echo "  Waiting for $num_panes reviewer(s)..."
+        # poll for all reviewers to finish with animated spinner
+        set -l spinner_frames "⠋" "⠙" "⠹" "⠸" "⠼" "⠴" "⠦" "⠧" "⠇" "⠏"
+        set -l frame_idx 1
         while true
             set -l done_count 0
+            set -l status_line ""
             for j in (seq $num_panes)
-                set -l name (string lower $names[$j])
-                if test -f $round_dir/.done_$name
+                set -l name $names[$j]
+                set -l name_lower (string lower $name)
+                if test -f $round_dir/.done_$name_lower
                     set done_count (math $done_count + 1)
+                    set status_line "$status_line $green✓$reset $dim$name$reset  "
+                else
+                    set status_line "$status_line $yellow○$reset $name  "
                 end
             end
+            
+            printf "\r  $dim$spinner_frames[$frame_idx]$reset  $status_line"
+            
             if test $done_count -ge $num_panes
                 break
             end
-            sleep 5
+            
+            set frame_idx (math "$frame_idx % 10 + 1")
+            sleep 0.5
         end
-        echo "  All reviewers finished."
+        echo ""
+        echo ""
+        echo "  $green✓$reset  All reviewers complete"
 
         # --- triage phase (runs in Evelyn's pane) ---
         echo ""
-        echo "───────────────────────────────────────────────"
-        echo "  ROUND $round / $max_rounds — TRIAGE PHASE"
-        echo "───────────────────────────────────────────────"
+        echo "  $cyan● TRIAGE$reset  $dim────────────────────────────────────$reset"
+        echo ""
 
         set -l review_files
         for j in (seq $num_panes)
@@ -173,38 +202,51 @@ Your job:
         set -l triage_cmd "cursor-agent --yolo --model $triage_model \"$triage_prompt\""
         printf '%s\r' "$triage_cmd" | wezterm cli send-text --no-paste --pane-id $pane_ids[1]
 
-        echo "  Waiting for triage agent..."
+        set frame_idx 1
         while not test -f $triage_sentinel
-            sleep 5
+            printf "\r  $dim$spinner_frames[$frame_idx]$reset  Triaging reviews..."
+            set frame_idx (math "$frame_idx % 10 + 1")
+            sleep 0.5
         end
-        echo "  Triage finished."
+        echo ""
+        echo ""
+        echo "  $green✓$reset  Triage complete"
 
         # check triage result
         if grep -q "NO_ISSUES_FOUND" $round_dir/triage.md
             echo ""
-            echo "┌─────────────────────────────────────────────┐"
-            echo "│  CLEAN — no real issues found in round $round"
-            echo "│  PR #$pr_number is good to go."
-            echo "│  Session: $session_dir"
-            echo "└─────────────────────────────────────────────┘"
+            echo ""
+            echo "$dim───────────────────────────────────────────────────$reset"
+            echo ""
+            echo "  $green●$reset  $bold PR #$pr_number is clean$reset"
+            echo ""
+            echo "  $dim No real issues found in round $round.$reset"
+            echo "  $dim Session: $session_dir$reset"
+            echo ""
+            echo "$dim───────────────────────────────────────────────────$reset"
+            echo ""
             return 0
         end
 
         if test "$dry_run" = true
             echo ""
-            echo "┌─────────────────────────────────────────────┐"
-            echo "│  DRY RUN — issues found but skipping fix"
-            echo "│  Triage output: $round_dir/triage.md"
-            echo "│  Session: $session_dir"
-            echo "└─────────────────────────────────────────────┘"
+            echo ""
+            echo "$dim───────────────────────────────────────────────────$reset"
+            echo ""
+            echo "  $yellow●$reset  $bold Dry run complete$reset"
+            echo ""
+            echo "  $dim Issues found but skipping fix.$reset"
+            echo "  $dim Triage: $round_dir/triage.md$reset"
+            echo ""
+            echo "$dim───────────────────────────────────────────────────$reset"
+            echo ""
             return 0
         end
 
         # --- fix phase (runs in Evelyn's pane) ---
         echo ""
-        echo "───────────────────────────────────────────────"
-        echo "  ROUND $round / $max_rounds — FIX PHASE"
-        echo "───────────────────────────────────────────────"
+        echo "  $yellow● FIX$reset  $dim──────────────────────────────────────$reset"
+        echo ""
 
         set -l fix_sentinel "$round_dir/.done_fix"
         set -l fix_prompt "You are a senior engineer. Read the triaged code-review issues at $round_dir/triage.md using the Read tool. Fix every issue listed. Do not fix anything not listed. After fixing, commit your changes with a clear message referencing what was fixed. When completely done, run: touch $fix_sentinel"
@@ -212,20 +254,30 @@ Your job:
         set -l fix_cmd "cursor-agent --yolo --model $fix_model \"$fix_prompt\""
         printf '%s\r' "$fix_cmd" | wezterm cli send-text --no-paste --pane-id $pane_ids[1]
 
-        echo "  Waiting for fix agent..."
+        set frame_idx 1
         while not test -f $fix_sentinel
-            sleep 5
+            printf "\r  $dim$spinner_frames[$frame_idx]$reset  Applying fixes..."
+            set frame_idx (math "$frame_idx % 10 + 1")
+            sleep 0.5
         end
-        echo "  Fix finished."
+        echo ""
+        echo ""
+        echo "  $green✓$reset  Fixes applied"
 
         set round (math $round + 1)
     end
 
     echo ""
-    echo "┌─────────────────────────────────────────────┐"
-    echo "│  MAX ROUNDS ($max_rounds) reached for PR #$pr_number"
-    echo "│  Review the last round's output manually."
-    echo "│  Session: $session_dir"
-    echo "└─────────────────────────────────────────────┘"
+    echo ""
+    echo "$dim───────────────────────────────────────────────────$reset"
+    echo ""
+    echo "  $red●$reset  $bold Max rounds reached$reset"
+    echo ""
+    echo "  $dim Completed $max_rounds rounds for PR #$pr_number.$reset"
+    echo "  $dim Review the last round's output manually.$reset"
+    echo "  $dim Session: $session_dir$reset"
+    echo ""
+    echo "$dim───────────────────────────────────────────────────$reset"
+    echo ""
     return 1
 end
