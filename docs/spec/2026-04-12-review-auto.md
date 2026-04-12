@@ -73,14 +73,17 @@ Each agent writes its output to a temp file so downstream agents can read it:
 
 ```
 /tmp/review_auto.<session>/
-  review_evelyn.md
-  review_vivian.md
-  review_stella.md
-  review_tiffany.md
-  triage.md          # consolidated real issues
+  round_1/
+    review_evelyn.md
+    review_vivian.md
+    review_stella.md
+    review_tiffany.md
+    triage.md
+  round_2/
+    ...
 ```
 
-`cursor-agent --print` mode writes to stdout, which we tee into these files. This also means each pane shows live output to the user.
+Each round gets its own subdirectory so previous rounds are preserved for debugging. `cursor-agent --print` mode writes to stdout, which we tee into these files. This also means each pane shows live output to the user.
 
 ### Wezterm pane layout
 
@@ -96,8 +99,8 @@ Fixed 5-pane layout for the entire session:
 └──────────┴──────────┴──────────┴────────────┘
 ```
 
-- **Top row:** 1 wide pane — the orchestrator. Runs triage and fix agents. Also displays loop status (round number, phase, etc).
-- **Bottom row:** 4 equal panes — the 4 review agents. Run in parallel each round.
+- **Top row:** 1 wide pane — the orchestrator. The fish function lives here, running triage and fix agents as direct subprocesses (`cursor-agent --print ... | tee file`). Output streams live to this pane. The function blocks on each subprocess, so there's no conflict between polling and agent output.
+- **Bottom row:** 4 equal panes — the 4 review agents. Run in parallel each round via `send-text`.
 
 Split order (verified with `wezterm cli split-pane`):
 1. pane_0 = `$WEZTERM_PANE` (orchestrator, top)
@@ -114,9 +117,9 @@ Two complementary mechanisms (both verified working):
 
 **Primary — sentinel files:** Each review command is chained with a `touch`:
 ```fish
-cursor-agent --print ... | tee /tmp/review_auto.xxx/review_evelyn.md; touch /tmp/review_auto.xxx/.done_evelyn
+cursor-agent --print ... | tee /tmp/review_auto.xxx/round_1/review_evelyn.md; touch /tmp/review_auto.xxx/round_1/.done_evelyn
 ```
-The orchestrator polls for all `.done_*` files to exist. Simple, race-free, works even if the agent crashes (the touch still runs because it's `;`-chained, not `&&`-chained).
+The orchestrator polls for all `.done_*` files to exist. Simple, race-free, works even if the agent crashes (the touch still runs because it's `;`-chained, not `&&`-chained). Empty or error output is handled gracefully by the triage agent (it skips empty files).
 
 **Fallback — TTY process check:** `wezterm cli list --format json` exposes `tty_name` for each pane. We can verify no `cursor-agent` process is running on a pane's TTY:
 ```fish
@@ -126,21 +129,31 @@ Verified: this correctly returns true when an agent is running and false when it
 
 ### Triage agent prompt
 
+The triage agent runs as a direct subprocess in the orchestrator pane. It reads the review output files itself (has `--yolo` tool access) rather than receiving them inline — review outputs can be very long.
+
 ```
-You are a senior code-review triage agent. You have 4 independent code reviews below.
+You are a senior code-review triage agent. Read the 4 review output files at:
+  {round_dir}/review_evelyn.md
+  {round_dir}/review_vivian.md
+  {round_dir}/review_stella.md
+  {round_dir}/review_tiffany.md
+
 Your job:
 - Read all 4 reviews
 - Filter out nitpicks, style-only comments, and false positives
 - Output ONLY the issues that are real bugs, logic errors, security
   vulnerabilities, or missing error handling
+- If a review file is empty or contains an error, skip it
 - If there are no real issues, output exactly: NO_ISSUES_FOUND
 - Format each real issue as a structured block with file, line, description, and severity
 ```
 
 ### Fix agent prompt
 
+The fix agent also runs as a direct subprocess in the orchestrator pane. It reads the triage output file.
+
 ```
-You are a senior engineer. You have a list of triaged code-review issues below.
+You are a senior engineer. Read the triaged issues at {round_dir}/triage.md.
 Fix every issue listed. Do not fix anything not listed. Commit your changes
 with a clear message referencing the fixes.
 ```
@@ -201,10 +214,13 @@ Use `send-text` (matching existing `review.fish` pattern). Each pane has a fish 
 ```
 cursor-agent --yolo --print --trust --model MODEL -p "PROMPT" 2>&1 | tee /tmp/session/review_NAME.md; touch /tmp/session/.done_NAME\r
 ```
-Orchestrator pane polls for `.done_*` files, then reads the review output files to build the triage prompt.
+Orchestrator pane polls for `.done_*` files, then runs triage/fix as direct subprocesses (`cursor-agent --print ... | tee file`) so their output streams live in the orchestrator pane.
+
+### Cleanup
+
+When the loop exits (clean PR or max rounds hit), the 4 review panes are left open so the user can scroll through the last round's output. The orchestrator pane prints a summary (rounds completed, final status) and returns control to the shell.
 
 ## Open questions
 
-- Should triage and fix reuse the same pane or split new ones each round?
 - Should the function auto-push after a clean round, or leave that to the user?
 - Should there be a `--notify` flag to send a macOS notification when done?
