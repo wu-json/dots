@@ -200,12 +200,14 @@ function review_auto
 Your job:
 - Read all review files using the Read tool
 - Filter out nitpicks, style-only comments, and false positives
-- Output ONLY the issues that are real bugs, logic errors, security vulnerabilities, or missing error handling
+- Identify ONLY real bugs, logic errors, security vulnerabilities, or missing error handling
 - If a review file is empty or contains an error, skip it
-- If there are no real issues, output exactly the string: NO_ISSUES_FOUND
-- Format each real issue as: file path, line number, severity (critical/high/medium), and description
-- IMPORTANT: Write your final verdict to $round_dir/triage.md using the Write tool. Include NO_ISSUES_FOUND in that file if there are none.
-- When completely done, run: touch $triage_sentinel" > $triage_prompt_file
+
+IMPORTANT - Write your verdict to $round_dir/triage.md:
+- If there are NO real issues: write ONLY the text 'NO_ISSUES_FOUND' (nothing else, just that one line)
+- If there ARE real issues: write each issue with file path, line number, severity (critical/high/medium), and description. Do NOT include the string NO_ISSUES_FOUND anywhere.
+
+When completely done, run: touch $triage_sentinel" > $triage_prompt_file
 
         set -l triage_cmd "cursor-agent --yolo --model $triage_model \"Read the prompt at $triage_prompt_file and follow its instructions exactly.\""
         printf '%s\r' "$triage_cmd" | wezterm cli send-text --no-paste --pane-id $work_pane
@@ -228,8 +230,8 @@ Your job:
         echo "   "(set_color white)"●"(set_color normal)"  triage  "(set_color brblack)"$time_str"(set_color normal)
         echo ""
 
-        # check triage result
-        if grep -q NO_ISSUES_FOUND $round_dir/triage.md 2>/dev/null
+        # check triage result - must be on its own line to avoid false matches
+        if grep -qx NO_ISSUES_FOUND $round_dir/triage.md 2>/dev/null
             echo "   "(set_color green)"●"(set_color normal)"  "(set_color --bold)"clean"(set_color normal)" "(set_color brblack)"— no issues found"(set_color normal)
             echo ""
             return 0
