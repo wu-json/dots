@@ -1,6 +1,6 @@
 function review
     # Usage: review [1-4] [openai|anthropic] — args can be in any order.
-    # Default: 4 panes, anthropic (claude-4.6-opus-high). openai → gpt-5.4-high.
+    # Default: 4 panes, anthropic (claude-4.6-opus). openai → gpt-5.4-high.
     set -l num_panes 4
     set -l provider anthropic
     set -l saw_panes false
@@ -37,8 +37,10 @@ function review
     set -l review_model gpt-5.4-high
     switch $provider
         case anthropic
-            set review_model claude-4.6-opus-high
+            set review_model claude-4.6-opus
     end
+
+    set -l review_cmd "claude --dangerously-skip-permissions --model $review_model -p"
 
     # pane identities
     # 0 - top left
@@ -64,25 +66,18 @@ function review
         set pane_3 (wezterm cli split-pane --pane-id $pane_1 --bottom)
     end
 
-    # Stagger pane launches: cursor-agent atomically updates ~/.cursor/cli-config.json (tmp + rename).
-    # Several agents starting at once race on the same .tmp path and one rename wins; others get ENOENT.
-    set -l review_stagger 0.75
-
     # send review commands to each pane
-    printf '%s\r' "cursor-agent --yolo --model $review_model \"You are Evelyn. Use the local review skill to review PR #$pr_number in read-only mode and follow its exact response format.\"" | wezterm cli send-text --no-paste --pane-id $pane_0
+    printf '%s\r' "$review_cmd \"You are Evelyn. Use the local review skill to review PR #$pr_number in read-only mode and follow its exact response format.\"" | wezterm cli send-text --no-paste --pane-id $pane_0
 
     if test $num_panes -ge 2
-        sleep $review_stagger
-        printf '%s\r' "cursor-agent --yolo --model $review_model \"You are Vivian. Use the local review skill to review PR #$pr_number in read-only mode and follow its exact response format.\"" | wezterm cli send-text --no-paste --pane-id $pane_1
+        printf '%s\r' "$review_cmd \"You are Vivian. Use the local review skill to review PR #$pr_number in read-only mode and follow its exact response format.\"" | wezterm cli send-text --no-paste --pane-id $pane_1
     end
 
     if test $num_panes -ge 3
-        sleep $review_stagger
-        printf '%s\r' "cursor-agent --yolo --model $review_model \"You are Stella. Use the local review skill to review PR #$pr_number in read-only mode and follow its exact response format. Focus on critical bugs, security vulnerabilities, and logic errors.\"" | wezterm cli send-text --no-paste --pane-id $pane_2
+        printf '%s\r' "$review_cmd \"You are Stella. Use the local review skill to review PR #$pr_number in read-only mode and follow its exact response format. Focus on critical bugs, security vulnerabilities, and logic errors.\"" | wezterm cli send-text --no-paste --pane-id $pane_2
     end
 
     if test $num_panes -ge 4
-        sleep $review_stagger
-        printf '%s\r' "cursor-agent --yolo --model $review_model \"You are Tiffany. Use the local review skill to review PR #$pr_number in read-only mode and follow its exact response format. Focus on dead code, unused imports, and unreachable code paths.\"" | wezterm cli send-text --no-paste --pane-id $pane_3
+        printf '%s\r' "$review_cmd \"You are Tiffany. Use the local review skill to review PR #$pr_number in read-only mode and follow its exact response format. Focus on dead code, unused imports, and unreachable code paths.\"" | wezterm cli send-text --no-paste --pane-id $pane_3
     end
 end
