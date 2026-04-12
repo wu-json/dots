@@ -161,9 +161,10 @@ Your job:
 - Output ONLY the issues that are real bugs, logic errors, security vulnerabilities, or missing error handling
 - If a review file is empty or contains an error, skip it
 - If there are no real issues, output exactly the string: NO_ISSUES_FOUND
-- Format each real issue as: file path, line number, severity (critical/high/medium), and description"
+- Format each real issue as: file path, line number, severity (critical/high/medium), and description
+- IMPORTANT: Write your final verdict to $round_dir/triage.md using the Write tool. Include NO_ISSUES_FOUND in that file if there are none."
 
-        cursor-agent --yolo --print --trust --model $triage_model -p "$triage_prompt" 2>&1 | tee $round_dir/triage.md
+        cursor-agent --yolo --print --trust --model $triage_model -p "$triage_prompt"
 
         # check triage result
         if grep -q "NO_ISSUES_FOUND" $round_dir/triage.md
@@ -194,7 +195,7 @@ Your job:
 
         set -l fix_prompt "You are a senior engineer. Read the triaged code-review issues at $round_dir/triage.md using the Read tool. Fix every issue listed. Do not fix anything not listed. After fixing, commit your changes with a clear message referencing what was fixed."
 
-        cursor-agent --yolo --print --trust --model $fix_model -p "$fix_prompt" 2>&1 | tee $round_dir/fix.md
+        cursor-agent --yolo --print --trust --model $fix_model -p "$fix_prompt"
 
         set round (math $round + 1)
     end
