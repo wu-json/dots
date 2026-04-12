@@ -116,9 +116,9 @@ function review_auto
         mkdir -p $round_dir
 
         echo ""
-        echo "   $bold round $round$reset$dim / $max_rounds$reset"
+        echo "   "(set_color --bold)"round $round"(set_color normal)(set_color brblack)" / $max_rounds"(set_color normal)
         echo ""
-        echo "   $white●$reset  review"
+        echo "   "(set_color white)"●"(set_color normal)"  review"
 
         # clean sentinel files and kill any lingering agents from previous round
         for j in (seq $num_panes)
@@ -157,7 +157,7 @@ function review_auto
                 end
             end
             
-            printf "\r   $dim$spinner_frames[$frame_idx]$reset  $status_line"
+            printf "\r   %s%s%s  %s" $dim $spinner_frames[$frame_idx] $reset "$status_line"
             
             if test $done_count -ge $num_panes
                 break
@@ -168,7 +168,7 @@ function review_auto
         end
         echo ""
         echo ""
-        echo "   $white●$reset  triage"
+        echo "   "(set_color white)"●"(set_color normal)"  triage"
 
         set -l review_files
         for j in (seq $num_panes)
@@ -204,21 +204,21 @@ Your job:
         # check triage result
         if grep -q "NO_ISSUES_FOUND" $round_dir/triage.md
             echo ""
-            echo "   $green●$reset  $bold clean$reset $dim— no issues found$reset"
+            echo "   "(set_color green)"●"(set_color normal)"  "(set_color --bold)"clean"(set_color normal)" "(set_color brblack)"— no issues found"(set_color normal)
             echo ""
             return 0
         end
 
         if test "$dry_run" = true
             echo ""
-            echo "   $yellow●$reset  $bold dry run$reset $dim— issues found, skipping fix$reset"
+            echo "   "(set_color yellow)"●"(set_color normal)"  "(set_color --bold)"dry run"(set_color normal)" "(set_color brblack)"— issues found, skipping fix"(set_color normal)
             echo ""
             return 0
         end
 
         # --- fix phase (runs in Evelyn's pane) ---
         echo ""
-        echo "   $white●$reset  fix"
+        echo "   "(set_color white)"●"(set_color normal)"  fix"
 
         set -l fix_sentinel "$round_dir/.done_fix"
         set -l fix_prompt "You are a senior engineer. Read the triaged code-review issues at $round_dir/triage.md using the Read tool. Fix every issue listed. Do not fix anything not listed. After fixing, commit your changes with a clear message referencing what was fixed. When completely done, run: touch $fix_sentinel"
@@ -238,7 +238,7 @@ Your job:
     end
 
     echo ""
-    echo "   $red●$reset  $bold max rounds$reset $dim— review manually$reset"
+    echo "   "(set_color red)"●"(set_color normal)"  "(set_color --bold)"max rounds"(set_color normal)" "(set_color brblack)"— review manually"(set_color normal)
     echo ""
     return 1
 end
