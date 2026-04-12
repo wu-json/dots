@@ -205,11 +205,9 @@ Your job:
 
 IMPORTANT - Write your verdict to $round_dir/triage.md:
 - If there are NO real issues: write ONLY the text 'NO_ISSUES_FOUND' (nothing else, just that one line)
-- If there ARE real issues: write each issue with file path, line number, severity (critical/high/medium), and description. Do NOT include the string NO_ISSUES_FOUND anywhere.
+- If there ARE real issues: write each issue with file path, line number, severity (critical/high/medium), and description. Do NOT include the string NO_ISSUES_FOUND anywhere." > $triage_prompt_file
 
-When completely done, run: touch $triage_sentinel" > $triage_prompt_file
-
-        set -l triage_cmd "cursor-agent --yolo --model $triage_model \"Read the prompt at $triage_prompt_file and follow its instructions exactly.\""
+        set -l triage_cmd "cursor-agent --yolo --model $triage_model -p (cat $triage_prompt_file); touch $triage_sentinel"
         printf '%s\r' "$triage_cmd" | wezterm cli send-text --no-paste --pane-id $work_pane
 
         set frame_idx 1
@@ -244,15 +242,15 @@ When completely done, run: touch $triage_sentinel" > $triage_prompt_file
         end
 
         # --- fix phase ---
-        # send ctrl-c to kill triage agent, then start fix
-        printf '\x03' | wezterm cli send-text --no-paste --pane-id $work_pane
-        sleep 1
+        # kill triage pane and create fresh one for fix
+        wezterm cli kill-pane --pane-id $work_pane 2>/dev/null
+        set work_pane (wezterm cli split-pane --pane-id $pane_0 --right)
 
         set -l fix_sentinel "$round_dir/.done_fix"
         set -l fix_prompt_file "$round_dir/fix_prompt.txt"
-        echo "You are a senior engineer. Read the triaged code-review issues at $round_dir/triage.md using the Read tool. Fix every issue listed. Do not fix anything not listed. After fixing, commit your changes with a clear message referencing what was fixed. When completely done, run: touch $fix_sentinel" > $fix_prompt_file
+        echo "You are a senior engineer. Read the triaged code-review issues at $round_dir/triage.md using the Read tool. Fix every issue listed. Do not fix anything not listed. After fixing, commit your changes with a clear message referencing what was fixed." > $fix_prompt_file
 
-        set -l fix_cmd "cursor-agent --yolo --model $fix_model \"Read the prompt at $fix_prompt_file and follow its instructions exactly.\""
+        set -l fix_cmd "cursor-agent --yolo --model $fix_model -p (cat $fix_prompt_file); touch $fix_sentinel"
         printf '%s\r' "$fix_cmd" | wezterm cli send-text --no-paste --pane-id $work_pane
 
         set frame_idx 1
@@ -273,8 +271,6 @@ When completely done, run: touch $triage_sentinel" > $triage_prompt_file
         echo "   "(set_color white)"●"(set_color normal)"  fix  "(set_color brblack)"$time_str"(set_color normal)
         
         # kill work pane before next round
-        printf '\x03' | wezterm cli send-text --no-paste --pane-id $work_pane
-        sleep 1
         wezterm cli kill-pane --pane-id $work_pane 2>/dev/null
 
         set round (math $round + 1)
