@@ -28,19 +28,15 @@ alias ghc="git reset --hard && git clean -fd"
 alias ls="eza"
 alias tree="eza --tree"
 
-# Claudius Codius
-alias cl="claude --dangerously-skip-permissions"
-
 # OpenCode
 alias o="opencode"
 
 # Codex 
 alias cx="codex"
 
-# Cursor
-alias cr="cursor-agent --yolo --model claude-4.6-opus-high"
-alias c="cr"
-alias prdoc="cursor-agent --yolo --model gpt-5.4-high-fast /pr"
+# Claude Code
+alias c="claude --dangerously-skip-permissions"
+alias prdoc="claude --dangerously-skip-permissions --model gpt-5.4-high-fast /pr"
 
 # Nvim
 alias v="nvim"
