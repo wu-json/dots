@@ -250,7 +250,7 @@ function review_auto
         set work_pane (wezterm cli split-pane --pane-id $pane_0 --right)
 
         set -l fix_sentinel "$round_dir/.done_fix"
-        set -l fix_prompt "You are a senior engineer. Read the triaged code-review issues at $round_dir/triage.md using the Read tool. Fix every issue listed. Do not fix anything not listed. After fixing, commit your changes with a clear message referencing what was fixed, then push to the remote branch with git push. When completely done, run this shell command: touch $fix_sentinel"
+        set -l fix_prompt "You are a senior engineer. Read the triaged code-review issues at $round_dir/triage.md using the Read tool. Fix every issue listed. Do not fix anything not listed. After fixing, commit your changes with a clear message referencing what was fixed, then push to the remote branch with git push. Then use the /pr skill to update the PR title and description. When completely done, run this shell command: touch $fix_sentinel"
 
         set -l fix_cmd "cursor-agent --yolo --model $fix_model \"$fix_prompt\""
         printf '%s\r' "$fix_cmd" | wezterm cli send-text --no-paste --pane-id $work_pane
