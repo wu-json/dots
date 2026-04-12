@@ -248,12 +248,12 @@ function review_auto
                 end
             end
 
-            set -l elapsed (math (date +%s) - $round_start)
-            set -l mins (math "floor($elapsed / 60)")
-            set -l secs (math "$elapsed % 60")
-            set -l time_str (printf "%d:%02d" $mins $secs)
+            set -l phase_el (math (date +%s) - $round_start)
+            set -l phase_m (math "floor($phase_el / 60)")
+            set -l phase_s (math "$phase_el % 60")
+            set -l phase_ts (printf "%d:%02d" $phase_m $phase_s)
             set -l dots (printf "%-4s" $dot_frames[$frame_idx])
-            printf "\r %s•%s Reviewing%s%s(%s/%s)%s  %s %s%s%s" (set_color $dot_colors[$frame_idx]) $reset "$dots" $dim $round $max_rounds $reset "$status_line" $dim $time_str $reset
+            printf "\r %s•%s Reviewing%s%s(%s/%s)%s  %s %s%s%s" (set_color $dot_colors[$frame_idx]) $reset "$dots" $dim $round $max_rounds $reset "$status_line" $dim $phase_ts $reset
 
             if test $done_count -ge $num_panes
                 break
@@ -271,10 +271,10 @@ function review_auto
             set frame_idx (math "$frame_idx % 3 + 1")
             sleep 0.15
         end
-        set -l elapsed (math (date +%s) - $round_start)
-        set -l mins (math "floor($elapsed / 60)")
-        set -l secs (math "$elapsed % 60")
-        set -l time_str (printf "%d:%02d" $mins $secs)
+        set -l review_dur (math (date +%s) - $round_start)
+        set -l review_dur_m (math "floor($review_dur / 60)")
+        set -l review_dur_s (math "$review_dur % 60")
+        set -l review_dur_str (printf "%d:%02d" $review_dur_m $review_dur_s)
 
         # kill reviewer panes and create fresh work pane before printing final status
         # (pane resize happens here, before any output)
@@ -288,7 +288,7 @@ function review_auto
         end
 
         printf "\r                                                           \r"
-        echo " "(set_color green)"✔"(set_color normal)" Reviewed "(set_color brblack)"($round/$max_rounds)"(set_color normal)"  $status_line"(set_color brblack)"$time_str"(set_color normal)
+        echo " "(set_color green)"✔"(set_color normal)" Reviewed "(set_color brblack)"($round/$max_rounds)"(set_color normal)"  $status_line"(set_color brblack)"$review_dur_str"(set_color normal)
 
         # --- triage phase ---
         set -l review_files
@@ -309,14 +309,18 @@ function review_auto
         set -l triage_start (date +%s)
         set frame_idx 1
         while not test -f $triage_sentinel
-            set -l elapsed (math (date +%s) - $round_start)
-            set -l mins (math "floor($elapsed / 60)")
-            set -l secs (math "$elapsed % 60")
-            set -l time_str (printf "%d:%02d" $mins $secs)
+            set -l phase_el (math (date +%s) - $triage_start)
+            set -l phase_m (math "floor($phase_el / 60)")
+            set -l phase_s (math "$phase_el % 60")
+            set -l phase_ts (printf "%d:%02d" $phase_m $phase_s)
+            set -l total_el (math (date +%s) - $round_start)
+            set -l total_m (math "floor($total_el / 60)")
+            set -l total_s (math "$total_el % 60")
+            set -l total_ts (printf "%d:%02d" $total_m $total_s)
             set -l dots (printf "%-4s" $dot_frames[$frame_idx])
-            printf "\r %s•%s Triaging%s %s%s%s" (set_color $dot_colors[$frame_idx]) $reset "$dots" $dim $time_str $reset
+            printf "\r %s•%s Triaging%s %s%s%s  %s%s%s" (set_color $dot_colors[$frame_idx]) $reset "$dots" $dim $phase_ts $reset $dim $total_ts $reset
 
-            set -l phase_elapsed (math (date +%s) - $triage_start)
+            set -l phase_elapsed $phase_el
             if test $phase_elapsed -ge $phase_timeout
                 printf "\r                                                           \r"
                 echo " "(set_color red)"✗"(set_color normal)"  Triage phase timed out after $phase_timeout seconds in round $round"
@@ -327,10 +331,10 @@ function review_auto
             set frame_idx (math "$frame_idx % 3 + 1")
             sleep 0.15
         end
-        set -l elapsed (math (date +%s) - $round_start)
-        set -l mins (math "floor($elapsed / 60)")
-        set -l secs (math "$elapsed % 60")
-        set -l time_str (printf "%d:%02d" $mins $secs)
+        set -l triage_dur (math (date +%s) - $triage_start)
+        set -l triage_dur_m (math "floor($triage_dur / 60)")
+        set -l triage_dur_s (math "$triage_dur % 60")
+        set -l triage_dur_str (printf "%d:%02d" $triage_dur_m $triage_dur_s)
 
         # kill triage pane and create fresh one before printing
         # (pane resize happens here, before any output)
@@ -342,7 +346,7 @@ function review_auto
         end
 
         printf "\r                                                           \r"
-        echo " "(set_color green)"✔"(set_color normal)" Triaged  "(set_color brblack)"$time_str"(set_color normal)
+        echo " "(set_color green)"✔"(set_color normal)" Triaged  "(set_color brblack)"$triage_dur_str"(set_color normal)
 
         # check triage result - compare trimmed entire file to exact string
         set -l _triage_content (string trim (cat $round_dir/triage.md 2>/dev/null))
@@ -377,14 +381,18 @@ function review_auto
         set -l fix_start (date +%s)
         set frame_idx 1
         while not test -f $fix_sentinel
-            set -l elapsed (math (date +%s) - $round_start)
-            set -l mins (math "floor($elapsed / 60)")
-            set -l secs (math "$elapsed % 60")
-            set -l time_str (printf "%d:%02d" $mins $secs)
+            set -l phase_el (math (date +%s) - $fix_start)
+            set -l phase_m (math "floor($phase_el / 60)")
+            set -l phase_s (math "$phase_el % 60")
+            set -l phase_ts (printf "%d:%02d" $phase_m $phase_s)
+            set -l total_el (math (date +%s) - $round_start)
+            set -l total_m (math "floor($total_el / 60)")
+            set -l total_s (math "$total_el % 60")
+            set -l total_ts (printf "%d:%02d" $total_m $total_s)
             set -l dots (printf "%-4s" $dot_frames[$frame_idx])
-            printf "\r %s•%s Fixing%s %s%s%s" (set_color $dot_colors[$frame_idx]) $reset "$dots" $dim $time_str $reset
+            printf "\r %s•%s Fixing%s %s%s%s  %s%s%s" (set_color $dot_colors[$frame_idx]) $reset "$dots" $dim $phase_ts $reset $dim $total_ts $reset
 
-            set -l phase_elapsed (math (date +%s) - $fix_start)
+            set -l phase_elapsed $phase_el
             if test $phase_elapsed -ge $phase_timeout
                 printf "\r                                                           \r"
                 echo " "(set_color red)"✗"(set_color normal)"  Fix phase timed out after $phase_timeout seconds in round $round"
@@ -395,12 +403,12 @@ function review_auto
             set frame_idx (math "$frame_idx % 3 + 1")
             sleep 0.15
         end
-        set -l elapsed (math (date +%s) - $round_start)
-        set -l mins (math "floor($elapsed / 60)")
-        set -l secs (math "$elapsed % 60")
-        set -l time_str (printf "%d:%02d" $mins $secs)
+        set -l fix_dur (math (date +%s) - $fix_start)
+        set -l fix_dur_m (math "floor($fix_dur / 60)")
+        set -l fix_dur_s (math "$fix_dur % 60")
+        set -l fix_dur_str (printf "%d:%02d" $fix_dur_m $fix_dur_s)
         printf "\r                                                           \r"
-        echo " "(set_color green)"✔"(set_color normal)" Fixed  "(set_color brblack)"$time_str"(set_color normal)
+        echo " "(set_color green)"✔"(set_color normal)" Fixed  "(set_color brblack)"$fix_dur_str"(set_color normal)
 
         # kill work pane before next round
         wezterm cli kill-pane --pane-id $work_pane &>/dev/null
