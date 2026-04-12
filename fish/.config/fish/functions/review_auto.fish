@@ -253,7 +253,7 @@ function review_auto
             set -l secs (math "$elapsed % 60")
             set -l time_str (printf "%d:%02d" $mins $secs)
             set -l dots (printf "%-4s" $dot_frames[$frame_idx])
-            printf "\r %s•%s  Reviewing%s%s(%s/%s)%s  %s %s%s%s" (set_color $dot_colors[$frame_idx]) $reset "$dots" $dim $round $max_rounds $reset "$status_line" $dim $time_str $reset
+            printf "\r  %s•%s Reviewing%s%s(%s/%s)%s  %s %s%s%s" (set_color $dot_colors[$frame_idx]) $reset "$dots" $dim $round $max_rounds $reset "$status_line" $dim $time_str $reset
 
             if test $done_count -ge $num_panes
                 break
@@ -288,7 +288,7 @@ function review_auto
         end
 
         printf "\r                                                           \r"
-        echo " "(set_color green)"✔"(set_color normal)"  Reviewed "(set_color brblack)"($round/$max_rounds)"(set_color normal)"  $status_line"(set_color brblack)"$time_str"(set_color normal)
+        echo "  "(set_color green)"✔"(set_color normal)" Reviewed "(set_color brblack)"($round/$max_rounds)"(set_color normal)"  $status_line"(set_color brblack)"$time_str"(set_color normal)
 
         # --- triage phase ---
         set -l review_files
@@ -314,7 +314,7 @@ function review_auto
             set -l secs (math "$elapsed % 60")
             set -l time_str (printf "%d:%02d" $mins $secs)
             set -l dots (printf "%-4s" $dot_frames[$frame_idx])
-            printf "\r %s•%s  Triaging%s %s%s%s" (set_color $dot_colors[$frame_idx]) $reset "$dots" $dim $time_str $reset
+            printf "\r  %s•%s Triaging%s %s%s%s" (set_color $dot_colors[$frame_idx]) $reset "$dots" $dim $time_str $reset
 
             set -l phase_elapsed (math (date +%s) - $triage_start)
             if test $phase_elapsed -ge $phase_timeout
@@ -342,7 +342,7 @@ function review_auto
         end
 
         printf "\r                                                           \r"
-        echo " "(set_color green)"✔"(set_color normal)"  Triaged  "(set_color brblack)"$time_str"(set_color normal)
+        echo "  "(set_color green)"✔"(set_color normal)" Triaged  "(set_color brblack)"$time_str"(set_color normal)
 
         # check triage result - trim whitespace and match robustly
         if string match -qr '^\s*NO_ISSUES_FOUND\s*$' < $round_dir/triage.md 2>/dev/null
@@ -381,7 +381,7 @@ function review_auto
             set -l secs (math "$elapsed % 60")
             set -l time_str (printf "%d:%02d" $mins $secs)
             set -l dots (printf "%-4s" $dot_frames[$frame_idx])
-            printf "\r %s•%s  Fixing%s %s%s%s" (set_color $dot_colors[$frame_idx]) $reset "$dots" $dim $time_str $reset
+            printf "\r  %s•%s Fixing%s %s%s%s" (set_color $dot_colors[$frame_idx]) $reset "$dots" $dim $time_str $reset
 
             set -l phase_elapsed (math (date +%s) - $fix_start)
             if test $phase_elapsed -ge $phase_timeout
@@ -399,7 +399,7 @@ function review_auto
         set -l secs (math "$elapsed % 60")
         set -l time_str (printf "%d:%02d" $mins $secs)
         printf "\r                                                           \r"
-        echo " "(set_color green)"✔"(set_color normal)"  Fixed  "(set_color brblack)"$time_str"(set_color normal)
+        echo "  "(set_color green)"✔"(set_color normal)" Fixed  "(set_color brblack)"$time_str"(set_color normal)
 
         # kill work pane before next round
         wezterm cli kill-pane --pane-id $work_pane &>/dev/null
