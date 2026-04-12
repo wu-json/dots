@@ -121,7 +121,7 @@ function review_auto
         set -l round_dir $session_dir/round_$round
         mkdir -p $round_dir
 
-        printf "\n"
+        printf "\n\n"
         echo "   "(set_color --bold)"review_auto"(set_color normal)"  "(set_color brblack)"·"(set_color normal)"  PR #"(set_color cyan)$pr_number(set_color normal)
         echo "   "(set_color brblack)"$provider · $num_panes reviewers · round $round/$max_rounds"(set_color normal)
         echo ""
@@ -173,17 +173,17 @@ function review_auto
                     set status_line "$status_line$dim$name$reset  "
                 end
             end
-            
+
             set -l elapsed (math (date +%s) - $round_start)
             set -l mins (math "floor($elapsed / 60)")
             set -l secs (math "$elapsed % 60")
             set -l time_str (printf "%d:%02d" $mins $secs)
             printf "\r   %s%s%s  review  %s %s%s%s" $dim $spinner_frames[$frame_idx] $reset "$status_line" $dim $time_str $reset
-            
+
             if test $done_count -ge $num_panes
                 break
             end
-            
+
             set frame_idx (math "$frame_idx % 10 + 1")
             sleep 0.05
         end
@@ -221,7 +221,7 @@ Your job:
 
 IMPORTANT - Write your verdict to $round_dir/triage.md:
 - If there are NO real issues: write ONLY the text 'NO_ISSUES_FOUND' (nothing else, just that one line)
-- If there ARE real issues: write each issue with file path, line number, severity (critical/high/medium), and description. Do NOT include the string NO_ISSUES_FOUND anywhere." > $triage_prompt_file
+- If there ARE real issues: write each issue with file path, line number, severity (critical/high/medium), and description. Do NOT include the string NO_ISSUES_FOUND anywhere." >$triage_prompt_file
 
         set -l triage_cmd "cursor-agent --yolo --model $triage_model -p \"(cat $triage_prompt_file)\" && touch $triage_sentinel"
         printf '%s\r' "$triage_cmd" | wezterm cli send-text --no-paste --pane-id $work_pane
@@ -264,7 +264,7 @@ IMPORTANT - Write your verdict to $round_dir/triage.md:
 
         set -l fix_sentinel "$round_dir/.done_fix"
         set -l fix_prompt_file "$round_dir/fix_prompt.txt"
-        echo "You are a senior engineer. Read the triaged code-review issues at $round_dir/triage.md using the Read tool. Fix every issue listed. Do not fix anything not listed. After fixing, commit your changes with a clear message referencing what was fixed, then push to the remote branch (git push)." > $fix_prompt_file
+        echo "You are a senior engineer. Read the triaged code-review issues at $round_dir/triage.md using the Read tool. Fix every issue listed. Do not fix anything not listed. After fixing, commit your changes with a clear message referencing what was fixed, then push to the remote branch (git push)." >$fix_prompt_file
 
         set -l fix_cmd "cursor-agent --yolo --model $fix_model -p \"(cat $fix_prompt_file)\" && touch $fix_sentinel"
         printf '%s\r' "$fix_cmd" | wezterm cli send-text --no-paste --pane-id $work_pane
@@ -285,7 +285,7 @@ IMPORTANT - Write your verdict to $round_dir/triage.md:
         set -l time_str (printf "%d:%02d" $mins $secs)
         printf "\r                                                           \r"
         echo "   "(set_color white)"●"(set_color normal)"  fix  "(set_color brblack)"$time_str"(set_color normal)
-        
+
         # kill work pane before next round
         wezterm cli kill-pane --pane-id $work_pane 2>/dev/null
 
