@@ -74,29 +74,38 @@ function review_auto
     # ├───────────┬─────────┴───────┬─────────────┤
     # │ Vivian    │    Stella       │   Tiffany   │
     # └───────────┴─────────────────┴─────────────┘
+    #
+    # Split order matters! Must split top/bottom FIRST (while pane is full width),
+    # then split each row horizontally.
     set -l pane_0 $WEZTERM_PANE
     set -l pane_ids
 
-    # Evelyn always goes top-right
+    # First: split top/bottom to create the two rows
+    set -l pane_bottom (wezterm cli split-pane --pane-id $pane_0 --bottom)
+
+    # Now split the top row: orchestrator | Evelyn
     set -l pane_evelyn (wezterm cli split-pane --pane-id $pane_0 --right)
     set pane_ids $pane_evelyn
 
     if test $num_panes -ge 2
-        # Vivian: bottom-left (split orchestrator down)
-        set -l pane_vivian (wezterm cli split-pane --pane-id $pane_0 --bottom)
-        set -a pane_ids $pane_vivian
+        # Vivian is already in pane_bottom (bottom-left after we split it)
+        # But we need to track it - it's pane_bottom itself for now
+        set -a pane_ids $pane_bottom
 
         if test $num_panes -ge 3
-            # Stella: bottom-right (split Vivian right)
-            set -l pane_stella (wezterm cli split-pane --pane-id $pane_vivian --right)
+            # Split bottom row: Vivian | Stella
+            set -l pane_stella (wezterm cli split-pane --pane-id $pane_bottom --right)
             set -a pane_ids $pane_stella
 
             if test $num_panes -ge 4
-                # Tiffany: bottom-far-right (split Stella right)
+                # Split again: Vivian | Stella | Tiffany
                 set -l pane_tiffany (wezterm cli split-pane --pane-id $pane_stella --right)
                 set -a pane_ids $pane_tiffany
             end
         end
+    else
+        # Only 1 reviewer (Evelyn) - kill the unused bottom pane
+        wezterm cli kill-pane --pane-id $pane_bottom
     end
 
     # --- main loop ---
