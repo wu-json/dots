@@ -72,8 +72,8 @@ function review_auto
     set -l red (set_color red)
 
     set -l white (set_color white)
-    
-    printf "\n\n"
+
+    printf "\n"
     set -l header1 "   "(set_color --bold)"review_auto"(set_color normal)"  "(set_color brblack)"·"(set_color normal)"  PR #"(set_color cyan)$pr_number(set_color normal)
     set -l header2 "   "(set_color brblack)$provider" · "$num_panes" reviewers · "$max_rounds" rounds max"(set_color normal)
     echo $header1
@@ -156,13 +156,13 @@ function review_auto
                     set status_line "$status_line$dim$name$reset  "
                 end
             end
-            
+
             printf "\r   %s%s%s  %s" $dim $spinner_frames[$frame_idx] $reset "$status_line"
-            
+
             if test $done_count -ge $num_panes
                 break
             end
-            
+
             set frame_idx (math "$frame_idx % 10 + 1")
             sleep 0.05
         end
@@ -202,7 +202,7 @@ Your job:
         echo ""
 
         # check triage result
-        if grep -q "NO_ISSUES_FOUND" $round_dir/triage.md
+        if grep -q NO_ISSUES_FOUND $round_dir/triage.md
             echo ""
             echo "   "(set_color green)"●"(set_color normal)"  "(set_color --bold)"clean"(set_color normal)" "(set_color brblack)"— no issues found"(set_color normal)
             echo ""
