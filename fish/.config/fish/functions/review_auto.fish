@@ -168,7 +168,7 @@ function review_auto
             end
             
             set frame_idx (math "$frame_idx % 10 + 1")
-            sleep 0.5
+            sleep 0.08
         end
         echo ""
         echo ""
@@ -206,7 +206,7 @@ Your job:
         while not test -f $triage_sentinel
             printf "\r  $dim$spinner_frames[$frame_idx]$reset  Triaging reviews..."
             set frame_idx (math "$frame_idx % 10 + 1")
-            sleep 0.5
+            sleep 0.08
         end
         echo ""
         echo ""
@@ -258,7 +258,7 @@ Your job:
         while not test -f $fix_sentinel
             printf "\r  $dim$spinner_frames[$frame_idx]$reset  Applying fixes..."
             set frame_idx (math "$frame_idx % 10 + 1")
-            sleep 0.5
+            sleep 0.08
         end
         echo ""
         echo ""
