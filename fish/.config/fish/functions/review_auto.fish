@@ -55,7 +55,7 @@ function review_auto
 
     # reviewer identities and prompts
     set -l names Evelyn Vivian Stella Tiffany
-    set -l prompts \
+    set -l base_prompts \
         "You are Evelyn. Use the local review skill to review PR #$pr_number in read-only mode and follow its exact response format." \
         "You are Vivian. Use the local review skill to review PR #$pr_number in read-only mode and follow its exact response format." \
         "You are Stella. Use the local review skill to review PR #$pr_number in read-only mode and follow its exact response format. Focus on critical bugs, security vulnerabilities, and logic errors." \
@@ -119,7 +119,9 @@ function review_auto
         # dispatch review agents to panes
         for j in (seq $num_panes)
             set -l name (string lower $names[$j])
-            set -l cmd "$review_cmd \"$prompts[$j]\" 2>&1 | tee $round_dir/review_$name.md; touch $round_dir/.done_$name"
+            set -l outfile "$round_dir/review_$name.md"
+            set -l prompt "$base_prompts[$j] IMPORTANT: When done, write your complete review to $outfile using the Write tool."
+            set -l cmd "$review_cmd \"$prompt\"; touch $round_dir/.done_$name"
             printf '%s\r' "$cmd" | wezterm cli send-text --no-paste --pane-id $pane_ids[$j]
         end
 
