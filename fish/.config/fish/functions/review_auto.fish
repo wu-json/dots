@@ -178,7 +178,7 @@ function review_auto
             set -l mins (math "floor($elapsed / 60)")
             set -l secs (math "$elapsed % 60")
             set -l time_str (printf "%d:%02d" $mins $secs)
-            printf "\r %s%s%s  Review (%s/%s)  %s %s%s%s" $dim $spinner_frames[$frame_idx] $reset $round $max_rounds "$status_line" $dim $time_str $reset
+            printf "\r %s%s%s  Review %s(%s/%s)%s  %s %s%s%s" $dim $spinner_frames[$frame_idx] $reset $dim $round $max_rounds $reset "$status_line" $dim $time_str $reset
 
             if test $done_count -ge $num_panes
                 break
@@ -200,7 +200,7 @@ function review_auto
         set -l work_pane (wezterm cli split-pane --pane-id $pane_0 --right)
 
         printf "\r                                                           \r"
-        echo " "(set_color green)"✔"(set_color normal)"  Review ($round/$max_rounds)  $status_line"(set_color brblack)"$time_str"(set_color normal)
+        echo " "(set_color green)"✔"(set_color normal)"  Review "(set_color brblack)"($round/$max_rounds)"(set_color normal)"  $status_line"(set_color brblack)"$time_str"(set_color normal)
 
         # --- triage phase ---
         set -l review_files
@@ -230,26 +230,31 @@ function review_auto
         set -l mins (math "floor($elapsed / 60)")
         set -l secs (math "$elapsed % 60")
         set -l time_str (printf "%d:%02d" $mins $secs)
+
+        # kill triage pane and create fresh one before printing
+        # (pane resize happens here, before any output)
+        wezterm cli kill-pane --pane-id $work_pane &>/dev/null
+        set work_pane (wezterm cli split-pane --pane-id $pane_0 --right)
+
         printf "\r                                                           \r"
         echo " "(set_color green)"✔"(set_color normal)"  Triage  "(set_color brblack)"$time_str"(set_color normal)
 
         # check triage result - must be on its own line to avoid false matches
         if grep -qx NO_ISSUES_FOUND $round_dir/triage.md 2>/dev/null
+            wezterm cli kill-pane --pane-id $work_pane &>/dev/null
             echo " "(set_color green)"●"(set_color normal)"  "(set_color --bold)"clean"(set_color normal)" "(set_color brblack)"— no issues found"(set_color normal)
             echo ""
             return 0
         end
 
         if test "$dry_run" = true
+            wezterm cli kill-pane --pane-id $work_pane &>/dev/null
             echo " "(set_color yellow)"●"(set_color normal)"  "(set_color --bold)"dry run"(set_color normal)" "(set_color brblack)"— issues found, skipping fix"(set_color normal)
             echo ""
             return 0
         end
 
-        # --- fix phase ---
-        # kill triage pane and create fresh one for fix
-        wezterm cli kill-pane --pane-id $work_pane &>/dev/null
-        set work_pane (wezterm cli split-pane --pane-id $pane_0 --right)
+        # --- fix phase (work pane already created above) ---
 
         set -l fix_sentinel "$round_dir/.done_fix"
         set -l fix_prompt "Read the triaged code-review issues at $round_dir/triage.md using the Read tool. Fix every issue listed. Do not fix anything not listed. After fixing, commit your changes with a clear message referencing what was fixed, then push to the remote branch with git push. Then use the /pr skill to update the PR title and description. When completely done, run this shell command: touch $fix_sentinel"
