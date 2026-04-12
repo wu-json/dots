@@ -178,8 +178,8 @@ review_auto [options]
 |---|---|---|
 | Output format | `--print` to file via tee | Gives visible terminal output AND machine-readable files for the next agent |
 | Triage sentinel | `NO_ISSUES_FOUND` string | Simple, grep-able exit condition |
-| Fix agent mode | `--yolo` (full write access) | Needs to edit files and commit |
-| Review agents | `--yolo --print` | Needs tool access (gh, shell) for PR inspection via review skill |
+| Fix agent mode | `--yolo` (full write access) | Needs to edit files, run shell tools, and commit |
+| Review agents | `--yolo --print` | Without `--yolo`, agents can't run shell tools (gh cli, git, etc.) needed for PR inspection |
 | Loop cap | 3 rounds | Prevents runaway; most real issues resolve in 1-2 rounds |
 
 ## Feasibility findings

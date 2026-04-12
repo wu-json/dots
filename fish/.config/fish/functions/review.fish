@@ -1,6 +1,7 @@
 function review
     # Usage: review [1-4] [openai|anthropic] — args can be in any order.
-    # Default: 4 panes, anthropic (claude-4.6-opus). openai → gpt-5.4-high.
+    # Default: 4 panes, anthropic (claude-4.6-opus-high). openai → gpt-5.4-high.
+    # Uses --yolo so agents can run shell tools (gh cli, git, etc.) for PR inspection.
     set -l num_panes 4
     set -l provider anthropic
     set -l saw_panes false

@@ -1,5 +1,6 @@
 function review_auto
     # Usage: review_auto [--max-rounds N] [--provider openai|anthropic] [--panes 1-4] [--dry-run]
+    # Uses --yolo so agents can run shell tools (gh cli, git, etc.) for PR inspection.
     set -l max_rounds 3
     set -l provider anthropic
     set -l num_panes 4
