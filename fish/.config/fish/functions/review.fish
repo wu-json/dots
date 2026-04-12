@@ -37,7 +37,7 @@ function review
     set -l review_model gpt-5.4-high
     switch $provider
         case anthropic
-            set review_model claude-4.6-opus
+            set review_model claude-4.6-opus-high
     end
 
     set -l review_cmd "cursor-agent --yolo --model $review_model -p"

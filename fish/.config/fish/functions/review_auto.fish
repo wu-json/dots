@@ -40,11 +40,11 @@ function review_auto
 
     set -l review_model gpt-5.4-high
     set -l triage_model gpt-5.4-high
-    set -l fix_model claude-4.6-opus
+    set -l fix_model claude-4.6-opus-high
     switch $provider
         case anthropic
-            set review_model claude-4.6-opus
-            set triage_model claude-4.6-opus
+            set review_model claude-4.6-opus-high
+            set triage_model claude-4.6-opus-high
         case openai
             set fix_model gpt-5.4-high
     end
