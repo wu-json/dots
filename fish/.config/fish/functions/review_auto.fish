@@ -8,16 +8,29 @@ function review_auto
     set -l dry_run false
 
     set -l i 1
-    while test $i -le (count $argv)
+    set -l argc (count $argv)
+    while test $i -le $argc
         switch $argv[$i]
             case --max-rounds
                 set i (math $i + 1)
+                if test $i -gt $argc
+                    echo "Missing value for --max-rounds"
+                    return 1
+                end
                 set max_rounds $argv[$i]
             case --provider
                 set i (math $i + 1)
+                if test $i -gt $argc
+                    echo "Missing value for --provider"
+                    return 1
+                end
                 set provider (string lower $argv[$i])
             case --panes
                 set i (math $i + 1)
+                if test $i -gt $argc
+                    echo "Missing value for --panes"
+                    return 1
+                end
                 set num_panes $argv[$i]
             case --dry-run
                 set dry_run true
@@ -49,6 +62,9 @@ function review_auto
             set triage_model claude-4.6-opus-high
         case openai
             set fix_model gpt-5.4-high
+        case '*'
+            echo "Invalid provider: $provider (must be 'anthropic' or 'openai')"
+            return 1
     end
 
     set -l session_dir (mktemp -d /tmp/review_auto.XXXXXX)
@@ -64,14 +80,7 @@ function review_auto
     # --- beautiful header ---
     set -l dim (set_color brblack)
     set -l reset (set_color normal)
-    set -l bold (set_color --bold)
-    set -l cyan (set_color cyan)
     set -l green (set_color green)
-    set -l yellow (set_color yellow)
-    set -l magenta (set_color magenta)
-    set -l red (set_color red)
-
-    set -l white (set_color white)
 
     printf "\n"
     set -l header1 "   "(set_color --bold)"review_auto"(set_color normal)"  "(set_color brblack)"·"(set_color normal)"  PR #"(set_color cyan)$pr_number(set_color normal)
@@ -90,24 +99,16 @@ function review_auto
     set -l pane_0 $WEZTERM_PANE
     set -l pane_ids
 
-    # Create quadrants (same pattern as wez_quadrants.example.fish)
-    set -l pane_bottom_left (wezterm cli split-pane --pane-id $pane_0 --bottom)
-    set -l pane_bottom_right (wezterm cli split-pane --pane-id $pane_bottom_left --right)
-    set -l pane_top_right (wezterm cli split-pane --pane-id $pane_0 --right)
-
-    # pane_ids: [Evelyn (top-right), Vivian (bottom-left), Stella (bottom-right)]
-    set pane_ids $pane_top_right $pane_bottom_left $pane_bottom_right
-
-    # For fewer panes, kill unused ones
-    if test $num_panes -lt 3
-        wezterm cli kill-pane --pane-id $pane_bottom_right
+    # Create only the panes we need
+    if test $num_panes -ge 1
+        set -a pane_ids (wezterm cli split-pane --pane-id $pane_0 --right)
     end
-    if test $num_panes -lt 2
-        wezterm cli kill-pane --pane-id $pane_bottom_left
+    if test $num_panes -ge 2
+        set -a pane_ids (wezterm cli split-pane --pane-id $pane_0 --bottom)
     end
-
-    # Trim pane_ids to match num_panes
-    set pane_ids $pane_ids[1..$num_panes]
+    if test $num_panes -ge 3
+        set -a pane_ids (wezterm cli split-pane --pane-id $pane_ids[2] --right)
+    end
 
     # --- main loop ---
     set -l round 1
@@ -179,7 +180,7 @@ function review_auto
             end
             
             set frame_idx (math "$frame_idx % 10 + 1")
-            sleep 0.05
+            sleep 0.5
         end
         set -l elapsed (math (date +%s) - $round_start)
         set -l mins (math "floor($elapsed / 60)")
@@ -217,7 +218,7 @@ IMPORTANT - Write your verdict to $round_dir/triage.md:
 - If there are NO real issues: write ONLY the text 'NO_ISSUES_FOUND' (nothing else, just that one line)
 - If there ARE real issues: write each issue with file path, line number, severity (critical/high/medium), and description. Do NOT include the string NO_ISSUES_FOUND anywhere." > $triage_prompt_file
 
-        set -l triage_cmd "cursor-agent --yolo --model $triage_model -p \"(cat $triage_prompt_file)\"; touch $triage_sentinel"
+        set -l triage_cmd "cursor-agent --yolo --model $triage_model -p \"(cat $triage_prompt_file)\" && touch $triage_sentinel"
         printf '%s\r' "$triage_cmd" | wezterm cli send-text --no-paste --pane-id $work_pane
 
         set frame_idx 1
@@ -258,9 +259,9 @@ IMPORTANT - Write your verdict to $round_dir/triage.md:
 
         set -l fix_sentinel "$round_dir/.done_fix"
         set -l fix_prompt_file "$round_dir/fix_prompt.txt"
-        echo "You are a senior engineer. Read the triaged code-review issues at $round_dir/triage.md using the Read tool. Fix every issue listed. Do not fix anything not listed. After fixing, commit your changes with a clear message referencing what was fixed." > $fix_prompt_file
+        echo "You are a senior engineer. Read the triaged code-review issues at $round_dir/triage.md using the Read tool. Fix every issue listed. Do not fix anything not listed. After fixing, commit your changes with a clear message referencing what was fixed, then push to the remote branch (git push)." > $fix_prompt_file
 
-        set -l fix_cmd "cursor-agent --yolo --model $fix_model -p \"(cat $fix_prompt_file)\"; touch $fix_sentinel"
+        set -l fix_cmd "cursor-agent --yolo --model $fix_model -p \"(cat $fix_prompt_file)\" && touch $fix_sentinel"
         printf '%s\r' "$fix_cmd" | wezterm cli send-text --no-paste --pane-id $work_pane
 
         set frame_idx 1
