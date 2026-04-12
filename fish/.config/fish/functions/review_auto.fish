@@ -259,7 +259,7 @@ function review_auto
                 break
             end
 
-            if test $elapsed -ge $phase_timeout
+            if test $phase_el -ge $phase_timeout
                 printf "\r                                                           \r"
                 echo " "(set_color red)"✗"(set_color normal)"  Review phase timed out after $phase_timeout seconds in round $round"
                 for pane in $pane_ids
