@@ -252,8 +252,8 @@ function review_auto
             set -l mins (math "floor($elapsed / 60)")
             set -l secs (math "$elapsed % 60")
             set -l time_str (printf "%d:%02d" $mins $secs)
-            set -l dots (printf "%-3s" $dot_frames[$frame_idx])
-            printf "\r %s·%s  Reviewing%s%s(%s/%s)%s  %s %s%s%s" (set_color $dot_colors[$frame_idx]) $reset "$dots" $dim $round $max_rounds $reset "$status_line" $dim $time_str $reset
+            set -l dots (printf "%-4s" $dot_frames[$frame_idx])
+            printf "\r %s•%s Reviewing%s%s(%s/%s)%s  %s %s%s%s" (set_color $dot_colors[$frame_idx]) $reset "$dots" $dim $round $max_rounds $reset "$status_line" $dim $time_str $reset
 
             if test $done_count -ge $num_panes
                 break
@@ -313,8 +313,8 @@ function review_auto
             set -l mins (math "floor($elapsed / 60)")
             set -l secs (math "$elapsed % 60")
             set -l time_str (printf "%d:%02d" $mins $secs)
-            set -l dots (printf "%-3s" $dot_frames[$frame_idx])
-            printf "\r %s·%s  Triaging%s %s%s%s" (set_color $dot_colors[$frame_idx]) $reset "$dots" $dim $time_str $reset
+            set -l dots (printf "%-4s" $dot_frames[$frame_idx])
+            printf "\r %s•%s Triaging%s %s%s%s" (set_color $dot_colors[$frame_idx]) $reset "$dots" $dim $time_str $reset
 
             set -l phase_elapsed (math (date +%s) - $triage_start)
             if test $phase_elapsed -ge $phase_timeout
@@ -380,8 +380,8 @@ function review_auto
             set -l mins (math "floor($elapsed / 60)")
             set -l secs (math "$elapsed % 60")
             set -l time_str (printf "%d:%02d" $mins $secs)
-            set -l dots (printf "%-3s" $dot_frames[$frame_idx])
-            printf "\r %s·%s  Fixing%s %s%s%s" (set_color $dot_colors[$frame_idx]) $reset "$dots" $dim $time_str $reset
+            set -l dots (printf "%-4s" $dot_frames[$frame_idx])
+            printf "\r %s•%s Fixing%s %s%s%s" (set_color $dot_colors[$frame_idx]) $reset "$dots" $dim $time_str $reset
 
             set -l phase_elapsed (math (date +%s) - $fix_start)
             if test $phase_elapsed -ge $phase_timeout
