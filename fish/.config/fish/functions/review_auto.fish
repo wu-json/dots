@@ -207,7 +207,7 @@ IMPORTANT - Write your verdict to $round_dir/triage.md:
 - If there are NO real issues: write ONLY the text 'NO_ISSUES_FOUND' (nothing else, just that one line)
 - If there ARE real issues: write each issue with file path, line number, severity (critical/high/medium), and description. Do NOT include the string NO_ISSUES_FOUND anywhere." > $triage_prompt_file
 
-        set -l triage_cmd "cursor-agent --yolo --model $triage_model -p (cat $triage_prompt_file); touch $triage_sentinel"
+        set -l triage_cmd "cursor-agent --yolo --model $triage_model -p \"(cat $triage_prompt_file)\"; touch $triage_sentinel"
         printf '%s\r' "$triage_cmd" | wezterm cli send-text --no-paste --pane-id $work_pane
 
         set frame_idx 1
@@ -250,7 +250,7 @@ IMPORTANT - Write your verdict to $round_dir/triage.md:
         set -l fix_prompt_file "$round_dir/fix_prompt.txt"
         echo "You are a senior engineer. Read the triaged code-review issues at $round_dir/triage.md using the Read tool. Fix every issue listed. Do not fix anything not listed. After fixing, commit your changes with a clear message referencing what was fixed." > $fix_prompt_file
 
-        set -l fix_cmd "cursor-agent --yolo --model $fix_model -p (cat $fix_prompt_file); touch $fix_sentinel"
+        set -l fix_cmd "cursor-agent --yolo --model $fix_model -p \"(cat $fix_prompt_file)\"; touch $fix_sentinel"
         printf '%s\r' "$fix_cmd" | wezterm cli send-text --no-paste --pane-id $work_pane
 
         set frame_idx 1
