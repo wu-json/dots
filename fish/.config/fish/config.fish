@@ -23,6 +23,7 @@ end
 
 # Git
 alias ghc="git reset --hard && git clean -fd"
+alias gho="ghome"
 
 # Eza
 alias ls="eza"
