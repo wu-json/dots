@@ -179,6 +179,13 @@ function review_auto
         echo "   "(set_color white)"●"(set_color normal)"  review  $status_line"(set_color brblack)"$time_str"(set_color normal)
         echo ""
 
+        # kill reviewer panes and create fresh pane for triage/fix
+        for pane in $pane_ids
+            wezterm cli kill-pane --pane-id $pane 2>/dev/null
+        end
+        set -l work_pane (wezterm cli split-pane --pane-id $pane_0 --right)
+
+        # --- triage phase ---
         set -l review_files
         for j in (seq $num_panes)
             set -l name (string lower $names[$j])
@@ -187,7 +194,8 @@ function review_auto
         set -l file_list (string join ", " $review_files)
 
         set -l triage_sentinel "$round_dir/.done_triage"
-        set -l triage_prompt "You are a senior code-review triage agent. Read the review output files at: $file_list
+        set -l triage_prompt_file "$round_dir/triage_prompt.txt"
+        echo "You are a senior code-review triage agent. Read the review output files at: $file_list
 
 Your job:
 - Read all review files using the Read tool
@@ -197,10 +205,10 @@ Your job:
 - If there are no real issues, output exactly the string: NO_ISSUES_FOUND
 - Format each real issue as: file path, line number, severity (critical/high/medium), and description
 - IMPORTANT: Write your final verdict to $round_dir/triage.md using the Write tool. Include NO_ISSUES_FOUND in that file if there are none.
-- When completely done, run: touch $triage_sentinel"
+- When completely done, run: touch $triage_sentinel" > $triage_prompt_file
 
-        set -l triage_cmd "cursor-agent --yolo --model $triage_model \"$triage_prompt\""
-        printf '%s\r' "$triage_cmd" | wezterm cli send-text --no-paste --pane-id $pane_ids[1]
+        set -l triage_cmd "cursor-agent --yolo --model $triage_model \"Read the prompt at $triage_prompt_file and follow its instructions exactly.\""
+        printf '%s\r' "$triage_cmd" | wezterm cli send-text --no-paste --pane-id $work_pane
 
         set frame_idx 1
         while not test -f $triage_sentinel
@@ -220,7 +228,7 @@ Your job:
         echo "   "(set_color white)"●"(set_color normal)"  triage  "(set_color brblack)"$time_str"(set_color normal)
 
         # check triage result
-        if grep -q NO_ISSUES_FOUND $round_dir/triage.md
+        if grep -q NO_ISSUES_FOUND $round_dir/triage.md 2>/dev/null
             echo ""
             echo "   "(set_color green)"●"(set_color normal)"  "(set_color --bold)"clean"(set_color normal)" "(set_color brblack)"— no issues found"(set_color normal)
             echo ""
@@ -234,14 +242,19 @@ Your job:
             return 0
         end
 
-        # --- fix phase (runs in Evelyn's pane) ---
+        # --- fix phase ---
         echo ""
+        
+        # send ctrl-c to kill triage agent, then start fix
+        printf '\x03' | wezterm cli send-text --no-paste --pane-id $work_pane
+        sleep 1
 
         set -l fix_sentinel "$round_dir/.done_fix"
-        set -l fix_prompt "You are a senior engineer. Read the triaged code-review issues at $round_dir/triage.md using the Read tool. Fix every issue listed. Do not fix anything not listed. After fixing, commit your changes with a clear message referencing what was fixed. When completely done, run: touch $fix_sentinel"
+        set -l fix_prompt_file "$round_dir/fix_prompt.txt"
+        echo "You are a senior engineer. Read the triaged code-review issues at $round_dir/triage.md using the Read tool. Fix every issue listed. Do not fix anything not listed. After fixing, commit your changes with a clear message referencing what was fixed. When completely done, run: touch $fix_sentinel" > $fix_prompt_file
 
-        set -l fix_cmd "cursor-agent --yolo --model $fix_model \"$fix_prompt\""
-        printf '%s\r' "$fix_cmd" | wezterm cli send-text --no-paste --pane-id $pane_ids[1]
+        set -l fix_cmd "cursor-agent --yolo --model $fix_model \"Read the prompt at $fix_prompt_file and follow its instructions exactly.\""
+        printf '%s\r' "$fix_cmd" | wezterm cli send-text --no-paste --pane-id $work_pane
 
         set frame_idx 1
         while not test -f $fix_sentinel
@@ -259,6 +272,11 @@ Your job:
         set -l time_str (printf "%d:%02d" $mins $secs)
         printf "\r                                                           \r"
         echo "   "(set_color white)"●"(set_color normal)"  fix  "(set_color brblack)"$time_str"(set_color normal)
+        
+        # kill work pane before next round
+        printf '\x03' | wezterm cli send-text --no-paste --pane-id $work_pane
+        sleep 1
+        wezterm cli kill-pane --pane-id $work_pane 2>/dev/null
 
         set round (math $round + 1)
     end

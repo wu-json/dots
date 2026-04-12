@@ -109,7 +109,7 @@ Split order (same pattern as `wez_quadrants.example.fish`):
 3. pane_bottom_right = `split-pane --pane-id $pane_bottom_left --right` (Stella)
 4. pane_top_right = `split-pane --pane-id $pane_0 --right` (Evelyn)
 
-All panes persist across rounds — review panes are reused each cycle. After reviewers finish, triage and fix run in Evelyn's pane (top-right).
+**After review phase:** All reviewer panes are killed. A fresh work pane is created on the right side of the orchestrator for triage/fix. This avoids the complexity of reusing panes and ensures clean agent startup.
 
 ### Waiting for agents to finish
 
@@ -129,8 +129,13 @@ Verified: this correctly returns true when an agent is running and false when it
 
 ### Triage agent prompt
 
-The triage agent runs in Evelyn's pane (top-right) after reviewers finish. It reads the review output files itself (has `--yolo` tool access) rather than receiving them inline — review outputs can be very long.
+The triage agent runs in a fresh work pane (right of orchestrator) after reviewers finish. The prompt is written to a file `{round_dir}/triage_prompt.txt` and the agent is told to read it:
 
+```
+cursor-agent --yolo --model MODEL "Read the prompt at {round_dir}/triage_prompt.txt and follow its instructions exactly."
+```
+
+The prompt file contains:
 ```
 You are a senior code-review triage agent. Read the 3 review output files at:
   {round_dir}/review_evelyn.md
@@ -145,16 +150,18 @@ Your job:
 - If a review file is empty or contains an error, skip it
 - If there are no real issues, output exactly: NO_ISSUES_FOUND
 - Format each real issue as a structured block with file, line, description, and severity
+- Write your final verdict to {round_dir}/triage.md using the Write tool
+- When done, run: touch {round_dir}/.done_triage
 ```
 
 ### Fix agent prompt
 
-The fix agent also runs in Evelyn's pane (top-right). It reads the triage output file.
+The fix agent runs in the same work pane after triage completes. Prompt is also written to a file `{round_dir}/fix_prompt.txt`:
 
 ```
 You are a senior engineer. Read the triaged issues at {round_dir}/triage.md.
 Fix every issue listed. Do not fix anything not listed. Commit your changes
-with a clear message referencing the fixes.
+with a clear message referencing the fixes. When done, run: touch {round_dir}/.done_fix
 ```
 
 ### Max iterations
@@ -210,15 +217,25 @@ Tested against `cursor-agent` CLI and `wezterm cli` on 2026-04-12. All core mech
 
 ### Confirmed approach
 
-Use `send-text` for all agents (matching existing `review.fish` pattern). Each pane has a fish shell. All agents run in full TUI mode (no `--print`) so you can watch agent progress live:
+Use `send-text` for all agents (matching existing `review.fish` pattern). Each pane has a fish shell. All agents run in full TUI mode (no `--print`) so you can watch agent progress live.
+
+**Review phase:**
 ```
 cursor-agent --yolo --model MODEL "PROMPT (write output to FILE, then run: touch SENTINEL)"
 ```
-Each agent writes its output via Write tool and touches a sentinel file via Shell tool when done. Orchestrator pane polls for `.done_*` files and prints status. Triage/fix reuse Evelyn's pane (top-right) after reviewers finish.
+Each reviewer writes its output via Write tool and touches a sentinel file via Shell tool when done.
+
+**Triage/Fix phase:**
+After review completes, reviewer panes are killed. A fresh work pane is created on the right of the orchestrator. Prompts are written to temp files to avoid quote/newline escaping issues with send-text:
+```
+echo "LONG PROMPT..." > {round_dir}/triage_prompt.txt
+cursor-agent --yolo --model MODEL "Read the prompt at {round_dir}/triage_prompt.txt and follow its instructions exactly."
+```
+Orchestrator pane polls for `.done_*` files and prints status.
 
 ### Cleanup
 
-When the loop exits (clean PR or max rounds hit), the 3 review panes are left open so the user can scroll through the last round's output. The orchestrator pane prints a summary (rounds completed, final status) and returns control to the shell.
+After each review phase, reviewer panes are killed to create a clean work pane for triage/fix. After triage/fix completes, the work pane is killed before the next round. When the loop exits (clean PR or max rounds hit), the orchestrator pane prints a summary (rounds completed, final status) and returns control to the shell.
 
 ## Open questions
 
