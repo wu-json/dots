@@ -344,8 +344,9 @@ function review_auto
         printf "\r                                                           \r"
         echo " "(set_color green)"✔"(set_color normal)" Triaged  "(set_color brblack)"$time_str"(set_color normal)
 
-        # check triage result - trim whitespace and match robustly
-        if string match -qr '^\s*NO_ISSUES_FOUND\s*$' < $round_dir/triage.md 2>/dev/null
+        # check triage result - compare trimmed entire file to exact string
+        set -l _triage_content (string trim (cat $round_dir/triage.md 2>/dev/null))
+        if test "$_triage_content" = NO_ISSUES_FOUND
             wezterm cli kill-pane --pane-id $work_pane &>/dev/null
             echo " "(set_color green)"●"(set_color normal)"  "(set_color --bold)"clean"(set_color normal)" "(set_color brblack)"— no issues found"(set_color normal)
             echo ""
