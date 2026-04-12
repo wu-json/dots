@@ -115,29 +115,33 @@ function review_auto
         set pane_ids $pane_evelyn
     end
 
+    # --- header (printed once) ---
+    printf "\n\n"
+    echo " "(set_color --bold)"review_auto"(set_color normal)" "(set_color brblack)"·"(set_color normal)" PR #"(set_color cyan)$pr_number(set_color normal)
+    echo " "(set_color brblack)"$provider · $num_panes reviewers"(set_color normal)
+    echo ""
+
     # --- main loop ---
     set -l round 1
     while test $round -le $max_rounds
         set -l round_dir $session_dir/round_$round
         mkdir -p $round_dir
 
-        printf "\n\n"
-        echo " "(set_color --bold)"review_auto"(set_color normal)"  "(set_color brblack)"·"(set_color normal)"  PR #"(set_color cyan)$pr_number(set_color normal)
-        echo " "(set_color brblack)"$provider · $num_panes reviewers"(set_color normal)
-        echo ""
         set -l round_start (date +%s)
 
-        # On round 2+, recreate reviewer panes (they were killed after the previous review phase)
+        # On round 2+, recreate reviewer panes (same quadrant layout as initial)
         if test $round -gt 1
-            set pane_ids
-            if test $num_panes -ge 1
-                set -a pane_ids (wezterm cli split-pane --pane-id $pane_0 --right)
+            set -l pb (wezterm cli split-pane --pane-id $pane_0 --bottom)
+            set -l pe (wezterm cli split-pane --pane-id $pane_0 --right)
+            set -l ps (wezterm cli split-pane --pane-id $pb --right)
+            set pane_ids $pe $pb $ps
+            if test $num_panes -lt 3
+                wezterm cli kill-pane --pane-id $ps &>/dev/null
+                set pane_ids $pe $pb
             end
-            if test $num_panes -ge 2
-                set -a pane_ids (wezterm cli split-pane --pane-id $pane_0 --bottom)
-            end
-            if test $num_panes -ge 3
-                set -a pane_ids (wezterm cli split-pane --pane-id $pane_ids[2] --right)
+            if test $num_panes -lt 2
+                wezterm cli kill-pane --pane-id $pb &>/dev/null
+                set pane_ids $pe
             end
         end
 
