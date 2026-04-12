@@ -157,7 +157,11 @@ function review_auto
     printf "\n\n"
     set -l pr_label "PR #$pr_number"
     if test -n "$pr_title"
-        set -l max_len 40
+        # " review_auto · " = 16 chars prefix, leave 2 for padding
+        set -l max_len (math $COLUMNS - 18)
+        if test $max_len -lt 20
+            set max_len 20
+        end
         if test (string length "$pr_title") -gt $max_len
             set pr_label (string sub -l $max_len "$pr_title")"…"
         else
