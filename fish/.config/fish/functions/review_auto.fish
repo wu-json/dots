@@ -107,11 +107,11 @@ function review_auto
 
     # Kill unused panes if num_panes < 3
     if test $num_panes -lt 3
-        wezterm cli kill-pane --pane-id $pane_stella 2>/dev/null
+        wezterm cli kill-pane --pane-id $pane_stella &>/dev/null
         set pane_ids $pane_evelyn $pane_vivian
     end
     if test $num_panes -lt 2
-        wezterm cli kill-pane --pane-id $pane_vivian 2>/dev/null
+        wezterm cli kill-pane --pane-id $pane_vivian &>/dev/null
         set pane_ids $pane_evelyn
     end
 
@@ -124,6 +124,7 @@ function review_auto
         printf "\n\n"
         echo " "(set_color --bold)"review_auto"(set_color normal)"  "(set_color brblack)"·"(set_color normal)"  PR #"(set_color cyan)$pr_number(set_color normal)
         echo " "(set_color brblack)"$provider · $num_panes reviewers · round $round/$max_rounds"(set_color normal)
+        echo ""
         set -l round_start (date +%s)
 
         # On round 2+, recreate reviewer panes (they were killed after the previous review phase)
@@ -195,7 +196,7 @@ function review_auto
 
         # kill reviewer panes and create fresh pane for triage/fix
         for pane in $pane_ids
-            wezterm cli kill-pane --pane-id $pane 2>/dev/null
+            wezterm cli kill-pane --pane-id $pane &>/dev/null
         end
         set -l work_pane (wezterm cli split-pane --pane-id $pane_0 --right)
 
@@ -245,7 +246,7 @@ function review_auto
 
         # --- fix phase ---
         # kill triage pane and create fresh one for fix
-        wezterm cli kill-pane --pane-id $work_pane 2>/dev/null
+        wezterm cli kill-pane --pane-id $work_pane &>/dev/null
         set work_pane (wezterm cli split-pane --pane-id $pane_0 --right)
 
         set -l fix_sentinel "$round_dir/.done_fix"
@@ -272,7 +273,7 @@ function review_auto
         echo " "(set_color white)"●"(set_color normal)"  fix  "(set_color brblack)"$time_str"(set_color normal)
 
         # kill work pane before next round
-        wezterm cli kill-pane --pane-id $work_pane 2>/dev/null
+        wezterm cli kill-pane --pane-id $work_pane &>/dev/null
 
         set round (math $round + 1)
     end
