@@ -51,7 +51,7 @@ function review_auto
     end
 
     set -l session_dir (mktemp -d /tmp/review_auto.XXXXXX)
-    set -l review_cmd "cursor-agent --yolo --print --trust --model $review_model -p"
+    set -l review_cmd "cursor-agent --yolo --model $review_model"
 
     # reviewer identities and prompts
     set -l names Evelyn Vivian Stella Tiffany
@@ -110,18 +110,23 @@ function review_auto
         echo "  ROUND $round / $max_rounds — REVIEW PHASE"
         echo "═══════════════════════════════════════════════"
 
-        # clean sentinel files
+        # clean sentinel files and kill any lingering agents from previous round
         for j in (seq $num_panes)
             set -l name (string lower $names[$j])
             rm -f $round_dir/.done_$name
+            if test $round -gt 1
+                printf '\x03' | wezterm cli send-text --no-paste --pane-id $pane_ids[$j]
+                sleep 1
+            end
         end
 
         # dispatch review agents to panes
         for j in (seq $num_panes)
             set -l name (string lower $names[$j])
             set -l outfile "$round_dir/review_$name.md"
-            set -l prompt "$base_prompts[$j] IMPORTANT: When done, write your complete review to $outfile using the Write tool."
-            set -l cmd "$review_cmd \"$prompt\"; touch $round_dir/.done_$name"
+            set -l sentinel "$round_dir/.done_$name"
+            set -l prompt "$base_prompts[$j] IMPORTANT: When done, write your complete review to $outfile using the Write tool. Then run this shell command: touch $sentinel"
+            set -l cmd "$review_cmd \"$prompt\""
             printf '%s\r' "$cmd" | wezterm cli send-text --no-paste --pane-id $pane_ids[$j]
         end
 
