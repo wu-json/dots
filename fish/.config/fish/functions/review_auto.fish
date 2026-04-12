@@ -76,6 +76,7 @@ function review_auto
     echo ""
     echo "  $bold review_auto$reset  $dim·$reset  PR #$cyan$pr_number$reset"
     echo "  $dim$provider · $num_panes reviewers · $max_rounds rounds max$reset"
+    echo ""
 
     # --- split panes: 4 quadrants (orchestrator + 3 reviewers) ---
     # Layout:
@@ -114,6 +115,7 @@ function review_auto
 
         echo ""
         echo "  $bold round $round$reset$dim / $max_rounds$reset"
+        echo ""
         echo "  $white●$reset  review"
 
         # clean sentinel files and kill any lingering agents from previous round
@@ -163,8 +165,7 @@ function review_auto
             sleep 0.05
         end
         echo ""
-
-        # --- triage phase (runs in Evelyn's pane) ---
+        echo ""
         echo "  $white●$reset  triage"
 
         set -l review_files
@@ -200,18 +201,21 @@ Your job:
 
         # check triage result
         if grep -q "NO_ISSUES_FOUND" $round_dir/triage.md
+            echo ""
             echo "  $green●$reset  $bold clean$reset $dim— no issues found$reset"
             echo ""
             return 0
         end
 
         if test "$dry_run" = true
+            echo ""
             echo "  $yellow●$reset  $bold dry run$reset $dim— issues found, skipping fix$reset"
             echo ""
             return 0
         end
 
         # --- fix phase (runs in Evelyn's pane) ---
+        echo ""
         echo "  $white●$reset  fix"
 
         set -l fix_sentinel "$round_dir/.done_fix"
@@ -231,6 +235,7 @@ Your job:
         set round (math $round + 1)
     end
 
+    echo ""
     echo "  $red●$reset  $bold max rounds$reset $dim— review manually$reset"
     echo ""
     return 1
