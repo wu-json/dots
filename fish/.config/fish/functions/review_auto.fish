@@ -118,7 +118,8 @@ function review_auto
         echo ""
         echo "   "(set_color brblack)"round $round / $max_rounds"(set_color normal)
         echo ""
-        echo "   "(set_color white)"●"(set_color normal)"  review"
+
+        set -l round_start (date +%s)
 
         # clean sentinel files and kill any lingering agents from previous round
         for j in (seq $num_panes)
@@ -156,19 +157,27 @@ function review_auto
                     set status_line "$status_line$dim$name$reset  "
                 end
             end
-
-            printf "\r   %s%s%s  %s" $dim $spinner_frames[$frame_idx] $reset "$status_line"
-
+            
+            set -l elapsed (math (date +%s) - $round_start)
+            set -l mins (math "floor($elapsed / 60)")
+            set -l secs (math "$elapsed % 60")
+            set -l time_str (printf "%d:%02d" $mins $secs)
+            printf "\r   %s%s%s  review  %s %s%s%s" $dim $spinner_frames[$frame_idx] $reset "$status_line" $dim $time_str $reset
+            
             if test $done_count -ge $num_panes
                 break
             end
-
+            
             set frame_idx (math "$frame_idx % 10 + 1")
             sleep 0.05
         end
+        set -l elapsed (math (date +%s) - $round_start)
+        set -l mins (math "floor($elapsed / 60)")
+        set -l secs (math "$elapsed % 60")
+        set -l time_str (printf "%d:%02d" $mins $secs)
+        printf "\r                                                           \r"
+        echo "   "(set_color white)"●"(set_color normal)"  review  $status_line"(set_color brblack)"$time_str"(set_color normal)
         echo ""
-        echo ""
-        echo "   "(set_color white)"●"(set_color normal)"  triage"
 
         set -l review_files
         for j in (seq $num_panes)
@@ -195,11 +204,20 @@ Your job:
 
         set frame_idx 1
         while not test -f $triage_sentinel
-            printf "\r   $dim$spinner_frames[$frame_idx]$reset  triaging..."
+            set -l elapsed (math (date +%s) - $round_start)
+            set -l mins (math "floor($elapsed / 60)")
+            set -l secs (math "$elapsed % 60")
+            set -l time_str (printf "%d:%02d" $mins $secs)
+            printf "\r   %s%s%s  triage  %s%s%s" $dim $spinner_frames[$frame_idx] $reset $dim $time_str $reset
             set frame_idx (math "$frame_idx % 10 + 1")
             sleep 0.05
         end
-        echo ""
+        set -l elapsed (math (date +%s) - $round_start)
+        set -l mins (math "floor($elapsed / 60)")
+        set -l secs (math "$elapsed % 60")
+        set -l time_str (printf "%d:%02d" $mins $secs)
+        printf "\r                                                           \r"
+        echo "   "(set_color white)"●"(set_color normal)"  triage  "(set_color brblack)"$time_str"(set_color normal)
 
         # check triage result
         if grep -q NO_ISSUES_FOUND $round_dir/triage.md
@@ -218,7 +236,6 @@ Your job:
 
         # --- fix phase (runs in Evelyn's pane) ---
         echo ""
-        echo "   "(set_color white)"●"(set_color normal)"  fix"
 
         set -l fix_sentinel "$round_dir/.done_fix"
         set -l fix_prompt "You are a senior engineer. Read the triaged code-review issues at $round_dir/triage.md using the Read tool. Fix every issue listed. Do not fix anything not listed. After fixing, commit your changes with a clear message referencing what was fixed. When completely done, run: touch $fix_sentinel"
@@ -228,11 +245,20 @@ Your job:
 
         set frame_idx 1
         while not test -f $fix_sentinel
-            printf "\r   $dim$spinner_frames[$frame_idx]$reset  fixing..."
+            set -l elapsed (math (date +%s) - $round_start)
+            set -l mins (math "floor($elapsed / 60)")
+            set -l secs (math "$elapsed % 60")
+            set -l time_str (printf "%d:%02d" $mins $secs)
+            printf "\r   %s%s%s  fix  %s%s%s" $dim $spinner_frames[$frame_idx] $reset $dim $time_str $reset
             set frame_idx (math "$frame_idx % 10 + 1")
             sleep 0.05
         end
-        echo ""
+        set -l elapsed (math (date +%s) - $round_start)
+        set -l mins (math "floor($elapsed / 60)")
+        set -l secs (math "$elapsed % 60")
+        set -l time_str (printf "%d:%02d" $mins $secs)
+        printf "\r                                                           \r"
+        echo "   "(set_color white)"●"(set_color normal)"  fix  "(set_color brblack)"$time_str"(set_color normal)
 
         set round (math $round + 1)
     end
