@@ -41,5 +41,6 @@
       "Bash(gh gist view:*)"
     ]
   },
-  "model": "opus"
+  "model": "opus",
+  "skipDangerousModePermissionPrompt": true
 }
