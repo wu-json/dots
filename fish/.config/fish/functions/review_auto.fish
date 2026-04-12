@@ -1,10 +1,11 @@
 function review_auto
-    # Usage: review_auto [--max-rounds N] [--provider openai|anthropic] [--panes 1-3] [--dry-run]
+    # Usage: review_auto [--max-rounds N] [--provider openai|anthropic] [--panes 1-3] [--timeout SECS] [--dry-run]
     # Uses --yolo so agents can run shell tools (gh cli, git, etc.) for PR inspection.
     # Default: 3 reviewers (Evelyn, Vivian, Stella) in 4-quadrant layout.
     set -l max_rounds 3
     set -l provider anthropic
     set -l num_panes 3
+    set -l phase_timeout 600
     set -l dry_run false
 
     set -l i 1
@@ -35,12 +36,27 @@ function review_auto
                     echo "Missing value for --panes"
                     return 1
                 end
+                if not string match -qr '^\d+$' -- $argv[$i]
+                    echo "Invalid --panes value: '$argv[$i]' (must be a positive integer)"
+                    return 1
+                end
                 set num_panes $argv[$i]
+            case --timeout
+                set i (math $i + 1)
+                if test $i -gt $argc
+                    echo "Missing value for --timeout"
+                    return 1
+                end
+                if not string match -qr '^\d+$' -- $argv[$i]; or test $argv[$i] -le 0
+                    echo "Invalid --timeout value: '$argv[$i]' (must be a positive integer in seconds)"
+                    return 1
+                end
+                set phase_timeout $argv[$i]
             case --dry-run
                 set dry_run true
             case '*'
                 echo "Unknown argument: $argv[$i]"
-                echo "Usage: review_auto [--max-rounds N] [--provider openai|anthropic] [--panes 1-3] [--dry-run]"
+                echo "Usage: review_auto [--max-rounds N] [--provider openai|anthropic] [--panes 1-3] [--timeout SECS] [--dry-run]"
                 return 1
         end
         set i (math $i + 1)
@@ -225,6 +241,15 @@ function review_auto
                 break
             end
 
+            if test $elapsed -ge $phase_timeout
+                printf "\r                                                           \r"
+                echo " "(set_color red)"✗"(set_color normal)"  Review phase timed out after $phase_timeout seconds in round $round"
+                for pane in $pane_ids
+                    wezterm cli kill-pane --pane-id $pane &>/dev/null
+                end
+                return 1
+            end
+
             set frame_idx (math "$frame_idx % 10 + 1")
             sleep 0.05 # ~20 FPS for smooth spinner animation
         end
@@ -239,6 +264,10 @@ function review_auto
             wezterm cli kill-pane --pane-id $pane &>/dev/null
         end
         set -l work_pane (wezterm cli split-pane --pane-id $pane_0 --right)
+        if test -z "$work_pane"
+            echo "Failed to create work pane after review phase in round $round"
+            return 1
+        end
 
         printf "\r                                                           \r"
         echo " "(set_color green)"✔"(set_color normal)"  Review "(set_color brblack)"($round/$max_rounds)"(set_color normal)"  $status_line"(set_color brblack)"$time_str"(set_color normal)
@@ -259,6 +288,7 @@ function review_auto
         set -l triage_cmd "cursor-agent --yolo --model $triage_model \"\$(cat $triage_prompt_file)\""
         printf '%s\r' "$triage_cmd" | wezterm cli send-text --no-paste --pane-id $work_pane
 
+        set -l triage_start (date +%s)
         set frame_idx 1
         while not test -f $triage_sentinel
             set -l elapsed (math (date +%s) - $round_start)
@@ -266,6 +296,15 @@ function review_auto
             set -l secs (math "$elapsed % 60")
             set -l time_str (printf "%d:%02d" $mins $secs)
             printf "\r %s%s%s  Triage  %s%s%s" $dim $spinner_frames[$frame_idx] $reset $dim $time_str $reset
+
+            set -l phase_elapsed (math (date +%s) - $triage_start)
+            if test $phase_elapsed -ge $phase_timeout
+                printf "\r                                                           \r"
+                echo " "(set_color red)"✗"(set_color normal)"  Triage phase timed out after $phase_timeout seconds in round $round"
+                wezterm cli kill-pane --pane-id $work_pane &>/dev/null
+                return 1
+            end
+
             set frame_idx (math "$frame_idx % 10 + 1")
             sleep 0.05 # ~20 FPS for smooth spinner animation
         end
@@ -278,6 +317,10 @@ function review_auto
         # (pane resize happens here, before any output)
         wezterm cli kill-pane --pane-id $work_pane &>/dev/null
         set work_pane (wezterm cli split-pane --pane-id $pane_0 --right)
+        if test -z "$work_pane"
+            echo "Failed to create work pane after triage phase in round $round"
+            return 1
+        end
 
         printf "\r                                                           \r"
         echo " "(set_color green)"✔"(set_color normal)"  Triage  "(set_color brblack)"$time_str"(set_color normal)
@@ -307,6 +350,7 @@ function review_auto
         set -l fix_cmd "cursor-agent --yolo --model $fix_model \"\$(cat $fix_prompt_file)\""
         printf '%s\r' "$fix_cmd" | wezterm cli send-text --no-paste --pane-id $work_pane
 
+        set -l fix_start (date +%s)
         set frame_idx 1
         while not test -f $fix_sentinel
             set -l elapsed (math (date +%s) - $round_start)
@@ -314,6 +358,15 @@ function review_auto
             set -l secs (math "$elapsed % 60")
             set -l time_str (printf "%d:%02d" $mins $secs)
             printf "\r %s%s%s  Fix  %s%s%s" $dim $spinner_frames[$frame_idx] $reset $dim $time_str $reset
+
+            set -l phase_elapsed (math (date +%s) - $fix_start)
+            if test $phase_elapsed -ge $phase_timeout
+                printf "\r                                                           \r"
+                echo " "(set_color red)"✗"(set_color normal)"  Fix phase timed out after $phase_timeout seconds in round $round"
+                wezterm cli kill-pane --pane-id $work_pane &>/dev/null
+                return 1
+            end
+
             set frame_idx (math "$frame_idx % 10 + 1")
             sleep 0.05 # ~20 FPS for smooth spinner animation
         end
