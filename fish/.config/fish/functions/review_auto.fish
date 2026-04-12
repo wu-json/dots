@@ -121,14 +121,24 @@ function review_auto
 
         set -l round_start (date +%s)
 
-        # clean sentinel files and kill any lingering agents from previous round
+        # On round 2+, recreate reviewer panes (they were killed after the previous review phase)
+        if test $round -gt 1
+            set pane_ids
+            if test $num_panes -ge 1
+                set -a pane_ids (wezterm cli split-pane --pane-id $pane_0 --right)
+            end
+            if test $num_panes -ge 2
+                set -a pane_ids (wezterm cli split-pane --pane-id $pane_0 --bottom)
+            end
+            if test $num_panes -ge 3
+                set -a pane_ids (wezterm cli split-pane --pane-id $pane_ids[2] --right)
+            end
+        end
+
+        # clean sentinel files
         for j in (seq $num_panes)
             set -l name (string lower $names[$j])
             rm -f $round_dir/.done_$name
-            if test $round -gt 1
-                printf '\x03' | wezterm cli send-text --no-paste --pane-id $pane_ids[$j]
-                sleep 1
-            end
         end
 
         # dispatch review agents to panes
