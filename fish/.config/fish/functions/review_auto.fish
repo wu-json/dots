@@ -123,7 +123,7 @@ function review_auto
 
         printf "\n\n"
         echo " "(set_color --bold)"review_auto"(set_color normal)"  "(set_color brblack)"·"(set_color normal)"  PR #"(set_color cyan)$pr_number(set_color normal)
-        echo " "(set_color brblack)"$provider · $num_panes reviewers · round $round/$max_rounds"(set_color normal)
+        echo " "(set_color brblack)"$provider · $num_panes reviewers"(set_color normal)
         echo ""
         set -l round_start (date +%s)
 
@@ -178,7 +178,7 @@ function review_auto
             set -l mins (math "floor($elapsed / 60)")
             set -l secs (math "$elapsed % 60")
             set -l time_str (printf "%d:%02d" $mins $secs)
-            printf "\r %s%s%s  review  %s %s%s%s" $dim $spinner_frames[$frame_idx] $reset "$status_line" $dim $time_str $reset
+            printf "\r %s%s%s  Review (%s/%s)  %s %s%s%s" $dim $spinner_frames[$frame_idx] $reset $round $max_rounds "$status_line" $dim $time_str $reset
 
             if test $done_count -ge $num_panes
                 break
@@ -200,7 +200,7 @@ function review_auto
         set -l work_pane (wezterm cli split-pane --pane-id $pane_0 --right)
 
         printf "\r                                                           \r"
-        echo " "(set_color white)"●"(set_color normal)"  review  $status_line"(set_color brblack)"$time_str"(set_color normal)
+        echo " "(set_color green)"✔"(set_color normal)"  Review ($round/$max_rounds)  $status_line"(set_color brblack)"$time_str"(set_color normal)
 
         # --- triage phase ---
         set -l review_files
@@ -222,7 +222,7 @@ function review_auto
             set -l mins (math "floor($elapsed / 60)")
             set -l secs (math "$elapsed % 60")
             set -l time_str (printf "%d:%02d" $mins $secs)
-            printf "\r %s%s%s  triage  %s%s%s" $dim $spinner_frames[$frame_idx] $reset $dim $time_str $reset
+            printf "\r %s%s%s  Triage  %s%s%s" $dim $spinner_frames[$frame_idx] $reset $dim $time_str $reset
             set frame_idx (math "$frame_idx % 10 + 1")
             sleep 0.05 # ~20 FPS for smooth spinner animation
         end
@@ -231,7 +231,7 @@ function review_auto
         set -l secs (math "$elapsed % 60")
         set -l time_str (printf "%d:%02d" $mins $secs)
         printf "\r                                                           \r"
-        echo " "(set_color white)"●"(set_color normal)"  triage  "(set_color brblack)"$time_str"(set_color normal)
+        echo " "(set_color green)"✔"(set_color normal)"  Triage  "(set_color brblack)"$time_str"(set_color normal)
 
         # check triage result - must be on its own line to avoid false matches
         if grep -qx NO_ISSUES_FOUND $round_dir/triage.md 2>/dev/null
@@ -263,7 +263,7 @@ function review_auto
             set -l mins (math "floor($elapsed / 60)")
             set -l secs (math "$elapsed % 60")
             set -l time_str (printf "%d:%02d" $mins $secs)
-            printf "\r %s%s%s  fix  %s%s%s" $dim $spinner_frames[$frame_idx] $reset $dim $time_str $reset
+            printf "\r %s%s%s  Fix  %s%s%s" $dim $spinner_frames[$frame_idx] $reset $dim $time_str $reset
             set frame_idx (math "$frame_idx % 10 + 1")
             sleep 0.05 # ~20 FPS for smooth spinner animation
         end
@@ -272,7 +272,7 @@ function review_auto
         set -l secs (math "$elapsed % 60")
         set -l time_str (printf "%d:%02d" $mins $secs)
         printf "\r                                                           \r"
-        echo " "(set_color white)"●"(set_color normal)"  fix  "(set_color brblack)"$time_str"(set_color normal)
+        echo " "(set_color green)"✔"(set_color normal)"  Fix  "(set_color brblack)"$time_str"(set_color normal)
 
         # kill work pane before next round
         wezterm cli kill-pane --pane-id $work_pane &>/dev/null
