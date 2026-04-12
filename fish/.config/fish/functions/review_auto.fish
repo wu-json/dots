@@ -1,9 +1,10 @@
 function review_auto
-    # Usage: review_auto [--max-rounds N] [--provider openai|anthropic] [--panes 1-4] [--dry-run]
+    # Usage: review_auto [--max-rounds N] [--provider openai|anthropic] [--panes 1-3] [--dry-run]
     # Uses --yolo so agents can run shell tools (gh cli, git, etc.) for PR inspection.
+    # Default: 3 reviewers (Evelyn, Vivian, Stella) in 4-quadrant layout.
     set -l max_rounds 3
     set -l provider anthropic
-    set -l num_panes 4
+    set -l num_panes 3
     set -l dry_run false
 
     set -l i 1
@@ -22,14 +23,14 @@ function review_auto
                 set dry_run true
             case '*'
                 echo "Unknown argument: $argv[$i]"
-                echo "Usage: review_auto [--max-rounds N] [--provider openai|anthropic] [--panes 1-4] [--dry-run]"
+                echo "Usage: review_auto [--max-rounds N] [--provider openai|anthropic] [--panes 1-3] [--dry-run]"
                 return 1
         end
         set i (math $i + 1)
     end
 
-    if test $num_panes -lt 1 -o $num_panes -gt 4
-        echo "Pane count must be between 1 and 4"
+    if test $num_panes -lt 1 -o $num_panes -gt 3
+        echo "Pane count must be between 1 and 3"
         return 1
     end
 
@@ -54,12 +55,11 @@ function review_auto
     set -l review_cmd "cursor-agent --yolo --model $review_model"
 
     # reviewer identities and prompts
-    set -l names Evelyn Vivian Stella Tiffany
+    set -l names Evelyn Vivian Stella
     set -l base_prompts \
         "You are Evelyn. Use the local review skill to review PR #$pr_number in read-only mode and follow its exact response format." \
         "You are Vivian. Use the local review skill to review PR #$pr_number in read-only mode and follow its exact response format." \
-        "You are Stella. Use the local review skill to review PR #$pr_number in read-only mode and follow its exact response format. Focus on critical bugs, security vulnerabilities, and logic errors." \
-        "You are Tiffany. Use the local review skill to review PR #$pr_number in read-only mode and follow its exact response format. Focus on dead code, unused imports, and unreachable code paths."
+        "You are Stella. Use the local review skill to review PR #$pr_number in read-only mode and follow its exact response format. Focus on dead code, unused imports, and unreachable code paths."
 
     echo "┌─────────────────────────────────────────────┐"
     echo "│  review_auto — PR #$pr_number"
@@ -67,46 +67,34 @@ function review_auto
     echo "│  session: $session_dir"
     echo "└─────────────────────────────────────────────┘"
 
-    # --- split panes: orchestrator + Evelyn on top, rest on bottom ---
+    # --- split panes: 4 quadrants (orchestrator + 3 reviewers) ---
     # Layout:
     # ┌─────────────────────┬─────────────────────┐
     # │   ORCHESTRATOR      │      Evelyn         │
-    # ├───────────┬─────────┴───────┬─────────────┤
-    # │ Vivian    │    Stella       │   Tiffany   │
-    # └───────────┴─────────────────┴─────────────┘
-    #
-    # Split order matters! Must split top/bottom FIRST (while pane is full width),
-    # then split each row horizontally.
+    # ├─────────────────────┼─────────────────────┤
+    # │     Vivian          │      Stella         │
+    # └─────────────────────┴─────────────────────┘
     set -l pane_0 $WEZTERM_PANE
     set -l pane_ids
 
-    # First: split top/bottom to create the two rows
-    set -l pane_bottom (wezterm cli split-pane --pane-id $pane_0 --bottom)
+    # Create quadrants (same pattern as wez_quadrants.example.fish)
+    set -l pane_bottom_left (wezterm cli split-pane --pane-id $pane_0 --bottom)
+    set -l pane_bottom_right (wezterm cli split-pane --pane-id $pane_bottom_left --right)
+    set -l pane_top_right (wezterm cli split-pane --pane-id $pane_0 --right)
 
-    # Now split the top row: orchestrator | Evelyn
-    set -l pane_evelyn (wezterm cli split-pane --pane-id $pane_0 --right)
-    set pane_ids $pane_evelyn
+    # pane_ids: [Evelyn (top-right), Vivian (bottom-left), Stella (bottom-right)]
+    set pane_ids $pane_top_right $pane_bottom_left $pane_bottom_right
 
-    if test $num_panes -ge 2
-        # Vivian is already in pane_bottom (bottom-left after we split it)
-        # But we need to track it - it's pane_bottom itself for now
-        set -a pane_ids $pane_bottom
-
-        if test $num_panes -ge 3
-            # Split bottom row: Vivian | Stella
-            set -l pane_stella (wezterm cli split-pane --pane-id $pane_bottom --right)
-            set -a pane_ids $pane_stella
-
-            if test $num_panes -ge 4
-                # Split again: Vivian | Stella | Tiffany
-                set -l pane_tiffany (wezterm cli split-pane --pane-id $pane_stella --right)
-                set -a pane_ids $pane_tiffany
-            end
-        end
-    else
-        # Only 1 reviewer (Evelyn) - kill the unused bottom pane
-        wezterm cli kill-pane --pane-id $pane_bottom
+    # For fewer panes, kill unused ones
+    if test $num_panes -lt 3
+        wezterm cli kill-pane --pane-id $pane_bottom_right
     end
+    if test $num_panes -lt 2
+        wezterm cli kill-pane --pane-id $pane_bottom_left
+    end
+
+    # Trim pane_ids to match num_panes
+    set pane_ids $pane_ids[1..$num_panes]
 
     # --- main loop ---
     set -l round 1

@@ -10,7 +10,7 @@ The current review workflow is manual and sequential:
 
 1. Write code with Cursor CLI (`c` / `cursor-agent --yolo`)
 2. Run `review` — spawns 4 wezterm panes, each running a review agent (Evelyn, Vivian, Stella, Tiffany) against the current PR
-3. Wait for all 4 reviewers to finish
+3. Wait for all 3 reviewers to finish
 4. Manually read each review, decide which findings are real
 5. Ask a new agent to fix the real findings
 6. Re-run `review` to verify fixes
@@ -77,7 +77,6 @@ Each agent writes its output to a temp file so downstream agents can read it:
     review_evelyn.md
     review_vivian.md
     review_stella.md
-    review_tiffany.md
     triage.md
   round_2/
     ...
@@ -87,27 +86,28 @@ Each round gets its own subdirectory so previous rounds are preserved for debugg
 
 ### Wezterm pane layout
 
-Fixed 5-pane layout for the entire session:
+Fixed 4-quadrant layout for the entire session:
 
 ```
 ┌─────────────────────┬─────────────────────┐
 │   ORCHESTRATOR      │      Evelyn         │
-├───────────┬─────────┴───────┬─────────────┤
-│ Vivian    │    Stella       │   Tiffany   │
-└───────────┴─────────────────┴─────────────┘
+├─────────────────────┼─────────────────────┤
+│     Vivian          │      Stella         │
+└─────────────────────┴─────────────────────┘
 ```
 
-- **Top row:** 2 panes — orchestrator (left) polls and prints status, Evelyn (right) is the first reviewer and later runs triage/fix.
-- **Bottom row:** 3 panes — Vivian, Stella, Tiffany. The remaining reviewers run in parallel.
+- **Top-left:** Orchestrator — polls for completion, prints status.
+- **Top-right:** Evelyn — first reviewer, later runs triage/fix.
+- **Bottom-left:** Vivian — second reviewer.
+- **Bottom-right:** Stella — third reviewer.
 
-All agents run in full TUI mode (not `--print`) so you can watch their progress live. The orchestrator pane only shows status text and polls for completion.
+All agents run in full TUI mode (not `--print`) so you can watch their progress live.
 
-Split order:
+Split order (same pattern as `wez_quadrants.example.fish`):
 1. pane_0 = `$WEZTERM_PANE` (orchestrator, top-left)
-2. pane_evelyn = `split-pane --pane-id $pane_0 --right` (top-right)
-3. pane_vivian = `split-pane --pane-id $pane_0 --bottom` (bottom-left)
-4. pane_stella = `split-pane --pane-id $pane_vivian --right` (bottom-center)
-5. pane_tiffany = `split-pane --pane-id $pane_stella --right` (bottom-right)
+2. pane_bottom_left = `split-pane --pane-id $pane_0 --bottom` (Vivian)
+3. pane_bottom_right = `split-pane --pane-id $pane_bottom_left --right` (Stella)
+4. pane_top_right = `split-pane --pane-id $pane_0 --right` (Evelyn)
 
 All panes persist across rounds — review panes are reused each cycle. After reviewers finish, triage and fix run in Evelyn's pane (top-right).
 
@@ -132,14 +132,13 @@ Verified: this correctly returns true when an agent is running and false when it
 The triage agent runs in Evelyn's pane (top-right) after reviewers finish. It reads the review output files itself (has `--yolo` tool access) rather than receiving them inline — review outputs can be very long.
 
 ```
-You are a senior code-review triage agent. Read the 4 review output files at:
+You are a senior code-review triage agent. Read the 3 review output files at:
   {round_dir}/review_evelyn.md
   {round_dir}/review_vivian.md
   {round_dir}/review_stella.md
-  {round_dir}/review_tiffany.md
 
 Your job:
-- Read all 4 reviews
+- Read all 3 reviews
 - Filter out nitpicks, style-only comments, and false positives
 - Output ONLY the issues that are real bugs, logic errors, security
   vulnerabilities, or missing error handling
@@ -168,7 +167,7 @@ Default cap of 3 iterations to prevent infinite loops. Configurable via argument
 review_auto [options]
   --max-rounds N     Max review/fix cycles (default: 3)
   --provider NAME    openai | anthropic (default: anthropic)
-  --panes N          Number of review panes 1-4 (default: 4)
+  --panes N          Number of review panes 1-3 (default: 3)
   --dry-run          Run reviews + triage only, skip fix step
 ```
 
@@ -219,7 +218,7 @@ Each agent writes its output via Write tool and touches a sentinel file via Shel
 
 ### Cleanup
 
-When the loop exits (clean PR or max rounds hit), the 4 review panes are left open so the user can scroll through the last round's output. The orchestrator pane prints a summary (rounds completed, final status) and returns control to the shell.
+When the loop exits (clean PR or max rounds hit), the 3 review panes are left open so the user can scroll through the last round's output. The orchestrator pane prints a summary (rounds completed, final status) and returns control to the shell.
 
 ## Open questions
 
