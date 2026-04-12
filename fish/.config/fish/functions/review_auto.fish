@@ -96,18 +96,30 @@ function review_auto
     # ├─────────────────────┼─────────────────────┤
     # │     Vivian          │      Stella         │
     # └─────────────────────┴─────────────────────┘
+    # Split order matters: bottom first, then split each row
     set -l pane_0 $WEZTERM_PANE
     set -l pane_ids
 
-    # Create only the panes we need
-    if test $num_panes -ge 1
-        set -a pane_ids (wezterm cli split-pane --pane-id $pane_0 --right)
+    # Step 1: split horizontally to create bottom row
+    set -l pane_bottom (wezterm cli split-pane --pane-id $pane_0 --bottom)
+    # Step 2: split top row to create Evelyn (top-right)
+    set -l pane_evelyn (wezterm cli split-pane --pane-id $pane_0 --right)
+    # Step 3: split bottom row to create Stella (bottom-right)
+    set -l pane_stella (wezterm cli split-pane --pane-id $pane_bottom --right)
+    # pane_bottom is now Vivian (bottom-left)
+    set -l pane_vivian $pane_bottom
+
+    # pane_ids order: Evelyn, Vivian, Stella
+    set pane_ids $pane_evelyn $pane_vivian $pane_stella
+
+    # Kill unused panes if num_panes < 3
+    if test $num_panes -lt 3
+        wezterm cli kill-pane --pane-id $pane_stella 2>/dev/null
+        set pane_ids $pane_evelyn $pane_vivian
     end
-    if test $num_panes -ge 2
-        set -a pane_ids (wezterm cli split-pane --pane-id $pane_0 --bottom)
-    end
-    if test $num_panes -ge 3
-        set -a pane_ids (wezterm cli split-pane --pane-id $pane_ids[2] --right)
+    if test $num_panes -lt 2
+        wezterm cli kill-pane --pane-id $pane_vivian 2>/dev/null
+        set pane_ids $pane_evelyn
     end
 
     # --- main loop ---
