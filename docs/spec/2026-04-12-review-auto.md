@@ -166,7 +166,7 @@ review_auto [options]
 | Output format | `--print` to file via tee | Gives visible terminal output AND machine-readable files for the next agent |
 | Triage sentinel | `NO_ISSUES_FOUND` string | Simple, grep-able exit condition |
 | Fix agent mode | `--yolo` (full write access) | Needs to edit files and commit |
-| Review agents | `--print` read-only | Same as existing review.fish, no writes needed |
+| Review agents | `--yolo --print` | Needs tool access (gh, shell) for PR inspection via review skill |
 | Loop cap | 3 rounds | Prevents runaway; most real issues resolve in 1-2 rounds |
 
 ## Feasibility findings
