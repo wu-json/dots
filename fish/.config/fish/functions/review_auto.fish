@@ -74,8 +74,8 @@ function review_auto
     set -l white (set_color white)
     
     echo ""
-    echo "  $bold review_auto$reset  $dim·$reset  PR #$cyan$pr_number$reset"
-    echo "  $dim$provider · $num_panes reviewers · $max_rounds rounds max$reset"
+    echo "   $bold review_auto$reset  $dim·$reset  PR #$cyan$pr_number$reset"
+    echo "   $dim$provider · $num_panes reviewers · $max_rounds rounds max$reset"
     echo ""
 
     # --- split panes: 4 quadrants (orchestrator + 3 reviewers) ---
@@ -114,9 +114,9 @@ function review_auto
         mkdir -p $round_dir
 
         echo ""
-        echo "  $bold round $round$reset$dim / $max_rounds$reset"
+        echo "   $bold round $round$reset$dim / $max_rounds$reset"
         echo ""
-        echo "  $white●$reset  review"
+        echo "   $white●$reset  review"
 
         # clean sentinel files and kill any lingering agents from previous round
         for j in (seq $num_panes)
@@ -155,7 +155,7 @@ function review_auto
                 end
             end
             
-            printf "\r  $dim$spinner_frames[$frame_idx]$reset  $status_line"
+            printf "\r   $dim$spinner_frames[$frame_idx]$reset  $status_line"
             
             if test $done_count -ge $num_panes
                 break
@@ -166,7 +166,7 @@ function review_auto
         end
         echo ""
         echo ""
-        echo "  $white●$reset  triage"
+        echo "   $white●$reset  triage"
 
         set -l review_files
         for j in (seq $num_panes)
@@ -193,7 +193,7 @@ Your job:
 
         set frame_idx 1
         while not test -f $triage_sentinel
-            printf "\r  $dim$spinner_frames[$frame_idx]$reset  triaging..."
+            printf "\r   $dim$spinner_frames[$frame_idx]$reset  triaging..."
             set frame_idx (math "$frame_idx % 10 + 1")
             sleep 0.05
         end
@@ -202,21 +202,21 @@ Your job:
         # check triage result
         if grep -q "NO_ISSUES_FOUND" $round_dir/triage.md
             echo ""
-            echo "  $green●$reset  $bold clean$reset $dim— no issues found$reset"
+            echo "   $green●$reset  $bold clean$reset $dim— no issues found$reset"
             echo ""
             return 0
         end
 
         if test "$dry_run" = true
             echo ""
-            echo "  $yellow●$reset  $bold dry run$reset $dim— issues found, skipping fix$reset"
+            echo "   $yellow●$reset  $bold dry run$reset $dim— issues found, skipping fix$reset"
             echo ""
             return 0
         end
 
         # --- fix phase (runs in Evelyn's pane) ---
         echo ""
-        echo "  $white●$reset  fix"
+        echo "   $white●$reset  fix"
 
         set -l fix_sentinel "$round_dir/.done_fix"
         set -l fix_prompt "You are a senior engineer. Read the triaged code-review issues at $round_dir/triage.md using the Read tool. Fix every issue listed. Do not fix anything not listed. After fixing, commit your changes with a clear message referencing what was fixed. When completely done, run: touch $fix_sentinel"
@@ -226,7 +226,7 @@ Your job:
 
         set frame_idx 1
         while not test -f $fix_sentinel
-            printf "\r  $dim$spinner_frames[$frame_idx]$reset  fixing..."
+            printf "\r   $dim$spinner_frames[$frame_idx]$reset  fixing..."
             set frame_idx (math "$frame_idx % 10 + 1")
             sleep 0.05
         end
@@ -236,7 +236,7 @@ Your job:
     end
 
     echo ""
-    echo "  $red●$reset  $bold max rounds$reset $dim— review manually$reset"
+    echo "   $red●$reset  $bold max rounds$reset $dim— review manually$reset"
     echo ""
     return 1
 end
