@@ -373,12 +373,12 @@ function review_auto
             set -l mins (math "floor($elapsed / 60)")
             set -l secs (math "$elapsed % 60")
             set -l time_str (printf "%d:%02d" $mins $secs)
-            printf "\r %s%s%s  Fix  %s%s%s" $dim $spinner_frames[$frame_idx] $reset $dim $time_str $reset
+            printf "\r %s%s%s  Address  %s%s%s" $dim $spinner_frames[$frame_idx] $reset $dim $time_str $reset
 
             set -l phase_elapsed (math (date +%s) - $fix_start)
             if test $phase_elapsed -ge $phase_timeout
                 printf "\r                                                           \r"
-                echo " "(set_color red)"✗"(set_color normal)"  Fix phase timed out after $phase_timeout seconds in round $round"
+                echo " "(set_color red)"✗"(set_color normal)"  Address phase timed out after $phase_timeout seconds in round $round"
                 wezterm cli kill-pane --pane-id $work_pane &>/dev/null
                 return 1
             end
@@ -391,7 +391,7 @@ function review_auto
         set -l secs (math "$elapsed % 60")
         set -l time_str (printf "%d:%02d" $mins $secs)
         printf "\r                                                           \r"
-        echo " "(set_color green)"✔"(set_color normal)"  Fix  "(set_color brblack)"$time_str"(set_color normal)
+        echo " "(set_color green)"✔"(set_color normal)"  Address  "(set_color brblack)"$time_str"(set_color normal)
 
         # kill work pane before next round
         wezterm cli kill-pane --pane-id $work_pane &>/dev/null
