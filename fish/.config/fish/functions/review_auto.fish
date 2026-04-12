@@ -191,14 +191,16 @@ function review_auto
         set -l mins (math "floor($elapsed / 60)")
         set -l secs (math "$elapsed % 60")
         set -l time_str (printf "%d:%02d" $mins $secs)
-        printf "\r                                                           \r"
-        echo " "(set_color white)"●"(set_color normal)"  review  $status_line"(set_color brblack)"$time_str"(set_color normal)
 
-        # kill reviewer panes and create fresh pane for triage/fix
+        # kill reviewer panes and create fresh work pane before printing final status
+        # (pane resize happens here, before any output)
         for pane in $pane_ids
             wezterm cli kill-pane --pane-id $pane &>/dev/null
         end
         set -l work_pane (wezterm cli split-pane --pane-id $pane_0 --right)
+
+        printf "\r                                                           \r"
+        echo " "(set_color white)"●"(set_color normal)"  review  $status_line"(set_color brblack)"$time_str"(set_color normal)
 
         # --- triage phase ---
         set -l review_files
