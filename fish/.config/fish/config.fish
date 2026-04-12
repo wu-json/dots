@@ -35,7 +35,7 @@ alias o="opencode"
 alias cx="codex"
 
 # Claude Code
-alias c="claude --dangerously-skip-permissions"
+alias c="FORCE_COLOR=0 claude --dangerously-skip-permissions"
 alias prdoc="claude --dangerously-skip-permissions --model gpt-5.4-high-fast /pr"
 
 # Nvim
