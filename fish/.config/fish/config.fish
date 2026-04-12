@@ -13,7 +13,7 @@ end
 
 # Brew
 # After upgrades, clear cursor-cli quarantine on macOS (native N-API load). https://forum.cursor.com/t/cursor-agent-merkle-tree-napi-darwin-arm64-node-not-opened/155056
-function pour
+function b
     brew update && brew upgrade
     set -l _cursor_cli_caskroom "$(brew --prefix 2>/dev/null)/Caskroom/cursor-cli"
     if test (uname) = Darwin && test -d "$_cursor_cli_caskroom"
