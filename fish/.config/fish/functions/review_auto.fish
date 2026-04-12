@@ -155,6 +155,7 @@ function review_auto
             set -l prompt "$base_prompts[$j] IMPORTANT: When done, write your complete review to $outfile using the Write tool. Then run this shell command: touch $sentinel"
             set -l cmd "$review_cmd \"$prompt\""
             printf '%s\r' "$cmd" | wezterm cli send-text --no-paste --pane-id $pane_ids[$j]
+            sleep 0.5 # stagger to avoid cli-config.json race condition
         end
 
         # poll for all reviewers to finish with animated spinner
