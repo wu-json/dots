@@ -147,13 +147,15 @@ function review_auto
             rm -f $round_dir/.done_$name
         end
 
-        # dispatch review agents to panes
+        # dispatch review agents to panes (prompts written to temp files to avoid shell metacharacter issues)
         for j in (seq $num_panes)
             set -l name (string lower $names[$j])
             set -l outfile "$round_dir/review_$name.md"
             set -l sentinel "$round_dir/.done_$name"
             set -l prompt "$base_prompts[$j] IMPORTANT: When done, write your complete review to $outfile using the Write tool. Then run this shell command: touch $sentinel"
-            set -l cmd "$review_cmd \"$prompt\""
+            set -l prompt_file "$round_dir/prompt_review_$name.txt"
+            printf '%s' "$prompt" > $prompt_file
+            set -l cmd "$review_cmd \"\$(cat $prompt_file)\""
             printf '%s\r' "$cmd" | wezterm cli send-text --no-paste --pane-id $pane_ids[$j]
             sleep 0.5 # stagger to avoid cli-config.json race condition
         end
@@ -214,7 +216,9 @@ function review_auto
         set -l triage_sentinel "$round_dir/.done_triage"
         set -l triage_prompt "You are a code-review triage agent. Read the review output files at: $file_list. Read all review files using the Read tool. Filter out nitpicks, style-only comments, and false positives. Identify ONLY real bugs, logic errors, security vulnerabilities, or missing error handling. If a review file is empty or contains an error, skip it. Write your verdict to $round_dir/triage.md. If there are NO real issues: write ONLY the text NO_ISSUES_FOUND (nothing else, just that one line). If there ARE real issues: write each issue with file path, line number, severity (critical/high/medium), and description. Do NOT include the string NO_ISSUES_FOUND anywhere. When completely done, run this shell command: touch $triage_sentinel"
 
-        set -l triage_cmd "cursor-agent --yolo --model $triage_model \"$triage_prompt\""
+        set -l triage_prompt_file "$round_dir/prompt_triage.txt"
+        printf '%s' "$triage_prompt" > $triage_prompt_file
+        set -l triage_cmd "cursor-agent --yolo --model $triage_model \"\$(cat $triage_prompt_file)\""
         printf '%s\r' "$triage_cmd" | wezterm cli send-text --no-paste --pane-id $work_pane
 
         set frame_idx 1
@@ -240,8 +244,8 @@ function review_auto
         printf "\r                                                           \r"
         echo " "(set_color green)"✔"(set_color normal)"  Triage  "(set_color brblack)"$time_str"(set_color normal)
 
-        # check triage result - must be on its own line to avoid false matches
-        if grep -qx NO_ISSUES_FOUND $round_dir/triage.md 2>/dev/null
+        # check triage result - trim whitespace and match robustly
+        if string match -qr '^\s*NO_ISSUES_FOUND\s*$' < $round_dir/triage.md 2>/dev/null
             wezterm cli kill-pane --pane-id $work_pane &>/dev/null
             echo " "(set_color green)"●"(set_color normal)"  "(set_color --bold)"clean"(set_color normal)" "(set_color brblack)"— no issues found"(set_color normal)
             echo ""
@@ -260,7 +264,9 @@ function review_auto
         set -l fix_sentinel "$round_dir/.done_fix"
         set -l fix_prompt "Read the triaged code-review issues at $round_dir/triage.md using the Read tool. Fix every issue listed. Do not fix anything not listed. After fixing, commit your changes with a clear message referencing what was fixed, then push to the remote branch with git push. Then use the /pr skill to update the PR title and description. When completely done, run this shell command: touch $fix_sentinel"
 
-        set -l fix_cmd "cursor-agent --yolo --model $fix_model \"$fix_prompt\""
+        set -l fix_prompt_file "$round_dir/prompt_fix.txt"
+        printf '%s' "$fix_prompt" > $fix_prompt_file
+        set -l fix_cmd "cursor-agent --yolo --model $fix_model \"\$(cat $fix_prompt_file)\""
         printf '%s\r' "$fix_cmd" | wezterm cli send-text --no-paste --pane-id $work_pane
 
         set frame_idx 1
