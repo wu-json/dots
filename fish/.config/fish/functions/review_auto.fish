@@ -231,8 +231,8 @@ function review_auto
         end
 
         # poll for all reviewers to finish
-        set -l dot_frames "." ".." "..." "..."
-        set -l dot_colors green green green white
+        set -l dot_frames "." ".." "..."
+        set -l dot_colors green white green
         set -l frame_idx 1
         while true
             set -l done_count 0
@@ -268,8 +268,8 @@ function review_auto
                 return 1
             end
 
-            set frame_idx (math "$frame_idx % 4 + 1")
-            sleep 0.3
+            set frame_idx (math "$frame_idx % 3 + 1")
+            sleep 0.15
         end
         set -l elapsed (math (date +%s) - $round_start)
         set -l mins (math "floor($elapsed / 60)")
@@ -324,8 +324,8 @@ function review_auto
                 return 1
             end
 
-            set frame_idx (math "$frame_idx % 4 + 1")
-            sleep 0.3
+            set frame_idx (math "$frame_idx % 3 + 1")
+            sleep 0.15
         end
         set -l elapsed (math (date +%s) - $round_start)
         set -l mins (math "floor($elapsed / 60)")
@@ -391,8 +391,8 @@ function review_auto
                 return 1
             end
 
-            set frame_idx (math "$frame_idx % 4 + 1")
-            sleep 0.3
+            set frame_idx (math "$frame_idx % 3 + 1")
+            sleep 0.15
         end
         set -l elapsed (math (date +%s) - $round_start)
         set -l mins (math "floor($elapsed / 60)")
