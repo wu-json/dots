@@ -163,7 +163,7 @@ function review_auto
                 end
             end
             
-            printf "\r     $dim$spinner_frames[$frame_idx]$reset  $status_line"
+            printf "\r  $dim$spinner_frames[$frame_idx]$reset  $status_line"
             
             if test $done_count -ge $num_panes
                 break
@@ -204,7 +204,7 @@ Your job:
 
         set frame_idx 1
         while not test -f $triage_sentinel
-            printf "\r     $dim$spinner_frames[$frame_idx]$reset  triaging..."
+            printf "\r  $dim$spinner_frames[$frame_idx]$reset  triaging..."
             set frame_idx (math "$frame_idx % 10 + 1")
             sleep 0.05
         end
@@ -213,25 +213,15 @@ Your job:
 
         # check triage result
         if grep -q "NO_ISSUES_FOUND" $round_dir/triage.md
-            echo "$dim───────────────────────────────────────────────────$reset"
             echo ""
-            echo "  $green●$reset  $bold clean$reset"
-            echo ""
-            echo "     $dim no issues found in round $round$reset"
-            echo ""
-            echo "$dim───────────────────────────────────────────────────$reset"
+            echo "  $green●$reset  $bold clean$reset $dim— no issues found$reset"
             echo ""
             return 0
         end
 
         if test "$dry_run" = true
-            echo "$dim───────────────────────────────────────────────────$reset"
             echo ""
-            echo "  $yellow●$reset  $bold dry run$reset"
-            echo ""
-            echo "     $dim issues found, skipping fix$reset"
-            echo ""
-            echo "$dim───────────────────────────────────────────────────$reset"
+            echo "  $yellow●$reset  $bold dry run$reset $dim— issues found, skipping fix$reset"
             echo ""
             return 0
         end
@@ -248,7 +238,7 @@ Your job:
 
         set frame_idx 1
         while not test -f $fix_sentinel
-            printf "\r     $dim$spinner_frames[$frame_idx]$reset  fixing..."
+            printf "\r  $dim$spinner_frames[$frame_idx]$reset  fixing..."
             set frame_idx (math "$frame_idx % 10 + 1")
             sleep 0.05
         end
@@ -258,13 +248,8 @@ Your job:
         set round (math $round + 1)
     end
 
-    echo "$dim───────────────────────────────────────────────────$reset"
     echo ""
-    echo "  $red●$reset  $bold max rounds$reset"
-    echo ""
-    echo "     $dim completed $max_rounds rounds, review manually$reset"
-    echo ""
-    echo "$dim───────────────────────────────────────────────────$reset"
+    echo "  $red●$reset  $bold max rounds$reset $dim— review manually$reset"
     echo ""
     return 1
 end
