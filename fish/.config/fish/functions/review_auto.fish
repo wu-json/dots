@@ -67,9 +67,10 @@ function review_auto
         return 1
     end
 
-    set -l pr_json (gh pr view --json number,url 2>/dev/null)
+    set -l pr_json (gh pr view --json number,url,title 2>/dev/null)
     set -l pr_number (echo $pr_json | string match -r '"number":(\d+)' | tail -1)
     set -l pr_url (echo $pr_json | string match -r '"url":"([^"]+)"' | tail -1)
+    set -l pr_title (echo $pr_json | string match -r '"title":"([^"]+)"' | tail -1)
     if test -z "$pr_number"
         echo "No PR found for current branch"
         return 1
@@ -154,7 +155,11 @@ function review_auto
 
     # --- header (printed once) ---
     printf "\n\n"
-    echo " "(set_color --bold)"review_auto"(set_color normal)" "(set_color brblack)"·"(set_color normal)" PR #"(set_color cyan)$pr_number(set_color normal)
+    set -l pr_label "PR #$pr_number"
+    if test -n "$pr_title"
+        set pr_label $pr_title
+    end
+    echo " "(set_color --bold)"review_auto"(set_color normal)" "(set_color brblack)"·"(set_color normal)" "\e]8\;\;$pr_url\e\\(set_color cyan)$pr_label(set_color normal)\e]8\;\;\e\\
     echo " "(set_color brblack)"$provider · $num_panes reviewers"(set_color normal)
     echo ""
 
