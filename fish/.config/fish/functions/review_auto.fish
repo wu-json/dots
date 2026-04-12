@@ -116,7 +116,7 @@ function review_auto
         mkdir -p $round_dir
 
         echo ""
-        echo "   "(set_color --bold)"round $round"(set_color normal)(set_color brblack)" / $max_rounds"(set_color normal)
+        echo "   "(set_color brblack)"round $round / $max_rounds"(set_color normal)
         echo ""
         echo "   "(set_color white)"●"(set_color normal)"  review"
 
