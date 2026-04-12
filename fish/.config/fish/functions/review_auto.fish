@@ -82,10 +82,6 @@ function review_auto
     set -l reset (set_color normal)
     set -l green (set_color green)
 
-    printf "\n"
-    set -l header1 "   "(set_color --bold)"review_auto"(set_color normal)"  "(set_color brblack)"·"(set_color normal)"  PR #"(set_color cyan)$pr_number(set_color normal)
-    echo $header1
-
     # --- split panes: 4 quadrants (orchestrator + 3 reviewers) ---
     # Layout:
     # ┌─────────────────────┬─────────────────────┐
@@ -125,6 +121,8 @@ function review_auto
         set -l round_dir $session_dir/round_$round
         mkdir -p $round_dir
 
+        printf "\n"
+        echo "   "(set_color --bold)"review_auto"(set_color normal)"  "(set_color brblack)"·"(set_color normal)"  PR #"(set_color cyan)$pr_number(set_color normal)
         echo "   "(set_color brblack)"$provider · $num_panes reviewers · round $round/$max_rounds"(set_color normal)
         echo ""
         set -l round_start (date +%s)
