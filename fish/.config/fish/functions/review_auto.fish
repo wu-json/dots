@@ -67,7 +67,9 @@ function review_auto
         return 1
     end
 
-    set -l pr_number (gh pr view --json number -q .number 2>/dev/null)
+    set -l pr_json (gh pr view --json number,url 2>/dev/null)
+    set -l pr_number (echo $pr_json | string match -r '"number":(\d+)' | tail -1)
+    set -l pr_url (echo $pr_json | string match -r '"url":"([^"]+)"' | tail -1)
     if test -z "$pr_number"
         echo "No PR found for current branch"
         return 1
@@ -330,12 +332,16 @@ function review_auto
             wezterm cli kill-pane --pane-id $work_pane &>/dev/null
             echo " "(set_color green)"●"(set_color normal)"  "(set_color --bold)"clean"(set_color normal)" "(set_color brblack)"— no issues found"(set_color normal)
             echo ""
+            echo " "(set_color brblack)$pr_url(set_color normal)
+            echo ""
             return 0
         end
 
         if test "$dry_run" = true
             wezterm cli kill-pane --pane-id $work_pane &>/dev/null
             echo " "(set_color yellow)"●"(set_color normal)"  "(set_color --bold)"dry run"(set_color normal)" "(set_color brblack)"— issues found, skipping fix"(set_color normal)
+            echo ""
+            echo " "(set_color brblack)$pr_url(set_color normal)
             echo ""
             return 0
         end
@@ -385,6 +391,8 @@ function review_auto
 
     echo ""
     echo " "(set_color red)"●"(set_color normal)"  "(set_color --bold)"max rounds"(set_color normal)" "(set_color brblack)"— review manually"(set_color normal)
+    echo ""
+    echo " "(set_color brblack)$pr_url(set_color normal)
     echo ""
     return 1
 end
