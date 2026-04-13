@@ -54,25 +54,6 @@ return {
     },
   },
   {
-    "vimwiki/vimwiki",
-    keys = {
-      { "<leader>ww", desc = "Open vimwiki index" },
-      { "<leader>wd", "<cmd>VimwikiMakeDiaryNote<cr>", desc = "Open vimwiki diary" },
-      { "<leader>wi", "<cmd>VimwikiDiaryIndex<cr>", desc = "Open vimwiki diary index" },
-    },
-    init = function()
-      vim.g.vimwiki_list = {
-        {
-          path = "~/vimwiki/",
-          syntax = "markdown",
-          ext = ".md",
-          auto_diary_index = 1,
-        },
-      }
-      vim.g.vimwiki_global_ext = 0 -- Don't hijack all .md files
-    end,
-  },
-  {
     "sotte/presenting.nvim",
     opts = {
       -- fill in your options here
