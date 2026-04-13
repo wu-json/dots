@@ -6,11 +6,11 @@ This is where I tweak config files till 4am like a goblin. It's pretty cozy in h
 
 ## My Cursed Tools
 
-- **[claude code](https://code.claude.com/)** - This is going to take my job
-- **[cursor cli](https://cursor.com/)** - headless job thief
+- **[claude](https://code.claude.com/)** - this is going to take my job
+- **[cursor](https://cursor.com/)** - this is also going to take my job 
 - **[fish](https://fishshell.com/)** - I eat the fish
-- **[homebrew](https://brew.sh/)** - Cyber alcoholic
-- **[neovim](https://neovim.io/)** - Female repellent
+- **[homebrew](https://brew.sh/)** - cyber alcoholic
+- **[neovim](https://neovim.io/)** - female repellent
 - **[wezterm](https://wezterm.org/index.html)** - lua lua lua
 - **[stow](https://www.gnu.org/software/stow/)** - link those symmies
 
