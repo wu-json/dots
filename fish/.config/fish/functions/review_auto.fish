@@ -339,7 +339,7 @@ function review_auto
         set -l _triage_content (string trim (cat $round_dir/triage.md 2>/dev/null))
         if test "$_triage_content" = NO_ISSUES_FOUND
             wezterm cli kill-pane --pane-id $work_pane &>/dev/null
-            echo " "(set_color green)"●"(set_color normal)"  "(set_color --bold)"clean"(set_color normal)" "(set_color brblack)"— no issues found"(set_color normal)
+            echo " "(set_color green)"✔"(set_color normal)" No issues found"
             set -l total_dur (math (date +%s) - $session_start)
             set -l total_dur_m (math "floor($total_dur / 60)")
             set -l total_dur_s (math "$total_dur % 60")
@@ -351,7 +351,7 @@ function review_auto
 
         if test "$dry_run" = true
             wezterm cli kill-pane --pane-id $work_pane &>/dev/null
-            echo " "(set_color yellow)"●"(set_color normal)"  "(set_color --bold)"dry run"(set_color normal)" "(set_color brblack)"— issues found, skipping fix"(set_color normal)
+            echo " "(set_color yellow)"⚠"(set_color normal)" Issues found "(set_color brblack)"(dry run)"(set_color normal)
             set -l total_dur (math (date +%s) - $session_start)
             set -l total_dur_m (math "floor($total_dur / 60)")
             set -l total_dur_s (math "$total_dur % 60")
@@ -402,7 +402,7 @@ function review_auto
     end
 
     echo ""
-    echo " "(set_color red)"●"(set_color normal)"  "(set_color --bold)"max rounds"(set_color normal)" "(set_color brblack)"— review manually"(set_color normal)
+    echo " "(set_color red)"✗"(set_color normal)" Max rounds reached"
     set -l total_dur (math (date +%s) - $session_start)
     set -l total_dur_m (math "floor($total_dur / 60)")
     set -l total_dur_s (math "$total_dur % 60")
