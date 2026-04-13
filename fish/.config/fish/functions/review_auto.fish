@@ -334,6 +334,13 @@ function review_auto
         printf "\r                                                           \r"
         echo " "(set_color green)"✔"(set_color normal)" Triaged"
 
+        # guard: triage.md must exist and be non-empty before proceeding
+        if not test -s $iter_dir/triage.md
+            echo " "(set_color red)"✗"(set_color normal)"  Triage produced empty or missing triage.md in iteration $iter"
+            rm -rf $session_dir
+            return 1
+        end
+
         # check triage result - collapse into a single string so multi-line files
         # are compared atomically instead of per-line via fish list semantics
         set -l _triage_content (cat $iter_dir/triage.md 2>/dev/null | string collect | string trim)
@@ -362,7 +369,7 @@ function review_auto
         end
 
         # --- fix phase ---
-        set work_pane (wezterm cli split-pane --pane-id $pane_0 --right)
+        set -l work_pane (wezterm cli split-pane --pane-id $pane_0 --right)
         if test -z "$work_pane"
             echo "Failed to create work pane for fix phase in iteration $iter"
             rm -rf $session_dir
