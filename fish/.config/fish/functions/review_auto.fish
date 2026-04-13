@@ -168,7 +168,7 @@ function review_auto
             set pr_label $pr_title
         end
     end
-    echo " "(set_color --bold)"review_auto"(set_color normal)" "(set_color brblack)"·"(set_color normal)" "\e]8\;\;$pr_url\e\\(set_color cyan)$pr_label(set_color normal)\e]8\;\;\e\\
+    echo " "(set_color --bold)"review_auto"(set_color normal)" "(set_color brblack)"·"(set_color normal)" "\e]8\;\;$pr_url\e\\(set_color white)$pr_label(set_color normal)\e]8\;\;\e\\
     echo " "(set_color brblack)"$provider · $num_panes reviewers"(set_color normal)
     echo ""
 
