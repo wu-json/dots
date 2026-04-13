@@ -67,10 +67,9 @@ function review_auto
         return 1
     end
 
-    set -l pr_json (gh pr view --json number,url,title 2>/dev/null)
-    set -l pr_number (echo $pr_json | string match -r '"number":(\d+)' | tail -1)
-    set -l pr_url (echo $pr_json | string match -r '"url":"([^"]+)"' | tail -1)
-    set -l pr_title (echo $pr_json | string match -r '"title":"([^"]+)"' | tail -1)
+    set -l pr_number (gh pr view --json number --jq '.number' 2>/dev/null)
+    set -l pr_url (gh pr view --json url --jq '.url' 2>/dev/null)
+    set -l pr_title (gh pr view --json title --jq '.title' 2>/dev/null)
     if test -z "$pr_number"
         echo "No PR found for current branch"
         return 1
@@ -186,12 +185,14 @@ function review_auto
             set -l pb (wezterm cli split-pane --pane-id $pane_0 --bottom)
             if test -z "$pb"
                 echo "Failed to recreate bottom pane in round $round"
+                rm -rf $session_dir
                 return 1
             end
             set -l pe (wezterm cli split-pane --pane-id $pane_0 --right)
             if test -z "$pe"
                 echo "Failed to recreate Evelyn pane in round $round"
                 wezterm cli kill-pane --pane-id $pb &>/dev/null
+                rm -rf $session_dir
                 return 1
             end
             set -l ps (wezterm cli split-pane --pane-id $pb --right)
@@ -199,6 +200,7 @@ function review_auto
                 echo "Failed to recreate Stella pane in round $round"
                 wezterm cli kill-pane --pane-id $pe &>/dev/null
                 wezterm cli kill-pane --pane-id $pb &>/dev/null
+                rm -rf $session_dir
                 return 1
             end
             set pane_ids $pe $pb $ps
@@ -266,6 +268,7 @@ function review_auto
                 for pane in $pane_ids
                     wezterm cli kill-pane --pane-id $pane &>/dev/null
                 end
+                rm -rf $session_dir
                 return 1
             end
 
@@ -280,6 +283,7 @@ function review_auto
         set -l work_pane (wezterm cli split-pane --pane-id $pane_0 --right)
         if test -z "$work_pane"
             echo "Failed to create work pane after review phase in round $round"
+            rm -rf $session_dir
             return 1
         end
 
@@ -317,6 +321,7 @@ function review_auto
                 printf "\r                                                           \r"
                 echo " "(set_color red)"✗"(set_color normal)"  Triage phase timed out after $phase_timeout seconds in round $round"
                 wezterm cli kill-pane --pane-id $work_pane &>/dev/null
+                rm -rf $session_dir
                 return 1
             end
 
@@ -329,15 +334,16 @@ function review_auto
         set work_pane (wezterm cli split-pane --pane-id $pane_0 --right)
         if test -z "$work_pane"
             echo "Failed to create work pane after triage phase in round $round"
+            rm -rf $session_dir
             return 1
         end
 
         printf "\r                                                           \r"
         echo " "(set_color green)"✔"(set_color normal)" Triaged"
 
-        # check triage result - compare trimmed entire file to exact string
+        # check triage result - tolerate minor LLM formatting variance around the token
         set -l _triage_content (cat $round_dir/triage.md 2>/dev/null | string trim)
-        if test "$_triage_content" = NO_ISSUES_FOUND
+        if string match -qr '^\s*NO_ISSUES_FOUND\s*$' -- "$_triage_content"
             wezterm cli kill-pane --pane-id $work_pane &>/dev/null
             echo " "(set_color green)"✔"(set_color normal)" No issues found"
             set -l total_dur (math (date +%s) - $session_start)
@@ -386,6 +392,7 @@ function review_auto
                 printf "\r                                                           \r"
                 echo " "(set_color red)"✗"(set_color normal)"  Fix phase timed out after $phase_timeout seconds in round $round"
                 wezterm cli kill-pane --pane-id $work_pane &>/dev/null
+                rm -rf $session_dir
                 return 1
             end
 
@@ -409,5 +416,6 @@ function review_auto
     echo ""
     echo " "(set_color brblack)$pr_url" · "(printf "%dm %ds" $total_dur_m $total_dur_s)(set_color normal)
     echo ""
+    rm -rf $session_dir
     return 1
 end
