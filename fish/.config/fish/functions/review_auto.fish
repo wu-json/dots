@@ -326,15 +326,8 @@ function review_auto
             set frame_idx (math "$frame_idx % 3 + 1")
             sleep 0.15
         end
-        # kill triage pane and create fresh one before printing
-        # (pane resize happens here, before any output)
+        # kill triage pane before printing (pane resize happens here, before any output)
         wezterm cli kill-pane --pane-id $work_pane &>/dev/null
-        set work_pane (wezterm cli split-pane --pane-id $pane_0 --right)
-        if test -z "$work_pane"
-            echo "Failed to create work pane after triage phase in iteration $iter"
-            rm -rf $session_dir
-            return 1
-        end
 
         printf "\r                                                           \r"
         echo " "(set_color green)"✔"(set_color normal)" Triaged"
@@ -343,7 +336,6 @@ function review_auto
         # are compared atomically instead of per-line via fish list semantics
         set -l _triage_content (cat $iter_dir/triage.md 2>/dev/null | string collect | string trim)
         if test "$_triage_content" = "NO_ISSUES_FOUND"
-            wezterm cli kill-pane --pane-id $work_pane &>/dev/null
             echo " "(set_color green)"✔"(set_color normal)" No issues found"
             set -l total_dur (math (date +%s) - $session_start)
             set -l total_dur_m (math "floor($total_dur / 60)")
@@ -355,7 +347,6 @@ function review_auto
         end
 
         if test "$dry_run" = true
-            wezterm cli kill-pane --pane-id $work_pane &>/dev/null
             echo " "(set_color yellow)"⚠"(set_color normal)" Issues found "(set_color brblack)"(dry run)"(set_color normal)
             set -l total_dur (math (date +%s) - $session_start)
             set -l total_dur_m (math "floor($total_dur / 60)")
@@ -366,7 +357,13 @@ function review_auto
             return 0
         end
 
-        # --- fix phase (work pane already created above) ---
+        # --- fix phase ---
+        set work_pane (wezterm cli split-pane --pane-id $pane_0 --right)
+        if test -z "$work_pane"
+            echo "Failed to create work pane for fix phase in iteration $iter"
+            rm -rf $session_dir
+            return 1
+        end
 
         set -l fix_sentinel "$iter_dir/.done_fix"
         set -l fix_prompt "Read the triaged code-review issues at $iter_dir/triage.md using the Read tool. Fix every issue listed. Do not fix anything not listed. After fixing, commit your changes with a clear message referencing what was fixed, then push to the remote branch with git push. Then use the /pr skill to update the PR title and description. When completely done, run this shell command: touch $fix_sentinel"
