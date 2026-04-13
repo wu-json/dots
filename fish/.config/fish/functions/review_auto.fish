@@ -411,6 +411,13 @@ function review_auto
         end
         printf "\r                                                           \r"
         set -l _commit_msg (git log -1 --format='%s' 2>/dev/null)
+        set -l _fix_max (math $COLUMNS - 12)
+        if test $_fix_max -lt 20
+            set _fix_max 20
+        end
+        if test (string length "$_commit_msg") -gt $_fix_max
+            set _commit_msg (string sub -l $_fix_max "$_commit_msg")"…"
+        end
         echo " "(set_color green)"✔"(set_color normal)" Fixed "(set_color brblack)"$_commit_msg"(set_color normal)
 
         # kill work pane before next iteration
