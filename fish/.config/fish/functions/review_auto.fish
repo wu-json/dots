@@ -410,7 +410,8 @@ function review_auto
             sleep 0.15
         end
         printf "\r                                                           \r"
-        echo " "(set_color green)"✔"(set_color normal)" Fixed"
+        set -l _commit_msg (git log -1 --format='%s' 2>/dev/null)
+        echo " "(set_color green)"✔"(set_color normal)" Fixed "(set_color brblack)"$_commit_msg"(set_color normal)
 
         # kill work pane before next iteration
         wezterm cli kill-pane --pane-id $work_pane &>/dev/null
