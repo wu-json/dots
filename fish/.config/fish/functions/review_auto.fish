@@ -178,8 +178,6 @@ function review_auto
         set -l iter_dir $session_dir/iter_$iter
         mkdir -p $iter_dir
 
-        set -l iter_start (date +%s)
-
         # On iteration 2+, recreate reviewer panes (same quadrant layout as initial)
         if test $iter -gt 1
             set -l pb (wezterm cli split-pane --pane-id $pane_0 --bottom)
@@ -251,7 +249,7 @@ function review_auto
                 end
             end
 
-            set -l total_el (math (date +%s) - $iter_start)
+            set -l total_el (math (date +%s) - $session_start)
             set -l total_m (math "floor($total_el / 60)")
             set -l total_s (math "$total_el % 60")
             set -l total_ts (printf "%d:%02d" $total_m $total_s)
@@ -309,7 +307,7 @@ function review_auto
         set -l triage_start (date +%s)
         set frame_idx 1
         while not test -f $triage_sentinel
-            set -l total_el (math (date +%s) - $iter_start)
+            set -l total_el (math (date +%s) - $session_start)
             set -l total_m (math "floor($total_el / 60)")
             set -l total_s (math "$total_el % 60")
             set -l total_ts (printf "%d:%02d" $total_m $total_s)
@@ -381,7 +379,7 @@ function review_auto
         set -l fix_start (date +%s)
         set frame_idx 1
         while not test -f $fix_sentinel
-            set -l total_el (math (date +%s) - $iter_start)
+            set -l total_el (math (date +%s) - $session_start)
             set -l total_m (math "floor($total_el / 60)")
             set -l total_s (math "$total_el % 60")
             set -l total_ts (printf "%d:%02d" $total_m $total_s)
