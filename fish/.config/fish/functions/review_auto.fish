@@ -136,6 +136,7 @@ function review_auto
         echo "Failed to create Stella pane (split-pane returned empty ID)"
         wezterm cli kill-pane --pane-id $pane_evelyn &>/dev/null
         wezterm cli kill-pane --pane-id $pane_bottom &>/dev/null
+        rm -rf $session_dir
         return 1
     end
     # pane_bottom is now Vivian (bottom-left)
