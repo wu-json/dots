@@ -336,7 +336,7 @@ function review_auto
         echo " "(set_color green)"✔"(set_color normal)" Triaged"
 
         # check triage result - compare trimmed entire file to exact string
-        set -l _triage_content (string trim (cat $round_dir/triage.md 2>/dev/null))
+        set -l _triage_content (cat $round_dir/triage.md 2>/dev/null | string trim)
         if test "$_triage_content" = NO_ISSUES_FOUND
             wezterm cli kill-pane --pane-id $work_pane &>/dev/null
             echo " "(set_color green)"✔"(set_color normal)" No issues found"
