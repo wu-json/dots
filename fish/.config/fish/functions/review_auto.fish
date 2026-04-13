@@ -1,8 +1,8 @@
 function review_auto
-    # Usage: review_auto [--max-rounds N] [--provider openai|anthropic] [--panes 1-3] [--timeout SECS] [--dry-run]
+    # Usage: review_auto [--max-iterations N] [--provider openai|anthropic] [--panes 1-3] [--timeout SECS] [--dry-run]
     # Uses --yolo so agents can run shell tools (gh cli, git, etc.) for PR inspection.
     # Default: 3 reviewers (Evelyn, Vivian, Stella) in 4-quadrant layout.
-    set -l max_rounds 3
+    set -l max_iters 3
     set -l provider anthropic
     set -l num_panes 3
     set -l phase_timeout 600
@@ -12,17 +12,17 @@ function review_auto
     set -l argc (count $argv)
     while test $i -le $argc
         switch $argv[$i]
-            case --max-rounds
+            case --max-iterations
                 set i (math $i + 1)
                 if test $i -gt $argc
-                    echo "Missing value for --max-rounds"
+                    echo "Missing value for --max-iterations"
                     return 1
                 end
                 if not string match -qr '^\d+$' -- $argv[$i]; or test $argv[$i] -le 0
-                    echo "Invalid --max-rounds value: '$argv[$i]' (must be a positive integer)"
+                    echo "Invalid --max-iterations value: '$argv[$i]' (must be a positive integer)"
                     return 1
                 end
-                set max_rounds $argv[$i]
+                set max_iters $argv[$i]
             case --provider
                 set i (math $i + 1)
                 if test $i -gt $argc
@@ -56,7 +56,7 @@ function review_auto
                 set dry_run true
             case '*'
                 echo "Unknown argument: $argv[$i]"
-                echo "Usage: review_auto [--max-rounds N] [--provider openai|anthropic] [--panes 1-3] [--timeout SECS] [--dry-run]"
+                echo "Usage: review_auto [--max-iterations N] [--provider openai|anthropic] [--panes 1-3] [--timeout SECS] [--dry-run]"
                 return 1
         end
         set i (math $i + 1)
@@ -173,31 +173,31 @@ function review_auto
     echo ""
 
     # --- main loop ---
-    set -l round 1
-    while test $round -le $max_rounds
-        set -l round_dir $session_dir/round_$round
-        mkdir -p $round_dir
+    set -l iter 1
+    while test $iter -le $max_iters
+        set -l iter_dir $session_dir/iter_$iter
+        mkdir -p $iter_dir
 
-        set -l round_start (date +%s)
+        set -l iter_start (date +%s)
 
-        # On round 2+, recreate reviewer panes (same quadrant layout as initial)
-        if test $round -gt 1
+        # On iteration 2+, recreate reviewer panes (same quadrant layout as initial)
+        if test $iter -gt 1
             set -l pb (wezterm cli split-pane --pane-id $pane_0 --bottom)
             if test -z "$pb"
-                echo "Failed to recreate bottom pane in round $round"
+                echo "Failed to recreate bottom pane in iteration $iter"
                 rm -rf $session_dir
                 return 1
             end
             set -l pe (wezterm cli split-pane --pane-id $pane_0 --right)
             if test -z "$pe"
-                echo "Failed to recreate Evelyn pane in round $round"
+                echo "Failed to recreate Evelyn pane in iteration $iter"
                 wezterm cli kill-pane --pane-id $pb &>/dev/null
                 rm -rf $session_dir
                 return 1
             end
             set -l ps (wezterm cli split-pane --pane-id $pb --right)
             if test -z "$ps"
-                echo "Failed to recreate Stella pane in round $round"
+                echo "Failed to recreate Stella pane in iteration $iter"
                 wezterm cli kill-pane --pane-id $pe &>/dev/null
                 wezterm cli kill-pane --pane-id $pb &>/dev/null
                 rm -rf $session_dir
@@ -217,16 +217,16 @@ function review_auto
         # clean sentinel files
         for j in (seq $num_panes)
             set -l name (string lower $names[$j])
-            rm -f $round_dir/.done_$name
+            rm -f $iter_dir/.done_$name
         end
 
         # dispatch review agents to panes (prompts written to temp files to avoid shell metacharacter issues)
         for j in (seq $num_panes)
             set -l name (string lower $names[$j])
-            set -l outfile "$round_dir/review_$name.md"
-            set -l sentinel "$round_dir/.done_$name"
+            set -l outfile "$iter_dir/review_$name.md"
+            set -l sentinel "$iter_dir/.done_$name"
             set -l prompt "$base_prompts[$j] IMPORTANT: When done, write your complete review to $outfile using the Write tool. Then run this shell command: touch $sentinel"
-            set -l prompt_file "$round_dir/prompt_review_$name.txt"
+            set -l prompt_file "$iter_dir/prompt_review_$name.txt"
             printf '%s' "$prompt" > $prompt_file
             set -l cmd "$review_cmd \"\$(cat $prompt_file)\""
             printf '%s\r' "$cmd" | wezterm cli send-text --no-paste --pane-id $pane_ids[$j]
@@ -243,7 +243,7 @@ function review_auto
             for j in (seq $num_panes)
                 set -l name $names[$j]
                 set -l name_lower (string lower $name)
-                if test -f $round_dir/.done_$name_lower
+                if test -f $iter_dir/.done_$name_lower
                     set done_count (math $done_count + 1)
                     set status_line "$status_line$green$name$reset  "
                 else
@@ -251,12 +251,12 @@ function review_auto
                 end
             end
 
-            set -l total_el (math (date +%s) - $round_start)
+            set -l total_el (math (date +%s) - $iter_start)
             set -l total_m (math "floor($total_el / 60)")
             set -l total_s (math "$total_el % 60")
             set -l total_ts (printf "%d:%02d" $total_m $total_s)
             set -l dots (printf "%-4s" $dot_frames[$frame_idx])
-            printf "\r %s•%s Reviewing%s%s(%s/%s)%s  %s %s%s%s" (set_color $dot_colors[$frame_idx]) $reset "$dots" $dim $round $max_rounds $reset "$status_line" $dim $total_ts $reset
+            printf "\r %s•%s Reviewing%s%s(%s/%s)%s  %s %s%s%s" (set_color $dot_colors[$frame_idx]) $reset "$dots" $dim $iter $max_iters $reset "$status_line" $dim $total_ts $reset
 
             if test $done_count -ge $num_panes
                 break
@@ -264,7 +264,7 @@ function review_auto
 
             if test $total_el -ge $phase_timeout
                 printf "\r                                                           \r"
-                echo " "(set_color red)"✗"(set_color normal)"  Review phase timed out after $phase_timeout seconds in round $round"
+                echo " "(set_color red)"✗"(set_color normal)"  Review phase timed out after $phase_timeout seconds in iteration $iter"
                 for pane in $pane_ids
                     wezterm cli kill-pane --pane-id $pane &>/dev/null
                 end
@@ -282,26 +282,26 @@ function review_auto
         end
         set -l work_pane (wezterm cli split-pane --pane-id $pane_0 --right)
         if test -z "$work_pane"
-            echo "Failed to create work pane after review phase in round $round"
+            echo "Failed to create work pane after review phase in iteration $iter"
             rm -rf $session_dir
             return 1
         end
 
         printf "\r                                                           \r"
-        echo " "(set_color green)"✔"(set_color normal)" Reviewed "(set_color brblack)"($round/$max_rounds)"(set_color normal)
+        echo " "(set_color green)"✔"(set_color normal)" Reviewed"
 
         # --- triage phase ---
         set -l review_files
         for j in (seq $num_panes)
             set -l name (string lower $names[$j])
-            set -a review_files "$round_dir/review_$name.md"
+            set -a review_files "$iter_dir/review_$name.md"
         end
         set -l file_list (string join ", " $review_files)
 
-        set -l triage_sentinel "$round_dir/.done_triage"
-        set -l triage_prompt "You are a code-review triage agent. Read the review output files at: $file_list. Read all review files using the Read tool. Filter out nitpicks, style-only comments, and false positives. Identify ONLY real bugs, logic errors, security vulnerabilities, or missing error handling. If a review file is empty or contains an error, skip it. Write your verdict to $round_dir/triage.md. If there are NO real issues: write ONLY the text NO_ISSUES_FOUND (nothing else, just that one line). If there ARE real issues: write each issue with file path, line number, severity (critical/high/medium), and description. Do NOT include the string NO_ISSUES_FOUND anywhere. When completely done, run this shell command: touch $triage_sentinel"
+        set -l triage_sentinel "$iter_dir/.done_triage"
+        set -l triage_prompt "You are a code-review triage agent. Read the review output files at: $file_list. Read all review files using the Read tool. Filter out nitpicks, style-only comments, and false positives. Identify ONLY real bugs, logic errors, security vulnerabilities, or missing error handling. If a review file is empty or contains an error, skip it. Write your verdict to $iter_dir/triage.md. If there are NO real issues: write ONLY the text NO_ISSUES_FOUND (nothing else, just that one line). If there ARE real issues: write each issue with file path, line number, severity (critical/high/medium), and description. Do NOT include the string NO_ISSUES_FOUND anywhere. When completely done, run this shell command: touch $triage_sentinel"
 
-        set -l triage_prompt_file "$round_dir/prompt_triage.txt"
+        set -l triage_prompt_file "$iter_dir/prompt_triage.txt"
         printf '%s' "$triage_prompt" > $triage_prompt_file
         set -l triage_cmd "cursor-agent --yolo --model $triage_model \"\$(cat $triage_prompt_file)\""
         printf '%s\r' "$triage_cmd" | wezterm cli send-text --no-paste --pane-id $work_pane
@@ -309,7 +309,7 @@ function review_auto
         set -l triage_start (date +%s)
         set frame_idx 1
         while not test -f $triage_sentinel
-            set -l total_el (math (date +%s) - $round_start)
+            set -l total_el (math (date +%s) - $iter_start)
             set -l total_m (math "floor($total_el / 60)")
             set -l total_s (math "$total_el % 60")
             set -l total_ts (printf "%d:%02d" $total_m $total_s)
@@ -319,7 +319,7 @@ function review_auto
             set -l phase_elapsed (math (date +%s) - $triage_start)
             if test $phase_elapsed -ge $phase_timeout
                 printf "\r                                                           \r"
-                echo " "(set_color red)"✗"(set_color normal)"  Triage phase timed out after $phase_timeout seconds in round $round"
+                echo " "(set_color red)"✗"(set_color normal)"  Triage phase timed out after $phase_timeout seconds in iteration $iter"
                 wezterm cli kill-pane --pane-id $work_pane &>/dev/null
                 rm -rf $session_dir
                 return 1
@@ -333,7 +333,7 @@ function review_auto
         wezterm cli kill-pane --pane-id $work_pane &>/dev/null
         set work_pane (wezterm cli split-pane --pane-id $pane_0 --right)
         if test -z "$work_pane"
-            echo "Failed to create work pane after triage phase in round $round"
+            echo "Failed to create work pane after triage phase in iteration $iter"
             rm -rf $session_dir
             return 1
         end
@@ -342,7 +342,7 @@ function review_auto
         echo " "(set_color green)"✔"(set_color normal)" Triaged"
 
         # check triage result - tolerate minor LLM formatting variance around the token
-        set -l _triage_content (cat $round_dir/triage.md 2>/dev/null | string trim)
+        set -l _triage_content (cat $iter_dir/triage.md 2>/dev/null | string trim)
         if string match -qr '^\s*NO_ISSUES_FOUND\s*$' -- "$_triage_content"
             wezterm cli kill-pane --pane-id $work_pane &>/dev/null
             echo " "(set_color green)"✔"(set_color normal)" No issues found"
@@ -369,10 +369,10 @@ function review_auto
 
         # --- fix phase (work pane already created above) ---
 
-        set -l fix_sentinel "$round_dir/.done_fix"
-        set -l fix_prompt "Read the triaged code-review issues at $round_dir/triage.md using the Read tool. Fix every issue listed. Do not fix anything not listed. After fixing, commit your changes with a clear message referencing what was fixed, then push to the remote branch with git push. Then use the /pr skill to update the PR title and description. When completely done, run this shell command: touch $fix_sentinel"
+        set -l fix_sentinel "$iter_dir/.done_fix"
+        set -l fix_prompt "Read the triaged code-review issues at $iter_dir/triage.md using the Read tool. Fix every issue listed. Do not fix anything not listed. After fixing, commit your changes with a clear message referencing what was fixed, then push to the remote branch with git push. Then use the /pr skill to update the PR title and description. When completely done, run this shell command: touch $fix_sentinel"
 
-        set -l fix_prompt_file "$round_dir/prompt_fix.txt"
+        set -l fix_prompt_file "$iter_dir/prompt_fix.txt"
         printf '%s' "$fix_prompt" > $fix_prompt_file
         set -l fix_cmd "cursor-agent --yolo --model $fix_model \"\$(cat $fix_prompt_file)\""
         printf '%s\r' "$fix_cmd" | wezterm cli send-text --no-paste --pane-id $work_pane
@@ -380,7 +380,7 @@ function review_auto
         set -l fix_start (date +%s)
         set frame_idx 1
         while not test -f $fix_sentinel
-            set -l total_el (math (date +%s) - $round_start)
+            set -l total_el (math (date +%s) - $iter_start)
             set -l total_m (math "floor($total_el / 60)")
             set -l total_s (math "$total_el % 60")
             set -l total_ts (printf "%d:%02d" $total_m $total_s)
@@ -390,7 +390,7 @@ function review_auto
             set -l phase_elapsed (math (date +%s) - $fix_start)
             if test $phase_elapsed -ge $phase_timeout
                 printf "\r                                                           \r"
-                echo " "(set_color red)"✗"(set_color normal)"  Fix phase timed out after $phase_timeout seconds in round $round"
+                echo " "(set_color red)"✗"(set_color normal)"  Fix phase timed out after $phase_timeout seconds in iteration $iter"
                 wezterm cli kill-pane --pane-id $work_pane &>/dev/null
                 rm -rf $session_dir
                 return 1
@@ -402,14 +402,14 @@ function review_auto
         printf "\r                                                           \r"
         echo " "(set_color green)"✔"(set_color normal)" Fixed"
 
-        # kill work pane before next round
+        # kill work pane before next iteration
         wezterm cli kill-pane --pane-id $work_pane &>/dev/null
 
-        set round (math $round + 1)
+        set iter (math $iter + 1)
     end
 
     echo ""
-    echo " "(set_color red)"✗"(set_color normal)" Max rounds reached"
+    echo " "(set_color red)"✗"(set_color normal)" Max iterations reached"
     set -l total_dur (math (date +%s) - $session_start)
     set -l total_dur_m (math "floor($total_dur / 60)")
     set -l total_dur_s (math "$total_dur % 60")

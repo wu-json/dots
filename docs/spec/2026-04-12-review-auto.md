@@ -73,16 +73,16 @@ Each agent writes its output to a temp file so downstream agents can read it:
 
 ```
 /tmp/review_auto.<session>/
-  round_1/
+  iter_1/
     review_evelyn.md
     review_vivian.md
     review_stella.md
     triage.md
-  round_2/
+  iter_2/
     ...
 ```
 
-Each round gets its own subdirectory so previous rounds are preserved for debugging. All agents write their output via the Write tool and run in full TUI mode.
+Each iteration gets its own subdirectory so previous iterations are preserved for debugging. All agents write their output via the Write tool and run in full TUI mode.
 
 ### Wezterm pane layout
 
@@ -117,7 +117,7 @@ Two complementary mechanisms (both verified working):
 
 **Primary — sentinel files:** Each review agent is instructed to touch a sentinel file via Shell tool when done:
 ```
-cursor-agent --yolo --model MODEL "... Then run this shell command: touch /tmp/review_auto.xxx/round_1/.done_evelyn"
+cursor-agent --yolo --model MODEL "... Then run this shell command: touch /tmp/review_auto.xxx/iter_1/.done_evelyn"
 ```
 The orchestrator polls for all `.done_*` files to exist. If an agent crashes before touching the sentinel, the orchestrator will wait indefinitely — but this is rare and the user can Ctrl+C to abort.
 
@@ -129,18 +129,18 @@ Verified: this correctly returns true when an agent is running and false when it
 
 ### Triage agent prompt
 
-The triage agent runs in a fresh work pane (right of orchestrator) after reviewers finish. The prompt is written to a file `{round_dir}/triage_prompt.txt` and the agent is told to read it:
+The triage agent runs in a fresh work pane (right of orchestrator) after reviewers finish. The prompt is written to a file `{iter_dir}/triage_prompt.txt` and the agent is told to read it:
 
 ```
-cursor-agent --yolo --model MODEL "Read the prompt at {round_dir}/triage_prompt.txt and follow its instructions exactly."
+cursor-agent --yolo --model MODEL "Read the prompt at {iter_dir}/triage_prompt.txt and follow its instructions exactly."
 ```
 
 The prompt file contains:
 ```
 You are a code-review triage agent. Read the 3 review output files at:
-  {round_dir}/review_evelyn.md
-  {round_dir}/review_vivian.md
-  {round_dir}/review_stella.md
+  {iter_dir}/review_evelyn.md
+  {iter_dir}/review_vivian.md
+  {iter_dir}/review_stella.md
 
 Your job:
 - Read all 3 reviews
@@ -150,18 +150,18 @@ Your job:
 - If a review file is empty or contains an error, skip it
 - If there are no real issues, output exactly: NO_ISSUES_FOUND
 - Format each real issue as a structured block with file, line, description, and severity
-- Write your final verdict to {round_dir}/triage.md using the Write tool
-- When done, run: touch {round_dir}/.done_triage
+- Write your final verdict to {iter_dir}/triage.md using the Write tool
+- When done, run: touch {iter_dir}/.done_triage
 ```
 
 ### Fix agent prompt
 
-The fix agent runs in the same work pane after triage completes. Prompt is also written to a file `{round_dir}/fix_prompt.txt`:
+The fix agent runs in a fresh work pane after triage completes. Prompt is also written to a file `{iter_dir}/fix_prompt.txt`:
 
 ```
-Read the triaged issues at {round_dir}/triage.md.
+Read the triaged issues at {iter_dir}/triage.md.
 Fix every issue listed. Do not fix anything not listed. Commit your changes
-with a clear message referencing the fixes. When done, run: touch {round_dir}/.done_fix
+with a clear message referencing the fixes. When done, run: touch {iter_dir}/.done_fix
 ```
 
 ### Max iterations
@@ -172,7 +172,7 @@ Default cap of 3 iterations to prevent infinite loops. Configurable via argument
 
 ```
 review_auto [options]
-  --max-rounds N     Max review/fix cycles (default: 3)
+  --max-iterations N Max review/fix cycles (default: 3)
   --provider NAME    openai | anthropic (default: anthropic)
   --panes N          Number of review panes 1-3 (default: 3)
   --dry-run          Run reviews + triage only, skip fix step
@@ -187,7 +187,7 @@ review_auto [options]
 | Triage sentinel | `NO_ISSUES_FOUND` in triage.md | Simple, grep-able exit condition |
 | Fix agent mode | `--yolo` (full write access) | Needs to edit files, run shell tools, and commit |
 | Review agents | `--yolo` (full TUI) | Without `--yolo`, agents can't run shell tools (gh cli, git, etc.) needed for PR inspection |
-| Loop cap | 3 rounds | Prevents runaway; most real issues resolve in 1-2 rounds |
+| Loop cap | 3 iterations | Prevents runaway; most real issues resolve in 1-2 iterations |
 
 ## Feasibility findings
 
@@ -212,7 +212,7 @@ Tested against `cursor-agent` CLI and `wezterm cli` on 2026-04-12. All core mech
 
 ### Pane lifecycle
 
-- Using `send-text` approach (same as existing `review.fish`): the pane has a persistent fish shell. After cursor-agent exits, the shell stays — the pane doesn't close. This is good: we can reuse panes across rounds.
+- Using `send-text` approach (same as existing `review.fish`): the pane has a persistent fish shell. After cursor-agent exits, the shell stays — the pane doesn't close. This is good: we can reuse panes across iterations.
 - Alternative `split-pane -- fish -c "cmd"` approach: pane runs one command and then the shell exits. Pane behavior on exit depends on wezterm `exit_behavior` config (default `CloseOnCleanExit`). **Not recommended** — we want persistent panes for reuse and visibility.
 
 ### Confirmed approach
@@ -228,16 +228,16 @@ Each reviewer writes its output via Write tool and touches a sentinel file via S
 **Triage/Fix phase:**
 After review completes, reviewer panes are killed. A fresh work pane is created on the right of the orchestrator. Prompts are written to temp files to avoid quote/newline escaping issues with send-text:
 ```
-echo "LONG PROMPT..." > {round_dir}/triage_prompt.txt
-cursor-agent --yolo --model MODEL "Read the prompt at {round_dir}/triage_prompt.txt and follow its instructions exactly."
+echo "LONG PROMPT..." > {iter_dir}/triage_prompt.txt
+cursor-agent --yolo --model MODEL "Read the prompt at {iter_dir}/triage_prompt.txt and follow its instructions exactly."
 ```
 Orchestrator pane polls for `.done_*` files and prints status.
 
 ### Cleanup
 
-After each review phase, reviewer panes are killed to create a clean work pane for triage/fix. After triage/fix completes, the work pane is killed before the next round. When the loop exits (clean PR or max rounds hit), the orchestrator pane prints a summary (rounds completed, final status) and returns control to the shell.
+After each review phase, reviewer panes are killed to create a clean work pane for triage/fix. After triage/fix completes, the work pane is killed before the next iteration. When the loop exits (clean PR or max iterations hit), the orchestrator pane prints a summary and returns control to the shell.
 
 ## Open questions
 
-- Should the function auto-push after a clean round, or leave that to the user?
+- Should the function auto-push after a clean iteration, or leave that to the user?
 - Should there be a `--notify` flag to send a macOS notification when done?
