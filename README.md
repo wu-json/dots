@@ -6,10 +6,11 @@ This is where I tweak config files till 4am like a goblin. It's pretty cozy in h
 
 ## My Cursed Tools
 
-- **[claude](https://code.claude.com/)** - This is going to take my job
+- **[claude](https://code.claude.com/)** - this is going to take my job
+- **[cursor](https://cursor.com/)** - this is also going to take my job 
 - **[fish](https://fishshell.com/)** - I eat the fish
-- **[homebrew](https://brew.sh/)** - Cyber alcoholic
-- **[neovim](https://neovim.io/)** - Female repellent
+- **[homebrew](https://brew.sh/)** - cyber alcoholic
+- **[neovim](https://neovim.io/)** - female repellent
 - **[wezterm](https://wezterm.org/index.html)** - lua lua lua
 - **[stow](https://www.gnu.org/software/stow/)** - link those symmies
 
@@ -18,5 +19,3 @@ This is where I tweak config files till 4am like a goblin. It's pretty cozy in h
 brew install just
 just init
 ```
-
-`just brew` (run as part of `just init`) clears macOS quarantine on the **cursor-cli** cask so native addons load correctly. If you use `brew bundle` without Just, run `xattr -rd com.apple.quarantine "$(brew --prefix)/Caskroom/cursor-cli/"` afterward. Background: [Cursor forum — merkle-tree NAPI / “not opened” on darwin-arm64](https://forum.cursor.com/t/cursor-agent-merkle-tree-napi-darwin-arm64-node-not-opened/155056).
