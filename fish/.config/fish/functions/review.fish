@@ -41,7 +41,7 @@ function review
             set review_model claude-4.6-opus-high
     end
 
-    set -l review_cmd "cursor-agent --yolo --model $review_model -p"
+    set -l review_cmd "cursor-agent --yolo --model $review_model"
 
     # pane identities
     # 0 - top left
