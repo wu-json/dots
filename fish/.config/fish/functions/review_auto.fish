@@ -169,7 +169,7 @@ function review_auto
         end
     end
     echo " "(set_color --bold)"review_auto"(set_color normal)" "(set_color brblack)"·"(set_color normal)" "\e]8\;\;$pr_url\e\\(set_color white)$pr_label(set_color normal)\e]8\;\;\e\\
-    echo " "(set_color brblack)"$provider · $num_panes reviewers"(set_color normal)
+    echo " "(set_color brblack)"$provider · $num_panes reviewers · $max_iters max iterations"(set_color normal)
     echo ""
 
     # --- main loop ---
@@ -288,7 +288,7 @@ function review_auto
         end
 
         printf "\r                                                           \r"
-        echo " "(set_color green)"✔"(set_color normal)" Reviewed"
+        echo " "(set_color green)"✔"(set_color normal)" Reviewed "(set_color brblack)"($iter/$max_iters)"(set_color normal)
 
         # --- triage phase ---
         set -l review_files
