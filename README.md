@@ -6,7 +6,7 @@ This is where I tweak config files till 4am like a goblin. It's pretty cozy in h
 
 ## My Cursed Tools
 
-- **[Claude Code](https://code.claude.com/)** - This is going to take my job
+- **[claude code](https://code.claude.com/)** - This is going to take my job
 - **[fish](https://fishshell.com/)** - I eat the fish
 - **[homebrew](https://brew.sh/)** - Cyber alcoholic
 - **[neovim](https://neovim.io/)** - Female repellent
