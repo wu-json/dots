@@ -90,7 +90,7 @@ function review_auto
     end
 
     set -l session_dir (mktemp -d /tmp/review_auto.XXXXXX)
-    set -l review_cmd "cursor-agent --yolo --model $review_model"
+    set -l review_cmd "cursor-agent --yolo --model $review_model -p"
 
     # reviewer identities and prompts
     set -l names Evelyn Vivian Stella
@@ -119,6 +119,7 @@ function review_auto
     set -l pane_bottom (wezterm cli split-pane --pane-id $pane_0 --bottom)
     if test -z "$pane_bottom"
         echo "Failed to create bottom pane (split-pane returned empty ID)"
+        rm -rf $session_dir
         return 1
     end
     # Step 2: split top row to create Evelyn (top-right)
@@ -126,6 +127,7 @@ function review_auto
     if test -z "$pane_evelyn"
         echo "Failed to create Evelyn pane (split-pane returned empty ID)"
         wezterm cli kill-pane --pane-id $pane_bottom &>/dev/null
+        rm -rf $session_dir
         return 1
     end
     # Step 3: split bottom row to create Stella (bottom-right)
