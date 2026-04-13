@@ -341,9 +341,10 @@ function review_auto
         printf "\r                                                           \r"
         echo " "(set_color green)"✔"(set_color normal)" Triaged"
 
-        # check triage result - tolerate minor LLM formatting variance around the token
-        set -l _triage_content (cat $iter_dir/triage.md 2>/dev/null | string trim)
-        if string match -qr '^\s*NO_ISSUES_FOUND\s*$' -- "$_triage_content"
+        # check triage result - collapse into a single string so multi-line files
+        # are compared atomically instead of per-line via fish list semantics
+        set -l _triage_content (cat $iter_dir/triage.md 2>/dev/null | string collect | string trim)
+        if test "$_triage_content" = "NO_ISSUES_FOUND"
             wezterm cli kill-pane --pane-id $work_pane &>/dev/null
             echo " "(set_color green)"✔"(set_color normal)" No issues found"
             set -l total_dur (math (date +%s) - $session_start)
