@@ -38,3 +38,4 @@ cask "codex"
 # https://forum.cursor.com/t/cursor-agent-merkle-tree-napi-darwin-arm64-node-not-opened/155056
 cask "cursor-cli"
 cask "vlc"
+cask "wezterm"
