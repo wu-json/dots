@@ -232,6 +232,7 @@ function review_auto
         end
 
         # poll for all reviewers to finish
+        set -l review_start (date +%s)
         set -l dot_frames "." ".." "..."
         set -l dot_colors green white green
         set -l frame_idx 1
@@ -260,7 +261,8 @@ function review_auto
                 break
             end
 
-            if test $total_el -ge $phase_timeout
+            set -l review_elapsed (math (date +%s) - $review_start)
+            if test $review_elapsed -ge $phase_timeout
                 printf "\r                                                           \r"
                 echo " "(set_color red)"✗"(set_color normal)"  Review phase timed out after $phase_timeout seconds in iteration $iter"
                 for pane in $pane_ids
@@ -343,6 +345,7 @@ function review_auto
             echo ""
             echo " "(set_color brblack)$pr_url" · "(printf "%dm %ds" $total_dur_m $total_dur_s)(set_color normal)
             echo ""
+            rm -rf $session_dir
             return 0
         end
 
@@ -354,6 +357,7 @@ function review_auto
             echo ""
             echo " "(set_color brblack)$pr_url" · "(printf "%dm %ds" $total_dur_m $total_dur_s)(set_color normal)
             echo ""
+            rm -rf $session_dir
             return 0
         end
 
