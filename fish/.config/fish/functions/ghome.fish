@@ -27,8 +27,7 @@ function ghome
         set -l track (string trim -- $parts[2])
         switch "$track"
             case '[gone]'
-                git branch -d $branch 2>/dev/null
-                or echo "ghome: skipped $branch (not fully merged into $def)" >&2
+                git branch -D $branch
         end
     end
     true
