@@ -54,4 +54,6 @@ Brief additional context or implementation notes if needed. Omit if not necessar
 
 Use a HEREDOC for the body to preserve formatting.
 
+If the user provides additional notes or context they want included in the PR body, append a `## Human Notes` section at the end with that content. Only include this section when explicitly requested — omit it by default.
+
 Do not attribute the PR to Cursor, any other AI tool, or any assistant in the title or body. Omit footers and phrases like "Generated with Cursor", "Generated with Claude Code", Copilot, or similar.
