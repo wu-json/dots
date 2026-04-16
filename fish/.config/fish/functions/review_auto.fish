@@ -94,10 +94,11 @@ function review_auto
 
     # reviewer identities and prompts
     set -l names Evelyn Vivian Stella
+    set -l no_checkout "IMPORTANT: Do NOT check out, switch, or create any git branch. Do NOT run git checkout, git switch, gh pr checkout, or any command that changes the working tree's branch. Inspect the PR diff via gh/git commands that do not mutate the branch (e.g. gh pr diff, git diff <base>...<head>)."
     set -l base_prompts \
-        "You are Evelyn. Use the local review skill to review PR #$pr_number in read-only mode and follow its exact response format." \
-        "You are Vivian. Use the local review skill to review PR #$pr_number in read-only mode and follow its exact response format." \
-        "You are Stella. Use the local review skill to review PR #$pr_number in read-only mode and follow its exact response format. Focus on dead code, unused imports, and unreachable code paths."
+        "You are Evelyn. Use the local review skill to review PR #$pr_number in read-only mode and follow its exact response format. $no_checkout" \
+        "You are Vivian. Use the local review skill to review PR #$pr_number in read-only mode and follow its exact response format. $no_checkout" \
+        "You are Stella. Use the local review skill to review PR #$pr_number in read-only mode and follow its exact response format. Focus on dead code, unused imports, and unreachable code paths. $no_checkout"
 
     # --- beautiful header ---
     set -l dim (set_color brblack)
@@ -302,7 +303,7 @@ function review_auto
         set -l file_list (string join ", " $review_files)
 
         set -l triage_sentinel "$iter_dir/.done_triage"
-        set -l triage_prompt "You are a code-review triage agent. Read the review output files at: $file_list. Read all review files using the Read tool. Filter out nitpicks, style-only comments, and false positives. Identify ONLY real bugs, logic errors, security vulnerabilities, missing error handling, dead code, unused imports, unreachable code paths, and formatting issues. If a review file is empty or contains an error, skip it. Write your verdict to $iter_dir/triage.md. If there are NO real issues: write ONLY the text NO_ISSUES_FOUND (nothing else, just that one line). If there ARE real issues: write each issue with file path, line number, severity (critical/high/medium), and description. Do NOT include the string NO_ISSUES_FOUND anywhere. When completely done, run this shell command: touch $triage_sentinel"
+        set -l triage_prompt "You are a code-review triage agent. Read the review output files at: $file_list. Read all review files using the Read tool. Filter out nitpicks, style-only comments, and false positives. Identify ONLY real bugs, logic errors, security vulnerabilities, missing error handling, dead code, unused imports, unreachable code paths, and formatting issues. If a review file is empty or contains an error, skip it. Write your verdict to $iter_dir/triage.md. If there are NO real issues: write ONLY the text NO_ISSUES_FOUND (nothing else, just that one line). If there ARE real issues: write each issue with file path, line number, severity (critical/high/medium), and description. Do NOT include the string NO_ISSUES_FOUND anywhere. IMPORTANT: Do NOT check out, switch, or create any git branch. Do NOT run git checkout, git switch, gh pr checkout, or any command that changes the working tree's branch. When completely done, run this shell command: touch $triage_sentinel"
 
         set -l triage_prompt_file "$iter_dir/prompt_triage.txt"
         printf '%s' "$triage_prompt" >$triage_prompt_file
@@ -380,7 +381,7 @@ function review_auto
         end
 
         set -l fix_sentinel "$iter_dir/.done_fix"
-        set -l fix_prompt "Read the triaged code-review issues at $iter_dir/triage.md using the Read tool. Fix every issue listed. Do not fix anything not listed. After fixing, commit your changes with a clear message referencing what was fixed, then push to the remote branch with git push. Then use the /pr skill to update the PR title and description. When completely done, run this shell command: touch $fix_sentinel"
+        set -l fix_prompt "Read the triaged code-review issues at $iter_dir/triage.md using the Read tool. Fix every issue listed. Do not fix anything not listed. After fixing, commit your changes with a clear message referencing what was fixed, then push to the remote branch with git push. Then use the /pr skill to update the PR title and description. IMPORTANT: Do NOT check out, switch, or create any git branch. Stay on the current branch. Do NOT run git checkout, git switch, gh pr checkout, or any command that changes the working tree's branch. When completely done, run this shell command: touch $fix_sentinel"
 
         set -l fix_prompt_file "$iter_dir/prompt_fix.txt"
         printf '%s' "$fix_prompt" >$fix_prompt_file
