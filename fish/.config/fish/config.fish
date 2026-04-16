@@ -46,6 +46,9 @@ alias prdoc="cursor-agent --yolo --model gpt-5.4-high-fast /pr"
 # Nvim
 alias v="nvim"
 
+# Working dir copy
+alias wdc="pwd | pbcopy"
+
 # Review fish function
 alias r="review"
 alias ra="review_auto"
