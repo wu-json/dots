@@ -47,7 +47,10 @@ alias prdoc="cursor-agent --yolo --model gpt-5.4-high-fast /pr"
 alias v="nvim"
 
 # Working dir copy
-alias wdc="pwd | pbcopy"
+function wdc
+    pwd | pbcopy
+    echo "Copied working directory to clipboard: "(pwd)
+end
 
 # Review fish function
 alias r="review"
