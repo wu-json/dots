@@ -46,5 +46,5 @@
   "typescript-tools.nvim": { "branch": "master", "commit": "c2f5910074103705661e9651aa841e0d7eea9932" },
   "vim-bufonly": { "branch": "master", "commit": "05a9f2d79f7aa7e2a94f9a6e29555e878e88d411" },
   "which-key.nvim": { "branch": "main", "commit": "3aab2147e74890957785941f0c1ad87d0a44c15a" },
-  "yuki.nvim": { "branch": "main", "commit": "ba67e9356bf727fb13509d9d905d176f7b1a9043" }
+  "yuki.nvim": { "branch": "main", "commit": "70f366dab9a9f15c19cb5d121ae7a6baa4ee1915" }
 }
