@@ -22,10 +22,10 @@ return {
             return {
               align = "center",
               text = {
-                { "Loaded ", hl = "footer" },
+                { "", hl = "footer" },
                 { stats.loaded .. "/" .. stats.count, hl = "special" },
-                { " plugins in ", hl = "footer" },
-                { ms .. "ms", hl = "special" },
+                { " プラグイン ", hl = "footer" },
+                { ms .. "ms で起動", hl = "special" },
               },
             }
           end,
