@@ -1,6 +1,6 @@
 function review
     # Usage: review [1-4] [openai|anthropic] — args can be in any order.
-    # Default: 4 panes, anthropic (claude-4.6-opus-high). openai → gpt-5.4-high.
+    # Default: 4 panes, anthropic (claude-opus-4-7-high). openai → gpt-5.4-high.
     # Uses --yolo so agents can run shell tools (gh cli, git, etc.) for PR inspection.
     set -l num_panes 4
     set -l provider anthropic
@@ -38,7 +38,7 @@ function review
     set -l review_model gpt-5.4-high
     switch $provider
         case anthropic
-            set review_model claude-4.6-opus-high
+            set review_model claude-opus-4-7-high
     end
 
     set -l review_cmd "cursor-agent --yolo --model $review_model"

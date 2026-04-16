@@ -39,7 +39,7 @@ alias cx="codex"
 alias cl="claude --dangerously-skip-permissions"
 
 # Cursor
-alias cr="cursor-agent --yolo --model claude-4.6-opus-high"
+alias cr="cursor-agent --yolo --model claude-opus-4-7-high"
 alias c="cr"
 alias prdoc="cursor-agent --yolo --model gpt-5.4-high-fast /pr"
 
