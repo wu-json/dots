@@ -16,29 +16,39 @@ function latte --description 'caffeinate with -h HOURS or -m MINUTES (default 1h
         end
     end
 
+    function __latte_brew -S -a msg
+        set_color -o magenta
+        echo -n "☕ latte"
+        set_color normal
+        echo " · $msg"
+    end
+
     if set -q _flag_hours; and set -q _flag_minutes
-        echo "latte: specify only one of -h/--hours or -m/--minutes" >&2
+        set_color -o red
+        echo -n "☕ latte"
+        set_color normal
+        echo " · pick one: -h/--hours or -m/--minutes (not both)" >&2
         return 1
     else if set -q _flag_hours
         set seconds (math -s0 "$_flag_hours * 3600")
         or begin
-            echo "latte: invalid hours: $_flag_hours" >&2
+            __latte_brew "invalid hours: $_flag_hours" >&2
             return 1
         end
         set label (__latte_plural $_flag_hours hour)
     else if set -q _flag_minutes
         set seconds (math -s0 "$_flag_minutes * 60")
         or begin
-            echo "latte: invalid minutes: $_flag_minutes" >&2
+            __latte_brew "invalid minutes: $_flag_minutes" >&2
             return 1
         end
         set label (__latte_plural $_flag_minutes minute)
     else
-        echo "latte: keeping awake (no timeout, ctrl-c to stop)"
+        __latte_brew "brewing a bottomless cup — ctrl-c when you're done"
         caffeinate -dimsu
         return
     end
 
-    echo "latte: keeping awake for $label"
+    __latte_brew "brewing for $label — sip slow"
     caffeinate -dimsu -t $seconds
 end
