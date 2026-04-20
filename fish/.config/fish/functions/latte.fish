@@ -34,8 +34,9 @@ function latte --description 'caffeinate with -h HOURS or -m MINUTES (default 1h
         end
         set label (__latte_plural $_flag_minutes minute)
     else
-        set seconds 3600
-        set label "1 hour"
+        echo "latte: keeping awake (no timeout, ctrl-c to stop)"
+        caffeinate -dimsu
+        return
     end
 
     echo "latte: keeping awake for $label"
