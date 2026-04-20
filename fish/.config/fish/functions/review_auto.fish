@@ -106,20 +106,36 @@ function review_auto
     set -l green (set_color green)
 
     # --- split panes: 4 quadrants (orchestrator + 3 reviewers) ---
-    # Layout:
-    # ┌─────────────────────┬─────────────────────┐
+    # Layout (latte is a thin strip above, keeping the laptop awake):
+    # ┌───────────────────────────────────────────┐
+    # │                  latte                    │
+    # ├─────────────────────┬─────────────────────┤
     # │   ORCHESTRATOR      │      Evelyn         │
     # ├─────────────────────┼─────────────────────┤
     # │     Vivian          │      Stella         │
     # └─────────────────────┴─────────────────────┘
-    # Split order matters: bottom first, then split each row
+    # Split order matters: latte first (thin top strip), then bottom row,
+    # then split each row horizontally. Splitting latte off pane_0 first
+    # shrinks pane_0 by a couple rows but leaves the reviewer quadrant
+    # geometry identical to before.
     set -l pane_0 $WEZTERM_PANE
     set -l pane_ids
+
+    # Step 0: carve off a thin strip above pane_0 for latte (caffeinate wrapper)
+    # so the laptop doesn't sleep while the auto-review runs.
+    set -l pane_latte (wezterm cli split-pane --pane-id $pane_0 --top --cells 2)
+    if test -z "$pane_latte"
+        echo "Failed to create latte pane (split-pane returned empty ID)"
+        rm -rf $session_dir
+        return 1
+    end
+    printf '%s\r' 'latte' | wezterm cli send-text --no-paste --pane-id $pane_latte
 
     # Step 1: split horizontally to create bottom row
     set -l pane_bottom (wezterm cli split-pane --pane-id $pane_0 --bottom)
     if test -z "$pane_bottom"
         echo "Failed to create bottom pane (split-pane returned empty ID)"
+        wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
         rm -rf $session_dir
         return 1
     end
@@ -128,6 +144,7 @@ function review_auto
     if test -z "$pane_evelyn"
         echo "Failed to create Evelyn pane (split-pane returned empty ID)"
         wezterm cli kill-pane --pane-id $pane_bottom &>/dev/null
+        wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
         rm -rf $session_dir
         return 1
     end
@@ -137,6 +154,7 @@ function review_auto
         echo "Failed to create Stella pane (split-pane returned empty ID)"
         wezterm cli kill-pane --pane-id $pane_evelyn &>/dev/null
         wezterm cli kill-pane --pane-id $pane_bottom &>/dev/null
+        wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
         rm -rf $session_dir
         return 1
     end
@@ -187,6 +205,7 @@ function review_auto
             set -l pb (wezterm cli split-pane --pane-id $pane_0 --bottom)
             if test -z "$pb"
                 echo "Failed to recreate bottom pane in iteration $iter"
+                wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
                 rm -rf $session_dir
                 return 1
             end
@@ -194,6 +213,7 @@ function review_auto
             if test -z "$pe"
                 echo "Failed to recreate Evelyn pane in iteration $iter"
                 wezterm cli kill-pane --pane-id $pb &>/dev/null
+                wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
                 rm -rf $session_dir
                 return 1
             end
@@ -202,6 +222,7 @@ function review_auto
                 echo "Failed to recreate Stella pane in iteration $iter"
                 wezterm cli kill-pane --pane-id $pe &>/dev/null
                 wezterm cli kill-pane --pane-id $pb &>/dev/null
+                wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
                 rm -rf $session_dir
                 return 1
             end
@@ -272,6 +293,7 @@ function review_auto
                 for pane in $pane_ids
                     wezterm cli kill-pane --pane-id $pane &>/dev/null
                 end
+                wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
                 rm -rf $session_dir
                 return 1
             end
@@ -287,6 +309,7 @@ function review_auto
         set -l work_pane (wezterm cli split-pane --pane-id $pane_0 --right)
         if test -z "$work_pane"
             echo "Failed to create work pane after review phase in iteration $iter"
+            wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
             rm -rf $session_dir
             return 1
         end
@@ -325,6 +348,7 @@ function review_auto
                 printf "\r                                                           \r"
                 echo " "(set_color red)"✗"(set_color normal)"  Triage phase timed out after $phase_timeout seconds in iteration $iter"
                 wezterm cli kill-pane --pane-id $work_pane &>/dev/null
+                wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
                 rm -rf $session_dir
                 return 1
             end
@@ -341,6 +365,7 @@ function review_auto
         # guard: triage.md must exist and be non-empty before proceeding
         if not test -s $iter_dir/triage.md
             echo " "(set_color red)"✗"(set_color normal)"  Triage produced empty or missing triage.md in iteration $iter"
+            wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
             rm -rf $session_dir
             return 1
         end
@@ -356,6 +381,7 @@ function review_auto
             echo ""
             echo " "(set_color brblack)$pr_url" · "(printf "%dm %ds" $total_dur_m $total_dur_s)(set_color normal)
             echo ""
+            wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
             rm -rf $session_dir
             return 0
         end
@@ -368,6 +394,7 @@ function review_auto
             echo ""
             echo " "(set_color brblack)$pr_url" · "(printf "%dm %ds" $total_dur_m $total_dur_s)(set_color normal)
             echo ""
+            wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
             rm -rf $session_dir
             return 0
         end
@@ -376,6 +403,7 @@ function review_auto
         set -l work_pane (wezterm cli split-pane --pane-id $pane_0 --right)
         if test -z "$work_pane"
             echo "Failed to create work pane for fix phase in iteration $iter"
+            wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
             rm -rf $session_dir
             return 1
         end
@@ -403,6 +431,7 @@ function review_auto
                 printf "\r                                                           \r"
                 echo " "(set_color red)"✗"(set_color normal)"  Fix phase timed out after $phase_timeout seconds in iteration $iter"
                 wezterm cli kill-pane --pane-id $work_pane &>/dev/null
+                wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
                 rm -rf $session_dir
                 return 1
             end
@@ -435,6 +464,7 @@ function review_auto
     echo ""
     echo " "(set_color brblack)$pr_url" · "(printf "%dm %ds" $total_dur_m $total_dur_s)(set_color normal)
     echo ""
+    wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
     rm -rf $session_dir
     return 1
 end
