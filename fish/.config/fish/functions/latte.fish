@@ -44,11 +44,11 @@ function latte --description 'caffeinate with -h HOURS or -m MINUTES (default 1h
         end
         set label (__latte_plural $_flag_minutes minute)
     else
-        __latte_brew "brewing a bottomless cup — ctrl-c when you're done"
+        __latte_brew "bottomless cup — keeping macOS awake until ctrl-c"
         caffeinate -dimsu
         return
     end
 
-    __latte_brew "brewing for $label — sip slow"
+    __latte_brew "keeping macOS awake for $label — sip slow"
     caffeinate -dimsu -t $seconds
 end
