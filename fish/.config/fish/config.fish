@@ -29,8 +29,8 @@ alias gho="ghome"
 alias ls="eza"
 alias tree="eza --tree"
 
-# OpenCode
-alias o="opencode"
+# Obsidian
+alias o="obsidian"
 
 # Codex 
 alias cx="codex"
