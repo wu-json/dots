@@ -8,6 +8,14 @@ function latte --description 'caffeinate with -h HOURS or -m MINUTES (default 1h
     set -l seconds
     set -l label
 
+    function __latte_plural -S -a n word
+        if test "$n" = 1
+            echo "$n $word"
+        else
+            echo "$n "$word"s"
+        end
+    end
+
     if set -q _flag_hours; and set -q _flag_minutes
         echo "latte: specify only one of -h/--hours or -m/--minutes" >&2
         return 1
@@ -17,19 +25,19 @@ function latte --description 'caffeinate with -h HOURS or -m MINUTES (default 1h
             echo "latte: invalid hours: $_flag_hours" >&2
             return 1
         end
-        set label "$_flag_hours hour(s)"
+        set label (__latte_plural $_flag_hours hour)
     else if set -q _flag_minutes
         set seconds (math -s0 "$_flag_minutes * 60")
         or begin
             echo "latte: invalid minutes: $_flag_minutes" >&2
             return 1
         end
-        set label "$_flag_minutes minute(s)"
+        set label (__latte_plural $_flag_minutes minute)
     else
         set seconds 3600
         set label "1 hour"
     end
 
-    echo "latte: keeping awake for $label ($seconds seconds)"
+    echo "latte: keeping awake for $label"
     caffeinate -dimsu -t $seconds
 end
