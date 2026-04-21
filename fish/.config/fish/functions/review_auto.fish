@@ -92,6 +92,40 @@ function review_auto
     set -l session_dir (mktemp -d /tmp/review_auto.XXXXXX)
     set -l review_cmd "cursor-agent --yolo --model $review_model"
 
+    # Make the orchestrator terminal robust to stray keystrokes while the
+    # spinner animates: disable echo and canonical line buffering, and hide
+    # the cursor. Restored on every exit path via __review_auto_restore_tty,
+    # which is invoked alongside `rm -rf $session_dir` in cleanup sites.
+    # Only touch the TTY if stdin is actually a terminal.
+    set -l __ra_tty_saved ""
+    set -l __ra_tty_active false
+    if isatty stdin
+        set __ra_tty_saved (stty -g 2>/dev/null)
+        if test -n "$__ra_tty_saved"
+            stty -echo -icanon 2>/dev/null
+            printf '\e[?25l'
+            set __ra_tty_active true
+        end
+    end
+    function __review_auto_restore_tty --inherit-variable __ra_tty_saved --inherit-variable __ra_tty_active
+        if test "$__ra_tty_active" = true
+            # Flush any keystrokes the user hit during the spinner so they
+            # don't paste into the next prompt as a command. python3 ships
+            # with macOS; fall back silently if it's unavailable.
+            command -q python3; and python3 -c 'import termios,sys; termios.tcflush(sys.stdin, termios.TCIFLUSH)' 2>/dev/null
+            stty "$__ra_tty_saved" 2>/dev/null
+            printf '\e[?25h'
+            set __ra_tty_active false
+        end
+        functions -q __review_auto_sigint_handler; and functions -e __review_auto_sigint_handler
+    end
+    # Restore the TTY if the user hits Ctrl-C mid-run. Registered globally
+    # because fish signal handlers must be top-level functions; erased on the
+    # normal exit paths below.
+    function __review_auto_sigint_handler --on-signal SIGINT
+        __review_auto_restore_tty
+    end
+
     # reviewer identities and prompts
     set -l names Evelyn Vivian Stella
     set -l no_checkout "IMPORTANT: Do NOT check out, switch, or create any git branch. Do NOT run git checkout, git switch, gh pr checkout, or any command that changes the working tree's branch. Inspect the PR diff via gh/git commands that do not mutate the branch (e.g. gh pr diff, git diff <base>...<head>)."
@@ -126,7 +160,7 @@ function review_auto
     set -l pane_latte (wezterm cli split-pane --pane-id $pane_0 --top --cells 2)
     if test -z "$pane_latte"
         echo "Failed to create latte pane (split-pane returned empty ID)"
-        rm -rf $session_dir
+        __review_auto_restore_tty; rm -rf $session_dir
         return 1
     end
     printf '%s\r' 'latte' | wezterm cli send-text --no-paste --pane-id $pane_latte
@@ -136,7 +170,7 @@ function review_auto
     if test -z "$pane_bottom"
         echo "Failed to create bottom pane (split-pane returned empty ID)"
         wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
-        rm -rf $session_dir
+        __review_auto_restore_tty; rm -rf $session_dir
         return 1
     end
     # Step 2: split top row to create Evelyn (top-right)
@@ -145,7 +179,7 @@ function review_auto
         echo "Failed to create Evelyn pane (split-pane returned empty ID)"
         wezterm cli kill-pane --pane-id $pane_bottom &>/dev/null
         wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
-        rm -rf $session_dir
+        __review_auto_restore_tty; rm -rf $session_dir
         return 1
     end
     # Step 3: split bottom row to create Stella (bottom-right)
@@ -155,7 +189,7 @@ function review_auto
         wezterm cli kill-pane --pane-id $pane_evelyn &>/dev/null
         wezterm cli kill-pane --pane-id $pane_bottom &>/dev/null
         wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
-        rm -rf $session_dir
+        __review_auto_restore_tty; rm -rf $session_dir
         return 1
     end
     # pane_bottom is now Vivian (bottom-left)
@@ -206,7 +240,7 @@ function review_auto
             if test -z "$pb"
                 echo "Failed to recreate bottom pane in iteration $iter"
                 wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
-                rm -rf $session_dir
+                __review_auto_restore_tty; rm -rf $session_dir
                 return 1
             end
             set -l pe (wezterm cli split-pane --pane-id $pane_0 --right)
@@ -214,7 +248,7 @@ function review_auto
                 echo "Failed to recreate Evelyn pane in iteration $iter"
                 wezterm cli kill-pane --pane-id $pb &>/dev/null
                 wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
-                rm -rf $session_dir
+                __review_auto_restore_tty; rm -rf $session_dir
                 return 1
             end
             set -l ps (wezterm cli split-pane --pane-id $pb --right)
@@ -223,7 +257,7 @@ function review_auto
                 wezterm cli kill-pane --pane-id $pe &>/dev/null
                 wezterm cli kill-pane --pane-id $pb &>/dev/null
                 wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
-                rm -rf $session_dir
+                __review_auto_restore_tty; rm -rf $session_dir
                 return 1
             end
             set pane_ids $pe $pb $ps
@@ -294,7 +328,7 @@ function review_auto
                     wezterm cli kill-pane --pane-id $pane &>/dev/null
                 end
                 wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
-                rm -rf $session_dir
+                __review_auto_restore_tty; rm -rf $session_dir
                 return 1
             end
 
@@ -310,7 +344,7 @@ function review_auto
         if test -z "$work_pane"
             echo "Failed to create work pane after review phase in iteration $iter"
             wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
-            rm -rf $session_dir
+            __review_auto_restore_tty; rm -rf $session_dir
             return 1
         end
 
@@ -349,7 +383,7 @@ function review_auto
                 echo " "(set_color red)"✗"(set_color normal)"  Triage phase timed out after $phase_timeout seconds in iteration $iter"
                 wezterm cli kill-pane --pane-id $work_pane &>/dev/null
                 wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
-                rm -rf $session_dir
+                __review_auto_restore_tty; rm -rf $session_dir
                 return 1
             end
 
@@ -366,7 +400,7 @@ function review_auto
         if not test -s $iter_dir/triage.md
             echo " "(set_color red)"✗"(set_color normal)"  Triage produced empty or missing triage.md in iteration $iter"
             wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
-            rm -rf $session_dir
+            __review_auto_restore_tty; rm -rf $session_dir
             return 1
         end
 
@@ -382,7 +416,7 @@ function review_auto
             echo " "(set_color brblack)$pr_url" · "(printf "%dm %ds" $total_dur_m $total_dur_s)(set_color normal)
             echo ""
             wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
-            rm -rf $session_dir
+            __review_auto_restore_tty; rm -rf $session_dir
             return 0
         end
 
@@ -395,7 +429,7 @@ function review_auto
             echo " "(set_color brblack)$pr_url" · "(printf "%dm %ds" $total_dur_m $total_dur_s)(set_color normal)
             echo ""
             wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
-            rm -rf $session_dir
+            __review_auto_restore_tty; rm -rf $session_dir
             return 0
         end
 
@@ -404,7 +438,7 @@ function review_auto
         if test -z "$work_pane"
             echo "Failed to create work pane for fix phase in iteration $iter"
             wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
-            rm -rf $session_dir
+            __review_auto_restore_tty; rm -rf $session_dir
             return 1
         end
 
@@ -432,7 +466,7 @@ function review_auto
                 echo " "(set_color red)"✗"(set_color normal)"  Fix phase timed out after $phase_timeout seconds in iteration $iter"
                 wezterm cli kill-pane --pane-id $work_pane &>/dev/null
                 wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
-                rm -rf $session_dir
+                __review_auto_restore_tty; rm -rf $session_dir
                 return 1
             end
 
@@ -465,6 +499,6 @@ function review_auto
     echo " "(set_color brblack)$pr_url" · "(printf "%dm %ds" $total_dur_m $total_dur_s)(set_color normal)
     echo ""
     wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
-    rm -rf $session_dir
+    __review_auto_restore_tty; rm -rf $session_dir
     return 1
 end
