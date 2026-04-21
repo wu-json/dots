@@ -23,6 +23,43 @@ function latte --description 'caffeinate with -h HOURS or -m MINUTES (default 1h
         echo " · $msg"
     end
 
+    # Run caffeinate with the TTY in no-echo, non-canonical mode so stray
+    # keystrokes in the pane don't corrupt the display or leak into the next
+    # prompt. isig stays on so Ctrl-C still terminates caffeinate normally.
+    # Restored via a SIGINT handler so interrupts can't leave the TTY broken.
+    function __latte_run -S -a seconds
+        set -l tty_saved ""
+        set -l tty_active false
+        if isatty stdin
+            set tty_saved (stty -g 2>/dev/null)
+            if test -n "$tty_saved"
+                stty -echo -icanon 2>/dev/null
+                printf '\e[?25l'
+                set tty_active true
+            end
+        end
+        function __latte_restore_tty --inherit-variable tty_saved --inherit-variable tty_active
+            if test "$tty_active" = true
+                command -q python3; and python3 -c 'import termios,sys; termios.tcflush(sys.stdin, termios.TCIFLUSH)' 2>/dev/null
+                stty "$tty_saved" 2>/dev/null
+                printf '\e[?25h'
+                set tty_active false
+            end
+            functions -q __latte_sigint_handler; and functions -e __latte_sigint_handler
+        end
+        function __latte_sigint_handler --on-signal SIGINT
+            __latte_restore_tty
+        end
+        if test -n "$seconds"
+            caffeinate -dimsu -t $seconds
+        else
+            caffeinate -dimsu
+        end
+        set -l rc $status
+        __latte_restore_tty
+        return $rc
+    end
+
     if set -q _flag_hours; and set -q _flag_minutes
         set_color -o red
         echo -n "☕ latte"
@@ -45,10 +82,10 @@ function latte --description 'caffeinate with -h HOURS or -m MINUTES (default 1h
         set label (__latte_plural $_flag_minutes minute)
     else
         __latte_brew "bottomless cup — keeping macOS awake until ctrl-c"
-        caffeinate -dimsu
+        __latte_run
         return
     end
 
     __latte_brew "keeping macOS awake for $label — sip slow"
-    caffeinate -dimsu -t $seconds
+    __latte_run $seconds
 end
