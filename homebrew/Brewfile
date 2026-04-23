@@ -4,6 +4,7 @@ tap "wu-json/asahi"
 
 brew "aqua"
 brew "oven-sh/bun/bun"
+brew "d2"
 brew "eza"
 brew "fd"
 brew "fish"
