@@ -2,10 +2,10 @@ function review_auto
     # Usage: review_auto [--max-iterations N] [--provider openai|anthropic] [--panes 1-3] [--timeout SECS] [--dry-run]
     # Uses --yolo so agents can run shell tools (gh cli, git, etc.) for PR inspection.
     # Default: 3 reviewers (Evelyn, Vivian, Stella) in 4-quadrant layout.
-    set -l max_iters 3
+    set -l max_iters 10
     set -l provider anthropic
     set -l num_panes 3
-    set -l phase_timeout 600
+    set -l phase_timeout 3600
     set -l dry_run false
 
     set -l i 1
