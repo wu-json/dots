@@ -11,6 +11,19 @@ init-fish:
   grep -qxF "{{brew_prefix}}/bin/fish" /etc/shells || echo "{{brew_prefix}}/bin/fish" | sudo tee -a /etc/shells
   chsh -s {{brew_prefix}}/bin/fish
 
+# macOS: App Store Tailscale ships no CLI launcher and crashes via a plain symlink (bundle-identity check), so install a wrapper script.
+init-tailscale-cli:
+  #!/usr/bin/env bash
+  set -euo pipefail
+  if [ "$(uname -s)" != Darwin ]; then echo "skip: macOS only"; exit 0; fi
+  if [ ! -x /Applications/Tailscale.app/Contents/MacOS/Tailscale ]; then echo "Tailscale.app not found"; exit 1; fi
+  sudo tee /usr/local/bin/tailscale > /dev/null <<'EOF'
+  #!/bin/sh
+  exec "/Applications/Tailscale.app/Contents/MacOS/Tailscale" "$@"
+  EOF
+  sudo chmod +x /usr/local/bin/tailscale
+  tailscale version
+
 stow:
   stow -t ~ claude
   # Cursor owns ~/.cursor/cli-config.json (auth/model/etc. state), so skip it.
