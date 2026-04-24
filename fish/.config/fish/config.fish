@@ -33,6 +33,9 @@ alias tree="eza --tree"
 alias o="obsidian"
 alias od="obsidian daily"
 
+# OpenCode
+alias oc="opencode"
+
 # Codex 
 alias cx="codex"
 
