@@ -17,6 +17,7 @@ stow:
   stow --ignore='cli-config\.json' -t ~ cursor
   stow -t ~ fish
   stow -t ~ nvim
+  stow -t ~ opencode
   stow -t ~ wezterm
 
 init: brew stow init-fish
