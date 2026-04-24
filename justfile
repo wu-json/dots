@@ -24,6 +24,16 @@ init-tailscale-cli:
   sudo chmod +x /usr/local/bin/tailscale
   tailscale version
 
+# macOS: Obsidian's installer only appends to .zprofile, so fish misses the CLI. Add the app's MacOS dir to fish's universal PATH.
+init-obsidian-cli:
+  #!/usr/bin/env bash
+  set -euo pipefail
+  if [ "$(uname -s)" != Darwin ]; then echo "skip: macOS only"; exit 0; fi
+  if [ ! -x /Applications/Obsidian.app/Contents/MacOS/Obsidian ]; then echo "Obsidian.app not found"; exit 1; fi
+  sudo rm -f /usr/local/bin/obsidian
+  fish -c 'fish_add_path -U /Applications/Obsidian.app/Contents/MacOS'
+  echo "✓ Obsidian MacOS dir added to fish's universal PATH"
+
 stow:
   stow -t ~ claude
   # Cursor owns ~/.cursor/cli-config.json (auth/model/etc. state), so skip it.
