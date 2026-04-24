@@ -47,6 +47,9 @@ alias prdoc="cursor-agent --yolo --model gpt-5.4-high-fast /pr"
 # Nvim
 alias v="nvim"
 
+# Lazygit
+alias lg="lazygit"
+
 # Working dir copy
 function wdc
     pwd | pbcopy
