@@ -53,6 +53,9 @@ alias v="nvim"
 # Lazygit
 alias lg="lazygit"
 
+# Source fish config
+alias sf="source ~/.config/fish/config.fish"
+
 # Working dir copy
 function wdc
     pwd | pbcopy
