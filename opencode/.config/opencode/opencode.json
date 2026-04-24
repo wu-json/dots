@@ -9,7 +9,17 @@
         "baseURL": "http://localhost:11434/v1"
       },
       "models": {
-        "qwen3.6:35b": { "name": "Qwen3.6 35B" },
+        "qwen3.6:35b": { "name": "Qwen3.6 35B" }
+      }
+    },
+    "ollama-tailnet": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Ollama (mac-studio tailnet)",
+      "options": {
+        "baseURL": "https://mac-studio.tailf2675.ts.net:11434/v1"
+      },
+      "models": {
+        "qwen3.6:35b": { "name": "Qwen3.6 35B" }
       }
     }
   }
