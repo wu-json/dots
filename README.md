@@ -11,6 +11,7 @@ This is where I tweak config files till 4am like a goblin. It's pretty cozy in h
 - **[fish](https://fishshell.com/)** - I eat the fish
 - **[homebrew](https://brew.sh/)** - cyber alcoholic
 - **[neovim](https://neovim.io/)** - female repellent
+- **[opencode](https://opencode.ai)** - tui gang
 - **[wezterm](https://wezterm.org/index.html)** - lua lua lua
 - **[stow](https://www.gnu.org/software/stow/)** - link those symmies
 
