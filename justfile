@@ -11,18 +11,15 @@ init-fish:
   grep -qxF "{{brew_prefix}}/bin/fish" /etc/shells || echo "{{brew_prefix}}/bin/fish" | sudo tee -a /etc/shells
   chsh -s {{brew_prefix}}/bin/fish
 
-# macOS: App Store Tailscale ships no CLI launcher and crashes via a plain symlink (bundle-identity check), so install a wrapper script.
+# macOS: App Store Tailscale ships no CLI launcher, so add the app's MacOS dir to fish's universal PATH. (Symlinks break Tailscale's bundle-identity check, hence PATH over symlink.)
 init-tailscale-cli:
   #!/usr/bin/env bash
   set -euo pipefail
   if [ "$(uname -s)" != Darwin ]; then echo "skip: macOS only"; exit 0; fi
   if [ ! -x /Applications/Tailscale.app/Contents/MacOS/Tailscale ]; then echo "Tailscale.app not found"; exit 1; fi
-  sudo tee /usr/local/bin/tailscale > /dev/null <<'EOF'
-  #!/bin/sh
-  exec "/Applications/Tailscale.app/Contents/MacOS/Tailscale" "$@"
-  EOF
-  sudo chmod +x /usr/local/bin/tailscale
-  tailscale version
+  sudo rm -f /usr/local/bin/tailscale
+  fish -c 'fish_add_path -U /Applications/Tailscale.app/Contents/MacOS'
+  echo "✓ Tailscale MacOS dir added to fish's universal PATH"
 
 # macOS: Obsidian's installer only appends to .zprofile, so fish misses the CLI. Add the app's MacOS dir to fish's universal PATH.
 init-obsidian-cli:
