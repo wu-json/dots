@@ -9,3 +9,8 @@
 claude/.claude/*
 !claude/.claude/skills
 !claude/.claude/settings.json
+
+# Same idea for pi: keep configs/extensions/themes, drop secrets and session logs
+pi/.pi/agent/auth.json
+pi/.pi/agent/sessions/
+

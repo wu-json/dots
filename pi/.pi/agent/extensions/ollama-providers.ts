@@ -27,8 +27,8 @@ interface LocalModel {
 // what the OpenAI-compatible endpoint returns (e.g. `ollama list`).
 const MODELS: LocalModel[] = [
 	{
-		id: "qwen3.6:35b",
-		name: "Qwen3.6 35B",
+		id: "qwen3.6:35b-a3b-coding-mxfp8",
+		name: "Qwen3.6 35B A3B Coding (mxfp8)",
 		// Qwen3 ships with 32k native context; bump if you've enabled YaRN.
 		contextWindow: 32768,
 		maxTokens: 4096,
