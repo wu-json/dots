@@ -47,6 +47,26 @@ function review
         set i (math $i + 1)
     end
 
+
+    # Resolve model aliases: opus, qwen, or pass through full provider strings
+    switch $model_override
+        case ''
+            # Empty — no alias resolution needed, skip to assignment below
+        case opus
+            set model_override "anthropic/claude-opus-4-7"
+        case qwen
+            set model_override "ollama-tailnet/qwen3.6:35b-a3b-coding-mxfp8"
+        case '*'
+            # Not a recognized alias — check if it's a full provider string (contains '/')
+            if not string match -q '*/*' -- $model_override
+                echo "Unknown model alias: '$model_override'" >&2
+                echo "Full provider strings (containing '/') are passed through as-is." >&2
+                echo "Available aliases: opus, qwen" >&2
+                return 1
+            end
+            # Full provider string — no conversion needed; fall through
+    end
+
     if test $num_panes -lt 1 -o $num_panes -gt 4
         echo "Number of panes must be between 1 and 4"
         return 1
@@ -68,9 +88,16 @@ function review
         echo "   - model is set via --model (default: anthropic/claude-opus-4-7)."
         echo "   - agent count via positional arg 1-4 (default: 1)."
         echo ""
+        echo "Aliases:"
+        echo "   opus          → anthropic/claude-opus-4-7"
+        echo "   qwen          → ollama-tailnet/qwen3.6:35b-a3b-coding-mxfp8"
+        echo "   Full provider strings (e.g. openai/gpt-5.5-high) are passed through as-is."
+        echo ""
         echo "Examples:"
-        echo "  review                                # 1 reviewer (Evelyn), default model"
-        echo "  review 3 --model ollama-local/qwen3.6 # 3 reviewers, local model"
+        echo "  review                                   # 1 reviewer (Evelyn), default model"
+        echo "  review 3 --model opus                    # 3 reviewers, Opus 4.7"
+        echo "  review 3 --model qwen                    # 3 reviewers, Qwen 3.6 on tailnet"
+        echo "  review 3 --model ollama-local/qwen3.6    # 3 reviewers, local model"
         return 0
     end
 
