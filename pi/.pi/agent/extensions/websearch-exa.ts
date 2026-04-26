@@ -48,15 +48,14 @@ export default function (pi: ExtensionAPI) {
 					? AbortSignal.any([signal, AbortSignal.timeout(25_000)])
 					: AbortSignal.timeout(25_000),
 			});
-			if (!res.ok) throw new Error(`Exa MCP HTTP ${res.status}`);
-			for (const line of (await res.text()).split("\n")) {
-				if (!line.startsWith("data: ")) continue;
-				let parsed: any;
-				try {
-					parsed = JSON.parse(line.slice(6));
-				} catch {
-					continue;
-				}
+			const body = await res.text();
+			if (!res.ok) {
+				const snippet = body.slice(0, 500);
+				throw new Error(
+					`Exa MCP HTTP ${res.status}${snippet ? `: ${snippet}` : ""}`,
+				);
+			}
+			const extract = (parsed: any): string | undefined => {
 				if (parsed?.error) {
 					throw new Error(parsed.error.message ?? "Exa MCP error");
 				}
@@ -67,8 +66,27 @@ export default function (pi: ExtensionAPI) {
 						.join("\n");
 					throw new Error(errText || "Exa MCP tool error");
 				}
-				const text = parsed?.result?.content?.[0]?.text;
+				return parsed?.result?.content?.[0]?.text;
+			};
+			for (const line of body.split("\n")) {
+				if (!line.startsWith("data: ")) continue;
+				let parsed: any;
+				try {
+					parsed = JSON.parse(line.slice(6));
+				} catch {
+					continue;
+				}
+				const text = extract(parsed);
 				if (text) return { content: [{ type: "text", text }], details: {} };
+			}
+			// Fallback: server may have honored `application/json` from our Accept
+			// header and returned a plain JSON-RPC response instead of SSE frames.
+			try {
+				const parsed = JSON.parse(body);
+				const text = extract(parsed);
+				if (text) return { content: [{ type: "text", text }], details: {} };
+			} catch {
+				// Not JSON either — fall through to empty-results sentinel.
 			}
 			return { content: [{ type: "text", text: "No results." }], details: {} };
 		},
