@@ -174,7 +174,7 @@ Default cap of 3 iterations to prevent infinite loops. Configurable via argument
 review_auto [options]
   --max-iterations N Max review/fix cycles (default: 3)
   --provider NAME    openai | anthropic (default: anthropic)
-  --panes N          Number of review panes 1-3 (default: 3)
+  --agents N         Number of review agents 1-3 (default: 3)
   --dry-run          Run reviews + triage only, skip fix step
 ```
 
