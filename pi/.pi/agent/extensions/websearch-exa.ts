@@ -51,7 +51,16 @@ export default function (pi: ExtensionAPI) {
 			if (!res.ok) throw new Error(`Exa MCP HTTP ${res.status}`);
 			for (const line of (await res.text()).split("\n")) {
 				if (!line.startsWith("data: ")) continue;
-				const text = JSON.parse(line.slice(6))?.result?.content?.[0]?.text;
+				let parsed: any;
+				try {
+					parsed = JSON.parse(line.slice(6));
+				} catch {
+					continue;
+				}
+				if (parsed?.error) {
+					throw new Error(parsed.error.message ?? "Exa MCP error");
+				}
+				const text = parsed?.result?.content?.[0]?.text;
 				if (text) return { content: [{ type: "text", text }], details: {} };
 			}
 			return { content: [{ type: "text", text: "No results." }], details: {} };
