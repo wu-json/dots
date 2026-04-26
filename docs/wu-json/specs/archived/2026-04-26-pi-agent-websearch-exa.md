@@ -1,12 +1,12 @@
 ---
-status: ready
+status: implemented
 ---
 
 # pi-agent websearch extension via public Exa MCP
 
 **Date:** 2026-04-26
 **Author:** Jason Wu
-**Status:** Ready
+**Status:** Implemented
 
 ## Problem
 
@@ -141,19 +141,32 @@ tool-surface-area argument).
 
 ## Verification
 
-Manual, TUI-observed:
+What I actually ran at implementation time:
 
-1. `stow pi`, restart pi. No extension-load errors on startup.
-2. Ask pi "search for the latest Claude Opus release" — `websearch`
-   tool call fires, results come back.
-3. `pi --tools read,websearch -p "..."` — allowlist mode works,
-   bash is excluded.
-4. Query for "latest TypeScript" — the `query` arg should include
-   the current year (confirms the template-string year is live).
-5. Ctrl-C mid-call — aborts cleanly, pi returns to prompt.
-6. Set `EXA_API_KEY`, re-run; confirm the URL includes
-   `?exaApiKey=…` (eyeball a `curl` side-by-side or add a temp
-   `console.error` during implementation).
+1. **Direct bun smoke test.** Loaded `websearch-exa.ts` via `bun`
+   with a stub `ExtensionAPI` that captured the `registerTool`
+   call, then invoked `execute()` against the live public Exa MCP
+   with `query: "latest TypeScript release notes", numResults: 3`.
+   Returned 6.5 KB of real 2026-dated results in ~2s; `details`
+   came back as `{}`; year-in-description rendered correctly.
+   Confirms the whole code path end-to-end (schema, fetch,
+   JSON-RPC body shape, SSE parser, result envelope) without
+   needing a full LLM round trip.
+2. **Stow state.** `~/.pi/agent/extensions` is already a symlink
+   into `pi/.pi/agent/extensions/`, so writing the file lands it
+   live with no additional step. Confirmed via `ls -la` and a
+   `diff` showing identity.
+
+Deferred to interactive use (cheap to check later, not worth
+blocking the rip on):
+
+- Full `pi -p "..." -t websearch` TUI round trip — ollama-tailnet
+  startup made this ≥2 minutes per call, and the bun path above
+  already exercises the only interesting code.
+- Ctrl-C abort path — logic is a single `AbortSignal.any` line
+  and is exercised any time an agent turn is interrupted.
+- `EXA_API_KEY` path — URL composition is a two-line ternary,
+  visually verifiable without a live run.
 
 ## Considered alternatives
 
