@@ -1,9 +1,13 @@
 function review_auto
-    # Usage: review_auto [--max-iterations N] [--provider openai|anthropic] [--agents 1-3] [--timeout SECS] [--dry-run]
-    # Uses --yolo so agents can run shell tools (gh cli, git, etc.) for PR inspection.
-    # Default: 3 reviewers (Evelyn, Vivian, Stella) in 4-quadrant layout.
+    # Usage: review_auto [--max-iterations N] [--model PATTERN] [--agents 1-3] [--timeout SECS] [--dry-run]
+    # Drives interactive `pi` (full TUI in each pane so you can watch
+    # progress) with role-specific --tools allowlists (review/triage are
+    # no-edit; fix gets the full mutating set). Default model is
+    # anthropic/claude-opus-4-7 with --thinking high; --model overrides for
+    # all three roles. Default: 3 reviewers (Evelyn, Vivian, Stella) in
+    # 4-quadrant layout.
     set -l max_iters 10
-    set -l provider anthropic
+    set -l model_override ""
     set -l num_agents 3
     set -l phase_timeout 3600
     set -l dry_run false
@@ -23,13 +27,22 @@ function review_auto
                     return 1
                 end
                 set max_iters $argv[$i]
-            case --provider
+            case --model
                 set i (math $i + 1)
                 if test $i -gt $argc
-                    echo "Missing value for --provider"
+                    echo "Missing value for --model"
                     return 1
                 end
-                set provider (string lower $argv[$i])
+                # Charset guard: the override is concatenated into a string
+                # that gets sent to the pane's fish via send-text, so a value
+                # like `--model 'foo; rm -rf ~/x'` would be parsed as two
+                # commands. Restrict to characters that appear in real model
+                # ids (provider/id[:tag] for both anthropic and ollama).
+                if not string match -rq '^[A-Za-z0-9._/:-]+$' -- $argv[$i]
+                    echo "Invalid --model value: '$argv[$i]' (allowed: A-Z a-z 0-9 . _ / : -)"
+                    return 1
+                end
+                set model_override $argv[$i]
             case --agents
                 set i (math $i + 1)
                 if test $i -gt $argc
@@ -56,7 +69,7 @@ function review_auto
                 set dry_run true
             case '*'
                 echo "Unknown argument: $argv[$i]"
-                echo "Usage: review_auto [--max-iterations N] [--provider openai|anthropic] [--agents 1-3] [--timeout SECS] [--dry-run]"
+                echo "Usage: review_auto [--max-iterations N] [--model PATTERN] [--agents 1-3] [--timeout SECS] [--dry-run]"
                 return 1
         end
         set i (math $i + 1)
@@ -75,22 +88,28 @@ function review_auto
         return 1
     end
 
-    set -l review_model gpt-5.4-high
-    set -l triage_model gpt-5.4-high
-    set -l fix_model claude-opus-4-7-high
-    switch $provider
-        case anthropic
-            set review_model claude-opus-4-7-high
-            set triage_model claude-opus-4-7-high
-        case openai
-            set fix_model gpt-5.4-high
-        case '*'
-            echo "Invalid provider: $provider (must be 'anthropic' or 'openai')"
-            return 1
+    # Resolve model: default to anthropic/claude-opus-4-7, allow --model override.
+    # If the override encodes a thinking level as the trailing :level suffix
+    # (matching pi's vocabulary), suppress the explicit --thinking flag to
+    # avoid double-specifying. Last-:-suffix detection is required because
+    # ollama tags use ':' natively (e.g. qwen3.6:35b-a3b-coding-mxfp8).
+    set -l model anthropic/claude-opus-4-7
+    if test -n "$model_override"
+        set model $model_override
     end
 
+    set -l thinking_levels off minimal low medium high xhigh
+    set -l suffix (string match -rg '^.*:([^:]+)$' -- $model)
+    set -l pi_base "pi --no-session"
+    if not contains -- "$suffix" $thinking_levels
+        set pi_base "$pi_base --thinking high"
+    end
+    set pi_base "$pi_base --model $model"
+
     set -l session_dir (mktemp -d /tmp/review_auto.XXXXXX)
-    set -l review_cmd "cursor-agent --yolo --model $review_model"
+    set -l review_cmd "$pi_base --tools read,grep,find,ls,bash"
+    set -l triage_cmd "$pi_base --tools read,grep,find,ls,bash,write"
+    set -l fix_cmd "$pi_base --tools read,grep,find,ls,bash,edit,write"
 
     # Make the orchestrator terminal robust to stray keystrokes while the
     # spinner animates: disable echo and canonical line buffering, and hide
@@ -225,7 +244,19 @@ function review_auto
         end
     end
     echo " "(set_color --bold)"review_auto"(set_color normal)" "(set_color brblack)"·"(set_color normal)" "\e]8\;\;$pr_url\e\\(set_color white)$pr_label(set_color normal)\e]8\;\;\e\\
-    echo " "(set_color brblack)"$provider · $num_agents reviewers · $max_iters max iterations"(set_color normal)
+    # Truncate the model id against $COLUMNS the same way pr_label is
+    # truncated above; the orchestrator pane is half-width by design and
+    # long ids (e.g. `ollama-tailnet/qwen3.6:35b-a3b-coding-mxfp8`) wrap.
+    set -l model_label $model
+    set -l _model_prefix " $num_agents reviewers · $max_iters max iterations · "
+    set -l model_max (math $COLUMNS - (string length "$_model_prefix") - 1)
+    if test $model_max -lt 20
+        set model_max 20
+    end
+    if test (string length "$model") -gt $model_max
+        set model_label (string sub -l $model_max "$model")"…"
+    end
+    echo " "(set_color brblack)"$num_agents reviewers · $max_iters max iterations · $model_label"(set_color normal)
     echo ""
 
     # --- main loop ---
@@ -364,8 +395,8 @@ function review_auto
 
         set -l triage_prompt_file "$iter_dir/prompt_triage.txt"
         printf '%s' "$triage_prompt" >$triage_prompt_file
-        set -l triage_cmd "cursor-agent --yolo --model $triage_model \"\$(cat $triage_prompt_file)\""
-        printf '%s\r' "$triage_cmd" | wezterm cli send-text --no-paste --pane-id $work_pane
+        set -l cmd "$triage_cmd \"\$(cat $triage_prompt_file)\""
+        printf '%s\r' "$cmd" | wezterm cli send-text --no-paste --pane-id $work_pane
 
         set -l triage_start (date +%s)
         set frame_idx 1
@@ -447,8 +478,8 @@ function review_auto
 
         set -l fix_prompt_file "$iter_dir/prompt_fix.txt"
         printf '%s' "$fix_prompt" >$fix_prompt_file
-        set -l fix_cmd "cursor-agent --yolo --model $fix_model \"\$(cat $fix_prompt_file)\""
-        printf '%s\r' "$fix_cmd" | wezterm cli send-text --no-paste --pane-id $work_pane
+        set -l cmd "$fix_cmd \"\$(cat $fix_prompt_file)\""
+        printf '%s\r' "$cmd" | wezterm cli send-text --no-paste --pane-id $work_pane
 
         set -l fix_start (date +%s)
         set frame_idx 1
