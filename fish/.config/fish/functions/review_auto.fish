@@ -1,10 +1,10 @@
 function review_auto
-    # Usage: review_auto [--max-iterations N] [--provider openai|anthropic] [--panes 1-3] [--timeout SECS] [--dry-run]
+    # Usage: review_auto [--max-iterations N] [--provider openai|anthropic] [--agents 1-3] [--timeout SECS] [--dry-run]
     # Uses --yolo so agents can run shell tools (gh cli, git, etc.) for PR inspection.
     # Default: 3 reviewers (Evelyn, Vivian, Stella) in 4-quadrant layout.
     set -l max_iters 10
     set -l provider anthropic
-    set -l num_panes 3
+    set -l num_agents 3
     set -l phase_timeout 3600
     set -l dry_run false
 
@@ -30,17 +30,17 @@ function review_auto
                     return 1
                 end
                 set provider (string lower $argv[$i])
-            case --panes
+            case --agents
                 set i (math $i + 1)
                 if test $i -gt $argc
-                    echo "Missing value for --panes"
+                    echo "Missing value for --agents"
                     return 1
                 end
                 if not string match -qr '^\d+$' -- $argv[$i]
-                    echo "Invalid --panes value: '$argv[$i]' (must be a positive integer)"
+                    echo "Invalid --agents value: '$argv[$i]' (must be a positive integer)"
                     return 1
                 end
-                set num_panes $argv[$i]
+                set num_agents $argv[$i]
             case --timeout
                 set i (math $i + 1)
                 if test $i -gt $argc
@@ -56,14 +56,14 @@ function review_auto
                 set dry_run true
             case '*'
                 echo "Unknown argument: $argv[$i]"
-                echo "Usage: review_auto [--max-iterations N] [--provider openai|anthropic] [--panes 1-3] [--timeout SECS] [--dry-run]"
+                echo "Usage: review_auto [--max-iterations N] [--provider openai|anthropic] [--agents 1-3] [--timeout SECS] [--dry-run]"
                 return 1
         end
         set i (math $i + 1)
     end
 
-    if test $num_panes -lt 1 -o $num_panes -gt 3
-        echo "Pane count must be between 1 and 3"
+    if test $num_agents -lt 1 -o $num_agents -gt 3
+        echo "Agent count must be between 1 and 3"
         return 1
     end
 
@@ -198,12 +198,12 @@ function review_auto
     # pane_ids order: Evelyn, Vivian, Stella
     set pane_ids $pane_evelyn $pane_vivian $pane_stella
 
-    # Kill unused panes if num_panes < 3
-    if test $num_panes -lt 3
+    # Kill unused panes if num_agents < 3
+    if test $num_agents -lt 3
         wezterm cli kill-pane --pane-id $pane_stella &>/dev/null
         set pane_ids $pane_evelyn $pane_vivian
     end
-    if test $num_panes -lt 2
+    if test $num_agents -lt 2
         wezterm cli kill-pane --pane-id $pane_vivian &>/dev/null
         set pane_ids $pane_evelyn
     end
@@ -225,7 +225,7 @@ function review_auto
         end
     end
     echo " "(set_color --bold)"review_auto"(set_color normal)" "(set_color brblack)"·"(set_color normal)" "\e]8\;\;$pr_url\e\\(set_color white)$pr_label(set_color normal)\e]8\;\;\e\\
-    echo " "(set_color brblack)"$provider · $num_panes reviewers · $max_iters max iterations"(set_color normal)
+    echo " "(set_color brblack)"$provider · $num_agents reviewers · $max_iters max iterations"(set_color normal)
     echo ""
 
     # --- main loop ---
@@ -261,24 +261,24 @@ function review_auto
                 return 1
             end
             set pane_ids $pe $pb $ps
-            if test $num_panes -lt 3
+            if test $num_agents -lt 3
                 wezterm cli kill-pane --pane-id $ps &>/dev/null
                 set pane_ids $pe $pb
             end
-            if test $num_panes -lt 2
+            if test $num_agents -lt 2
                 wezterm cli kill-pane --pane-id $pb &>/dev/null
                 set pane_ids $pe
             end
         end
 
         # clean sentinel files
-        for j in (seq $num_panes)
+        for j in (seq $num_agents)
             set -l name (string lower $names[$j])
             rm -f $iter_dir/.done_$name
         end
 
         # dispatch review agents to panes (prompts written to temp files to avoid shell metacharacter issues)
-        for j in (seq $num_panes)
+        for j in (seq $num_agents)
             set -l name (string lower $names[$j])
             set -l outfile "$iter_dir/review_$name.md"
             set -l sentinel "$iter_dir/.done_$name"
@@ -298,7 +298,7 @@ function review_auto
         while true
             set -l done_count 0
             set -l status_line ""
-            for j in (seq $num_panes)
+            for j in (seq $num_agents)
                 set -l name $names[$j]
                 set -l name_lower (string lower $name)
                 if test -f $iter_dir/.done_$name_lower
@@ -316,7 +316,7 @@ function review_auto
             set -l dots (printf "%-4s" $dot_frames[$frame_idx])
             printf "\r %s•%s Reviewing%s%s(%s/%s)%s  %s %s%s%s" (set_color $dot_colors[$frame_idx]) $reset "$dots" $dim $iter $max_iters $reset "$status_line" $dim $total_ts $reset
 
-            if test $done_count -ge $num_panes
+            if test $done_count -ge $num_agents
                 break
             end
 
@@ -353,7 +353,7 @@ function review_auto
 
         # --- triage phase ---
         set -l review_files
-        for j in (seq $num_panes)
+        for j in (seq $num_agents)
             set -l name (string lower $names[$j])
             set -a review_files "$iter_dir/review_$name.md"
         end
