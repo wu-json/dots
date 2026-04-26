@@ -60,6 +60,13 @@ export default function (pi: ExtensionAPI) {
 				if (parsed?.error) {
 					throw new Error(parsed.error.message ?? "Exa MCP error");
 				}
+				if (parsed?.result?.isError) {
+					const errText = (parsed.result.content ?? [])
+						.map((c: any) => c?.text)
+						.filter(Boolean)
+						.join("\n");
+					throw new Error(errText || "Exa MCP tool error");
+				}
 				const text = parsed?.result?.content?.[0]?.text;
 				if (text) return { content: [{ type: "text", text }], details: {} };
 			}
