@@ -2,7 +2,7 @@
 
 This is where I tweak config files till 4am like a goblin. It's pretty cozy in here.
 
-![10d1d033-882c-4e25-b427-9b6c0ff7985b](https://github.com/user-attachments/assets/c0c99a76-39bc-4618-8a29-741b0904e2b6)
+![banner](assets/banner.png)
 
 ## My Cursed Tools
 
@@ -20,4 +20,19 @@ This is where I tweak config files till 4am like a goblin. It's pretty cozy in h
 ```bash
 brew install just
 just init
+```
+
+## Skills
+
+`skills/<name>/SKILL.md` is the only file you edit. Each agent's skills dir (`claude/.claude/skills`, `cursor/.cursor/skills`, `pi/.pi/agent/skills`, `opencode/.config/opencode/skills`) is a symlink to `skills/`, so one copy is shared across all four agents.
+
+```yaml
+---
+name: <name>
+description: One-line trigger blurb. "Use when the user asks for X."
+---
+
+# <name>
+
+Body of the skill.
 ```
