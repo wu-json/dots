@@ -38,6 +38,7 @@ stow:
   stow -t ~ fish
   stow -t ~ nvim
   stow -t ~ opencode
+  stow -t ~ pi
   stow -t ~ wezterm
 
 init: brew stow init-fish
