@@ -1,6 +1,6 @@
 {
-  "defaultProvider": "anthropic",
-  "defaultModel": "claude-opus-4-7",
+  "defaultProvider": "ollama-tailnet",
+  "defaultModel": "qwen3.6:35b-a3b-coding-mxfp8",
   "theme": "mono",
   "quietStartup": true,
   "collapseChangelog": true,
