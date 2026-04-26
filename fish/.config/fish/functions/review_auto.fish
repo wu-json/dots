@@ -1,22 +1,24 @@
 function review_auto
-    # Usage: review_auto [--max-iterations N] [--model PATTERN] [--agents 1-3] [--timeout SECS] [--dry-run]
-    # Drives interactive `pi` (full TUI in each pane so you can watch
-    # progress) with role-specific --tools allowlists (review/triage are
-    # no-edit; fix gets the full mutating set). Default model is
-    # anthropic/claude-opus-4-7 with --thinking high; --model overrides for
-    # all three roles. Default: 3 reviewers (Evelyn, Vivian, Stella) in
-    # 4-quadrant layout.
+     # Usage: review_auto [--max-iterations N] [--model PATTERN] [--agents 1-3] [--timeout SECS] [--dry-run] [--help]
+     # Drives interactive `pi` (full TUI in each pane so you can watch
+     # progress) with role-specific --tools allowlists (review/triage are
+     # no-edit; fix gets the full mutating set). Default model is
+     # anthropic/claude-opus-4-7 with --thinking high; --model overrides for
+     # all three roles. Default: 1 reviewer (Evelyn) in single-pane layout.
     set -l max_iters 10
     set -l model_override ""
-    set -l num_agents 3
+    set -l num_agents 1
     set -l phase_timeout 3600
     set -l dry_run false
+    set -l show_help false
 
     set -l i 1
     set -l argc (count $argv)
     while test $i -le $argc
         switch $argv[$i]
-            case --max-iterations
+            case '-h' '--help'
+                set show_help true
+            case '--max-iterations'
                 set i (math $i + 1)
                 if test $i -gt $argc
                     echo "Missing value for --max-iterations"
@@ -27,23 +29,23 @@ function review_auto
                     return 1
                 end
                 set max_iters $argv[$i]
-            case --model
+            case '--model'
                 set i (math $i + 1)
                 if test $i -gt $argc
                     echo "Missing value for --model"
                     return 1
                 end
-                # Charset guard: the override is concatenated into a string
-                # that gets sent to the pane's fish via send-text, so a value
-                # like `--model 'foo; rm -rf ~/x'` would be parsed as two
-                # commands. Restrict to characters that appear in real model
-                # ids (provider/id[:tag] for both anthropic and ollama).
+                 # Charset guard: the override is concatenated into a string
+                 # that gets sent to the pane's fish via send-text, so a value
+                 # like `--model 'foo; rm -rf ~/x'` would be parsed as two
+                 # commands. Restrict to characters that appear in real model
+                 # ids (provider/id[:tag] for both anthropic and ollama).
                 if not string match -rq '^[A-Za-z0-9._/:-]+$' -- $argv[$i]
                     echo "Invalid --model value: '$argv[$i]' (allowed: A-Z a-z 0-9 . _ / : -)"
                     return 1
                 end
                 set model_override $argv[$i]
-            case --agents
+            case '--agents'
                 set i (math $i + 1)
                 if test $i -gt $argc
                     echo "Missing value for --agents"
@@ -54,7 +56,7 @@ function review_auto
                     return 1
                 end
                 set num_agents $argv[$i]
-            case --timeout
+            case '--timeout'
                 set i (math $i + 1)
                 if test $i -gt $argc
                     echo "Missing value for --timeout"
@@ -65,11 +67,11 @@ function review_auto
                     return 1
                 end
                 set phase_timeout $argv[$i]
-            case --dry-run
+            case '--dry-run'
                 set dry_run true
             case '*'
                 echo "Unknown argument: $argv[$i]"
-                echo "Usage: review_auto [--max-iterations N] [--model PATTERN] [--agents 1-3] [--timeout SECS] [--dry-run]"
+                echo "Usage: review_auto [--max-iterations N] [--model PATTERN] [--agents 1-3] [--timeout SECS] [--dry-run] [--help]"
                 return 1
         end
         set i (math $i + 1)
@@ -80,6 +82,34 @@ function review_auto
         return 1
     end
 
+    if test $show_help = true
+        echo "Usage: review_auto [--max-iterations N] [--model PATTERN] [--agents 1-3] [--timeout SECS] [--dry-run] [--help]"
+        echo ""
+        echo "Drives interactive pi auto-review with orchestrator + reviewer(s),"
+        echo "triage, and fix phases in a Wezterm multi-pane layout."
+        echo ""
+        echo "Arguments:"
+        echo "  --max-iterations N   Max review-fix iterations (default: 10)"
+        echo "  --model PATTERN      Provider/model id, e.g. anthropic/claude-opus-4-7"
+        echo "                       or ollama-tailnet/qwen3.6:35b-a3b-coding-mxfp8"
+        echo "  --agents 1-3         Number of reviewer agents (default: 1)"
+        echo "  --timeout SECS       Per-phase timeout in seconds (default: 3600)"
+        echo "  --dry-run            Stop after triage without auto-fixing"
+        echo "  --help, -h           Show this help message"
+        echo ""
+        echo "Input configuration:"
+        echo "  - model is set via --model (default: anthropic/claude-opus-4-7)."
+        echo "  - agent count via --agents (default: 1, max 3)."
+        echo "  - max iterations via --max-iterations (default: 10)."
+        echo "  - phase timeout via --timeout in seconds (default: 3600, i.e. 1 hour)."
+        echo ""
+        echo "Examples:"
+        echo "  review_auto                              # 1 reviewer, 10 iterations"
+        echo "  review_auto --agents 3 --max-iterations 3 # 3 reviewers, up to 3 iterations"
+        echo "  review_auto --model ollama-local/qwen3.6  # use local model"
+        return 0
+    end
+
     set -l pr_number (gh pr view --json number --jq '.number' 2>/dev/null)
     set -l pr_url (gh pr view --json url --jq '.url' 2>/dev/null)
     set -l pr_title (gh pr view --json title --jq '.title' 2>/dev/null)
@@ -88,11 +118,11 @@ function review_auto
         return 1
     end
 
-    # Resolve model: default to anthropic/claude-opus-4-7, allow --model override.
-    # If the override encodes a thinking level as the trailing :level suffix
-    # (matching pi's vocabulary), suppress the explicit --thinking flag to
-    # avoid double-specifying. Last-:-suffix detection is required because
-    # ollama tags use ':' natively (e.g. qwen3.6:35b-a3b-coding-mxfp8).
+     # Resolve model: default to anthropic/claude-opus-4-7, allow --model override.
+     # If the override encodes a thinking level as the trailing :level suffix
+     # (matching pi's vocabulary), suppress the explicit --thinking flag to
+     # avoid double-specifying. Last-:-suffix detection is required because
+     # ollama tags use ':' natively (e.g. qwen3.6:35b-a3b-coding-mxfp8).
     set -l model anthropic/claude-opus-4-7
     if test -n "$model_override"
         set model $model_override
@@ -111,11 +141,11 @@ function review_auto
     set -l triage_cmd "$pi_base --tools read,grep,find,ls,bash,write"
     set -l fix_cmd "$pi_base --tools read,grep,find,ls,bash,edit,write"
 
-    # Make the orchestrator terminal robust to stray keystrokes while the
-    # spinner animates: disable echo and canonical line buffering, and hide
-    # the cursor. Restored on every exit path via __review_auto_restore_tty,
-    # which is invoked alongside `rm -rf $session_dir` in cleanup sites.
-    # Only touch the TTY if stdin is actually a terminal.
+     # Make the orchestrator terminal robust to stray keystrokes while the
+     # spinner animates: disable echo and canonical line buffering, and hide
+     # the cursor. Restored on every exit path via __review_auto_restore_tty,
+     # which is invoked alongside `rm -rf $session_dir` in cleanup sites.
+     # Only touch the TTY if stdin is actually a terminal.
     set -l __ra_tty_saved ""
     set -l __ra_tty_active false
     if isatty stdin
@@ -128,9 +158,9 @@ function review_auto
     end
     function __review_auto_restore_tty --inherit-variable __ra_tty_saved --inherit-variable __ra_tty_active
         if test "$__ra_tty_active" = true
-            # Flush any keystrokes the user hit during the spinner so they
-            # don't paste into the next prompt as a command. python3 ships
-            # with macOS; fall back silently if it's unavailable.
+             # Flush any keystrokes the user hit during the spinner so they
+             # don't paste into the next prompt as a command. python3 ships
+             # with macOS; fall back silently if it's unavailable.
             command -q python3; and python3 -c 'import termios,sys; termios.tcflush(sys.stdin, termios.TCIFLUSH)' 2>/dev/null
             stty "$__ra_tty_saved" 2>/dev/null
             printf '\e[?25h'
@@ -138,86 +168,86 @@ function review_auto
         end
         functions -q __review_auto_sigint_handler; and functions -e __review_auto_sigint_handler
     end
-    # Restore the TTY if the user hits Ctrl-C mid-run. Registered globally
-    # because fish signal handlers must be top-level functions; erased on the
-    # normal exit paths below.
+     # Restore the TTY if the user hits Ctrl-C mid-run. Registered globally
+     # because fish signal handlers must be top-level functions; erased on the
+     # normal exit paths below.
     function __review_auto_sigint_handler --on-signal SIGINT
-        __review_auto_restore_tty
+         __review_auto_restore_tty
     end
 
-    # reviewer identities and prompts
+     # reviewer identities and prompts
     set -l names Evelyn Vivian Stella
     set -l no_checkout "IMPORTANT: Do NOT check out, switch, or create any git branch. Do NOT run git checkout, git switch, gh pr checkout, or any command that changes the working tree's branch. Inspect the PR diff via gh/git commands that do not mutate the branch (e.g. gh pr diff, git diff <base>...<head>)."
     set -l base_prompts \
-        "You are Evelyn. Use the local review skill to review PR #$pr_number in read-only mode and follow its exact response format. $no_checkout" \
-        "You are Vivian. Use the local review skill to review PR #$pr_number in read-only mode and follow its exact response format. $no_checkout" \
-        "You are Stella. Use the local review skill to review PR #$pr_number in read-only mode and follow its exact response format. Focus on dead code, unused imports, and unreachable code paths. $no_checkout"
+         "You are Evelyn. Use the local review skill to review PR #$pr_number in read-only mode and follow its exact response format. $no_checkout" \
+         "You are Vivian. Use the local review skill to review PR #$pr_number in read-only mode and follow its exact response format. $no_checkout" \
+         "You are Stella. Use the local review skill to review PR #$pr_number in read-only mode and follow its exact response format. Focus on dead code, unused imports, and unreachable code paths. $no_checkout"
 
-    # --- beautiful header ---
+     # --- beautiful header ---
     set -l dim (set_color brblack)
     set -l reset (set_color normal)
     set -l green (set_color green)
 
-    # --- split panes: 4 quadrants (orchestrator + 3 reviewers) ---
-    # Layout (latte is a thin strip above, keeping the laptop awake):
-    # ┌───────────────────────────────────────────┐
-    # │                  latte                    │
-    # ├─────────────────────┬─────────────────────┤
-    # │   ORCHESTRATOR      │      Evelyn         │
-    # ├─────────────────────┼─────────────────────┤
-    # │     Vivian          │      Stella         │
-    # └─────────────────────┴─────────────────────┘
-    # Split order matters: latte first (thin top strip), then bottom row,
-    # then split each row horizontally. Splitting latte off pane_0 first
-    # shrinks pane_0 by a couple rows but leaves the reviewer quadrant
-    # geometry identical to before.
+     # --- split panes: 4 quadrants (orchestrator + 3 reviewers) ---
+     # Layout (latte is a thin strip above, keeping the laptop awake):
+     # ┌───────────────────────────────────────────┐
+     # │                  latte                     │
+     # ├─────────────────────┬─────────────────────┤
+     # │   ORCHESTRATOR       │      Evelyn          │
+     # ├─────────────────────┼─────────────────────┤
+     # │     Vivian           │      Stella          │
+     # └─────────────────────┴─────────────────────┘
+     # Split order matters: latte first (thin top strip), then bottom row,
+     # then split each row horizontally. Splitting latte off pane_0 first
+     # shrinks pane_0 by a couple rows but leaves the reviewer quadrant
+     # geometry identical to before.
     set -l pane_0 $WEZTERM_PANE
     set -l pane_ids
 
-    # Step 0: carve off a thin strip above pane_0 for latte (caffeinate wrapper)
-    # so the laptop doesn't sleep while the auto-review runs.
+     # Step 0: carve off a thin strip above pane_0 for latte (caffeinate wrapper)
+     # so the laptop doesn't sleep while the auto-review runs.
     set -l pane_latte (wezterm cli split-pane --pane-id $pane_0 --top --cells 2)
     if test -z "$pane_latte"
         echo "Failed to create latte pane (split-pane returned empty ID)"
-        __review_auto_restore_tty; rm -rf $session_dir
+         __review_auto_restore_tty; rm -rf $session_dir
         return 1
     end
     printf '%s\r' 'latte' | wezterm cli send-text --no-paste --pane-id $pane_latte
 
-    # Step 1: split horizontally to create bottom row
+     # Step 1: split horizontally to create bottom row
     set -l pane_bottom (wezterm cli split-pane --pane-id $pane_0 --bottom)
     if test -z "$pane_bottom"
         echo "Failed to create bottom pane (split-pane returned empty ID)"
         wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
-        __review_auto_restore_tty; rm -rf $session_dir
+         __review_auto_restore_tty; rm -rf $session_dir
         return 1
     end
-    # Step 2: split top row to create Evelyn (top-right)
+     # Step 2: split top row to create Evelyn (top-right)
     set -l pane_evelyn (wezterm cli split-pane --pane-id $pane_0 --right)
     if test -z "$pane_evelyn"
         echo "Failed to create Evelyn pane (split-pane returned empty ID)"
         wezterm cli kill-pane --pane-id $pane_bottom &>/dev/null
         wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
-        __review_auto_restore_tty; rm -rf $session_dir
+         __review_auto_restore_tty; rm -rf $session_dir
         return 1
     end
-    # Step 3: split bottom row to create Stella (bottom-right)
+     # Step 3: split bottom row to create Stella (bottom-right)
     set -l pane_stella (wezterm cli split-pane --pane-id $pane_bottom --right)
     if test -z "$pane_stella"
         echo "Failed to create Stella pane (split-pane returned empty ID)"
         wezterm cli kill-pane --pane-id $pane_evelyn &>/dev/null
         wezterm cli kill-pane --pane-id $pane_bottom &>/dev/null
         wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
-        __review_auto_restore_tty; rm -rf $session_dir
+         __review_auto_restore_tty; rm -rf $session_dir
         return 1
     end
-    # pane_bottom is now Vivian (bottom-left)
+     # pane_bottom is now Vivian (bottom-left)
     set -l pane_vivian $pane_bottom
 
-    # pane_ids order: Evelyn, Vivian, Stella
+     # pane_ids order: Evelyn, Vivian, Stella
     set pane_ids $pane_evelyn $pane_vivian $pane_stella
 
-    # Kill unused panes if num_agents < 3
+     # Kill unused panes if num_agents < 3
     if test $num_agents -lt 3
         wezterm cli kill-pane --pane-id $pane_stella &>/dev/null
         set pane_ids $pane_evelyn $pane_vivian
@@ -227,12 +257,12 @@ function review_auto
         set pane_ids $pane_evelyn
     end
 
-    # --- header (printed once) ---
+     # --- header (printed once) ---
     set -l session_start (date +%s)
     printf "\n\n"
     set -l pr_label "PR #$pr_number"
     if test -n "$pr_title"
-        # " review_auto · " = 16 chars prefix, leave 2 for padding
+         # " review_auto · " = 16 chars prefix, leave 2 for padding
         set -l max_len (math $COLUMNS - 18)
         if test $max_len -lt 20
             set max_len 20
@@ -244,9 +274,9 @@ function review_auto
         end
     end
     echo " "(set_color --bold)"review_auto"(set_color normal)" "(set_color brblack)"·"(set_color normal)" "\e]8\;\;$pr_url\e\\(set_color white)$pr_label(set_color normal)\e]8\;\;\e\\
-    # Truncate the model id against $COLUMNS the same way pr_label is
-    # truncated above; the orchestrator pane is half-width by design and
-    # long ids (e.g. `ollama-tailnet/qwen3.6:35b-a3b-coding-mxfp8`) wrap.
+     # Truncate the model id against $COLUMNS the same way pr_label is
+     # truncated above; the orchestrator pane is half-width by design and
+     # long ids (e.g. `ollama-tailnet/qwen3.6:35b-a3b-coding-mxfp8`) wrap.
     set -l model_label $model
     set -l _model_prefix " $num_agents reviewers · $max_iters max iterations · "
     set -l model_max (math $COLUMNS - (string length "$_model_prefix") - 1)
@@ -259,19 +289,19 @@ function review_auto
     echo " "(set_color brblack)"$num_agents reviewers · $max_iters max iterations · $model_label"(set_color normal)
     echo ""
 
-    # --- main loop ---
+     # --- main loop ---
     set -l iter 1
     while test $iter -le $max_iters
         set -l iter_dir $session_dir/iter_$iter
         mkdir -p $iter_dir
 
-        # On iteration 2+, recreate reviewer panes (same quadrant layout as initial)
+         # On iteration 2+, recreate reviewer panes (same quadrant layout as initial)
         if test $iter -gt 1
             set -l pb (wezterm cli split-pane --pane-id $pane_0 --bottom)
             if test -z "$pb"
                 echo "Failed to recreate bottom pane in iteration $iter"
                 wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
-                __review_auto_restore_tty; rm -rf $session_dir
+                 __review_auto_restore_tty; rm -rf $session_dir
                 return 1
             end
             set -l pe (wezterm cli split-pane --pane-id $pane_0 --right)
@@ -279,7 +309,7 @@ function review_auto
                 echo "Failed to recreate Evelyn pane in iteration $iter"
                 wezterm cli kill-pane --pane-id $pb &>/dev/null
                 wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
-                __review_auto_restore_tty; rm -rf $session_dir
+                 __review_auto_restore_tty; rm -rf $session_dir
                 return 1
             end
             set -l ps (wezterm cli split-pane --pane-id $pb --right)
@@ -288,7 +318,7 @@ function review_auto
                 wezterm cli kill-pane --pane-id $pe &>/dev/null
                 wezterm cli kill-pane --pane-id $pb &>/dev/null
                 wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
-                __review_auto_restore_tty; rm -rf $session_dir
+                 __review_auto_restore_tty; rm -rf $session_dir
                 return 1
             end
             set pane_ids $pe $pb $ps
@@ -302,13 +332,13 @@ function review_auto
             end
         end
 
-        # clean sentinel files
+         # clean sentinel files
         for j in (seq $num_agents)
             set -l name (string lower $names[$j])
             rm -f $iter_dir/.done_$name
         end
 
-        # dispatch review agents to panes (prompts written to temp files to avoid shell metacharacter issues)
+         # dispatch review agents to panes (prompts written to temp files to avoid shell metacharacter issues)
         for j in (seq $num_agents)
             set -l name (string lower $names[$j])
             set -l outfile "$iter_dir/review_$name.md"
@@ -321,7 +351,7 @@ function review_auto
             sleep 0.5 # stagger to avoid cli-config.json race condition
         end
 
-        # poll for all reviewers to finish
+         # poll for all reviewers to finish
         set -l review_start (date +%s)
         set -l dot_frames "." ".." "..."
         set -l dot_colors green white green
@@ -334,9 +364,9 @@ function review_auto
                 set -l name_lower (string lower $name)
                 if test -f $iter_dir/.done_$name_lower
                     set done_count (math $done_count + 1)
-                    set status_line "$status_line$green$name$reset  "
+                    set status_line "$status_line$green$name$reset   "
                 else
-                    set status_line "$status_line$dim$name$reset  "
+                    set status_line "$status_line$dim$name$reset   "
                 end
             end
 
@@ -345,7 +375,7 @@ function review_auto
             set -l total_s (math "$total_el % 60")
             set -l total_ts (printf "%d:%02d" $total_m $total_s)
             set -l dots (printf "%-4s" $dot_frames[$frame_idx])
-            printf "\r %s•%s Reviewing%s%s(%s/%s)%s  %s %s%s%s" (set_color $dot_colors[$frame_idx]) $reset "$dots" $dim $iter $max_iters $reset "$status_line" $dim $total_ts $reset
+            printf "\r %s•%s Reviewing%s%s(%s/%s)%s   %s %s%s%s" (set_color $dot_colors[$frame_idx]) $reset "$dots" $dim $iter $max_iters $reset "$status_line" $dim $total_ts $reset
 
             if test $done_count -ge $num_agents
                 break
@@ -353,21 +383,21 @@ function review_auto
 
             set -l review_elapsed (math (date +%s) - $review_start)
             if test $review_elapsed -ge $phase_timeout
-                printf "\r                                                           \r"
+                printf "\r                                                            \r"
                 echo " "(set_color red)"✗"(set_color normal)"  Review phase timed out after $phase_timeout seconds in iteration $iter"
                 for pane in $pane_ids
                     wezterm cli kill-pane --pane-id $pane &>/dev/null
                 end
                 wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
-                __review_auto_restore_tty; rm -rf $session_dir
+                 __review_auto_restore_tty; rm -rf $session_dir
                 return 1
             end
 
             set frame_idx (math "$frame_idx % 3 + 1")
             sleep 0.15
         end
-        # kill reviewer panes and create fresh work pane before printing final status
-        # (pane resize happens here, before any output)
+         # kill reviewer panes and create fresh work pane before printing final status
+         # (pane resize happens here, before any output)
         for pane in $pane_ids
             wezterm cli kill-pane --pane-id $pane &>/dev/null
         end
@@ -375,14 +405,14 @@ function review_auto
         if test -z "$work_pane"
             echo "Failed to create work pane after review phase in iteration $iter"
             wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
-            __review_auto_restore_tty; rm -rf $session_dir
+             __review_auto_restore_tty; rm -rf $session_dir
             return 1
         end
 
-        printf "\r                                                           \r"
+        printf "\r                                                            \r"
         echo " "(set_color green)"✔"(set_color normal)" Reviewed "(set_color brblack)"($iter/$max_iters)"(set_color normal)
 
-        # --- triage phase ---
+         # --- triage phase ---
         set -l review_files
         for j in (seq $num_agents)
             set -l name (string lower $names[$j])
@@ -410,33 +440,33 @@ function review_auto
 
             set -l phase_elapsed (math (date +%s) - $triage_start)
             if test $phase_elapsed -ge $phase_timeout
-                printf "\r                                                           \r"
+                printf "\r                                                            \r"
                 echo " "(set_color red)"✗"(set_color normal)"  Triage phase timed out after $phase_timeout seconds in iteration $iter"
                 wezterm cli kill-pane --pane-id $work_pane &>/dev/null
                 wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
-                __review_auto_restore_tty; rm -rf $session_dir
+                 __review_auto_restore_tty; rm -rf $session_dir
                 return 1
             end
 
             set frame_idx (math "$frame_idx % 3 + 1")
             sleep 0.15
         end
-        # kill triage pane before printing (pane resize happens here, before any output)
+         # kill triage pane before printing (pane resize happens here, before any output)
         wezterm cli kill-pane --pane-id $work_pane &>/dev/null
 
-        printf "\r                                                           \r"
+        printf "\r                                                            \r"
         echo " "(set_color green)"✔"(set_color normal)" Triaged"
 
-        # guard: triage.md must exist and be non-empty before proceeding
+         # guard: triage.md must exist and be non-empty before proceeding
         if not test -s $iter_dir/triage.md
             echo " "(set_color red)"✗"(set_color normal)"  Triage produced empty or missing triage.md in iteration $iter"
             wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
-            __review_auto_restore_tty; rm -rf $session_dir
+             __review_auto_restore_tty; rm -rf $session_dir
             return 1
         end
 
-        # check triage result - collapse into a single string so multi-line files
-        # are compared atomically instead of per-line via fish list semantics
+         # check triage result - collapse into a single string so multi-line files
+         # are compared atomically instead of per-line via fish list semantics
         set -l _triage_content (cat $iter_dir/triage.md 2>/dev/null | string collect | string trim)
         if test "$_triage_content" = NO_ISSUES_FOUND
             echo " "(set_color green)"✔"(set_color normal)" No issues found"
@@ -447,7 +477,7 @@ function review_auto
             echo " "(set_color brblack)$pr_url" · "(printf "%dm %ds" $total_dur_m $total_dur_s)(set_color normal)
             echo ""
             wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
-            __review_auto_restore_tty; rm -rf $session_dir
+             __review_auto_restore_tty; rm -rf $session_dir
             return 0
         end
 
@@ -460,16 +490,16 @@ function review_auto
             echo " "(set_color brblack)$pr_url" · "(printf "%dm %ds" $total_dur_m $total_dur_s)(set_color normal)
             echo ""
             wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
-            __review_auto_restore_tty; rm -rf $session_dir
+             __review_auto_restore_tty; rm -rf $session_dir
             return 0
         end
 
-        # --- fix phase ---
+         # --- fix phase ---
         set -l work_pane (wezterm cli split-pane --pane-id $pane_0 --right)
         if test -z "$work_pane"
             echo "Failed to create work pane for fix phase in iteration $iter"
             wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
-            __review_auto_restore_tty; rm -rf $session_dir
+             __review_auto_restore_tty; rm -rf $session_dir
             return 1
         end
 
@@ -493,18 +523,18 @@ function review_auto
 
             set -l phase_elapsed (math (date +%s) - $fix_start)
             if test $phase_elapsed -ge $phase_timeout
-                printf "\r                                                           \r"
+                printf "\r                                                            \r"
                 echo " "(set_color red)"✗"(set_color normal)"  Fix phase timed out after $phase_timeout seconds in iteration $iter"
                 wezterm cli kill-pane --pane-id $work_pane &>/dev/null
                 wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
-                __review_auto_restore_tty; rm -rf $session_dir
+                 __review_auto_restore_tty; rm -rf $session_dir
                 return 1
             end
 
             set frame_idx (math "$frame_idx % 3 + 1")
             sleep 0.15
         end
-        printf "\r                                                           \r"
+        printf "\r                                                            \r"
         set -l _commit_msg (git log -1 --format='%s' 2>/dev/null)
         set -l _fix_max (math $COLUMNS - 12)
         if test $_fix_max -lt 20
@@ -515,7 +545,7 @@ function review_auto
         end
         echo " "(set_color green)"✔"(set_color normal)" Fixed "(set_color brblack)"$_commit_msg"(set_color normal)
 
-        # kill work pane before next iteration
+         # kill work pane before next iteration
         wezterm cli kill-pane --pane-id $work_pane &>/dev/null
 
         set iter (math $iter + 1)
@@ -530,6 +560,6 @@ function review_auto
     echo " "(set_color brblack)$pr_url" · "(printf "%dm %ds" $total_dur_m $total_dur_s)(set_color normal)
     echo ""
     wezterm cli kill-pane --pane-id $pane_latte &>/dev/null
-    __review_auto_restore_tty; rm -rf $session_dir
+     __review_auto_restore_tty; rm -rf $session_dir
     return 1
 end
