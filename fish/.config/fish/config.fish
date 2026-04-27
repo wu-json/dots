@@ -32,6 +32,7 @@ alias tree="eza --tree"
 # Obsidian
 alias o="obsidian"
 alias od="obsidian daily"
+alias pi="p"
 
 # OpenCode
 alias oc="opencode"
