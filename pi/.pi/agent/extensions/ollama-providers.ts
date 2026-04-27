@@ -34,6 +34,15 @@ const MODELS: LocalModel[] = [
 		maxTokens: 4096,
 		reasoning: true,
 	},
+	{
+		id: "gemma4:26b",
+		name: "Gemma 4 26B",
+		// Gemma 4 ships with a smaller native context; bumped to 256k for pi agent's extended context needs.
+		contextWindow: 256000,
+		maxTokens: 4096,
+		// Gemma is not a reasoning/thinking model.
+		reasoning: false,
+	},
 ];
 
 function buildModelConfig(m: LocalModel) {
@@ -45,11 +54,12 @@ function buildModelConfig(m: LocalModel) {
 		cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
 		contextWindow: m.contextWindow,
 		maxTokens: m.maxTokens,
-		compat: {
-			// Qwen-compatible local servers (Ollama, llama.cpp) read the
-			// thinking toggle from chat_template_kwargs.enable_thinking.
-			thinkingFormat: "qwen-chat-template" as const,
-		},
+		// Only Qwen-compatible local servers (Ollama, llama.cpp) read the
+		// thinking toggle from chat_template_kwargs.enable_thinking. Gemma
+		// has no thinking mode, so don't claim a thinking format for it.
+		...(m.reasoning
+			? { compat: { thinkingFormat: "qwen-chat-template" as const } }
+			: {}),
 	};
 }
 
@@ -76,7 +86,10 @@ export default function (pi: ExtensionAPI) {
 	// See docs/wu-json/specs/archived/2026-04-26-ollama-model-keepalive.md
 	pi.on("before_provider_request", (event) => {
 		const p = event.payload as Record<string, unknown> | undefined;
-		if (p?.model?.toString().includes("qwen3.6:35b-a3b-coding-mxfp8")) {
+		const modelId = p?.model?.toString() ?? "";
+		const isOllamaModel =
+			modelId.includes("qwen3.6:35b-a3b-coding-mxfp8") || modelId.includes("gemma4:26b");
+		if (isOllamaModel) {
 			// Return a new object instead of mutating in place: the runner currently
 			// threads the same reference, but `emitContext` already structuredClones
 			// its payload, and `emitBeforeProviderRequest` could be refactored to do
