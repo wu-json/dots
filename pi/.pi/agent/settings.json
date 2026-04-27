@@ -1,6 +1,6 @@
 {
-  "defaultProvider": "anthropic",
-  "defaultModel": "claude-opus-4-7",
+  "defaultProvider": "ollama-tailnet",
+  "defaultModel": "gemma4:26b",
   "theme": "mono",
   "quietStartup": true,
   "collapseChangelog": true,

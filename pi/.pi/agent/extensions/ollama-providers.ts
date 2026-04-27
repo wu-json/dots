@@ -29,8 +29,15 @@ const MODELS: LocalModel[] = [
 	{
 		id: "qwen3.6:35b-a3b-coding-mxfp8",
 		name: "Qwen3.6 35B A3B Coding (mxfp8)",
-		// Qwen3 ships with 32k native context; bumped to 200k for pi agent's extended context needs.
-		contextWindow: 200000,
+		// Qwen3 ships with 32k native context; bumped to 256k for pi agent's extended context needs.
+		contextWindow: 256000,
+		maxTokens: 4096,
+		reasoning: true,
+	},
+	{
+		id: "qwen3.6:27b-coding-mxfp8",
+		name: "Qwen3.6 27B Coding (mxfp8)",
+		contextWindow: 256000,
 		maxTokens: 4096,
 		reasoning: true,
 	},
@@ -88,7 +95,9 @@ export default function (pi: ExtensionAPI) {
 		const p = event.payload as Record<string, unknown> | undefined;
 		const modelId = p?.model?.toString() ?? "";
 		const isOllamaModel =
-			modelId.includes("qwen3.6:35b-a3b-coding-mxfp8") || modelId.includes("gemma4:26b");
+			modelId.includes("qwen3.6:35b-a3b-coding-mxfp8") ||
+			modelId.includes("qwen3.6:27b-coding-mxfp8") ||
+			modelId.includes("gemma4:26b");
 		if (isOllamaModel) {
 			// Return a new object instead of mutating in place: the runner currently
 			// threads the same reference, but `emitContext` already structuredClones
