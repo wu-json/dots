@@ -48,6 +48,11 @@ alias cr="cursor-agent --yolo --model claude-opus-4-7-high"
 alias c="cr"
 alias prdoc="cursor-agent --yolo --model gpt-5.4-high-fast /pr"
 
+# Cloudflared
+function cftunnel
+    cloudflared tunnel --url localhost:$argv[1]
+end
+
 # Nvim
 alias v="nvim"
 
