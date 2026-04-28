@@ -78,7 +78,7 @@ function review_auto
     end
 
 
-     # Resolve model aliases: opus, qwen, or pass through full provider strings
+     # Resolve model aliases: opus, qwen, deepseek, or pass through full provider strings
     switch $model_override
         case ''
               # Empty — no alias resolution needed, skip to assignment below
@@ -86,12 +86,14 @@ function review_auto
             set model_override "anthropic/claude-opus-4-7"
         case qwen
             set model_override "ollama-tailnet/qwen3.6:35b-a3b-coding-mxfp8"
+        case deepseek
+            set model_override "deepseek/deepseek-v4-pro"
         case '*'
               # Not a recognized alias — check if it's a full provider string (contains '/')
             if not string match -q '*/*' -- $model_override
                 echo "Unknown model alias: '$model_override'" >&2
                 echo "Full provider strings (containing '/') are passed through as-is." >&2
-                echo "Available aliases: opus, qwen" >&2
+                echo "Available aliases: opus, qwen, deepseek" >&2
                 return 1
             end
               # Full provider string — no conversion needed; fall through
@@ -126,6 +128,7 @@ function review_auto
         echo "Aliases:"
         echo "   opus             -> anthropic/claude-opus-4-7"
         echo "   qwen             -> ollama-tailnet/qwen3.6:35b-a3b-coding-mxfp8"
+        echo "   deepseek         -> deepseek/deepseek-v4-pro"
         echo "   Full provider strings (e.g. openai/gpt-5.5-high) are passed through as-is."
         echo ""
         echo "Examples:"
@@ -133,6 +136,7 @@ function review_auto
         echo "  review_auto --agents 3 --max-iterations 3      # 3 reviewers, up to 3 iterations"
         echo "  review_auto --model opus                       # Opus 4.7"
         echo "  review_auto --model qwen                       # Qwen 3.6 on tailnet"
+        echo "  review_auto --model deepseek                   # DeepSeek V4 Pro"
         echo "  review_auto --model ollama-local/qwen3.6        # use local model"
         return 0
     end
