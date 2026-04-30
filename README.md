@@ -7,11 +7,11 @@ This is where I tweak config files till 4am like a goblin. It's pretty cozy in h
 ## My Cursed Tools
 
 - **[claude](https://code.claude.com/)** - this is going to take my job
-- **[cursor](https://cursor.com/)** - this is also going to take my job 
+- **[cursor](https://cursor.com/)** - this is also going to take my job
 - **[fish](https://fishshell.com/)** - I eat the fish
 - **[homebrew](https://brew.sh/)** - cyber alcoholic
 - **[neovim](https://neovim.io/)** - female repellent
-- **[pi](https://github.com/badlogic/pi-mono)** - hackable cli agent
+- **[pi](https://github.com/badlogic/pi-mono)** - this is also going to take my job
 - **[wezterm](https://wezterm.org/index.html)** - lua lua lua
 - **[stow](https://www.gnu.org/software/stow/)** - link those symmies
 
