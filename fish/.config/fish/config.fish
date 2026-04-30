@@ -34,12 +34,6 @@ alias o="obsidian"
 alias od="obsidian daily"
 alias c="pi"
 
-# OpenCode
-alias oc="opencode"
-
-# Codex 
-alias cx="codex"
-
 # Claudius Codius
 alias cl="claude --dangerously-skip-permissions"
 

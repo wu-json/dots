@@ -7,11 +7,6 @@
       "commit": "577474d89ee61aef4a48145cdec82a638d874751"
     },
     {
-      "url": "https://github.com/anomalyco/opencode",
-      "branch": "dev",
-      "commit": "af3998c8a60dc00f27c94a410c4f508e5b0891a7"
-    },
-    {
       "url": "https://github.com/badlogic/pi-mono",
       "branch": "main",
       "commit": "05f79b08516809e0e06756013645c37419bf5570"
