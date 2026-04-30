@@ -1,9 +1,9 @@
 {
-  "defaultProvider": "ollama-tailnet",
-  "defaultModel": "gemma4:26b",
+  "defaultProvider": "anthropic",
+  "defaultModel": "claude-opus-4-7",
   "theme": "mono",
   "quietStartup": true,
   "collapseChangelog": true,
-  "lastChangelogVersion": "0.70.2",
+  "lastChangelogVersion": "0.70.6",
   "defaultThinkingLevel": "high"
 }
