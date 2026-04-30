@@ -45,5 +45,6 @@ cask "codex"
 # (Gatekeeper can block cursor-agent native modules; see forum thread below.)
 # https://forum.cursor.com/t/cursor-agent-merkle-tree-napi-darwin-arm64-node-not-opened/155056
 cask "cursor-cli"
+cask "raycast"
 cask "vlc"
 cask "wezterm@nightly"
