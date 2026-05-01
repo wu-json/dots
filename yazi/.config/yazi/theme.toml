@@ -1,272 +1,199 @@
-# ─────────────────────────────────────────────
-#  Beijing Duck — a warm monochrome theme
-#  Clean, quiet, high-contrast. No colour needed.
-# ─────────────────────────────────────────────
+# ────────────────────────────────────────
+#  Monochrome — clean, warm gray theme.
+#  No colour, just contrast.
+# ────────────────────────────────────────
+"$schema" = "https://yazi-rs.github.io/schemas/theme.json"
 
-[manager]
-# ── Cursor ──
-cursor_style          = "steady-block"
-cursor_fg           = "#eeeeee"
-cursor_bg           = "#3a3a3a"
+[flavor]
+dark  = ""
+light = ""
 
-# ── Preview ──
-preview_fg          = "#888888"
+[mgr]
+cwd = { fg = "white", bold = true }
 
-# ── Selected ──
-selected_fg         = "#eeeeee"
-selected_bg         = "#333333"
+# Find / search
+find_keyword  = { fg = "white", bold = true, italic = true, underline = true }
+find_position = { fg = "lightgray", bg = "reset", bold = true, italic = true }
 
-# ── Hovered (tab-preview target) ──
-hovered_fg           = "#eeeeee"
-hovered_bg           = "#282828"
+# Symlink
+symlink_target = { fg = "darkgray", italic = true }
 
-# ── File-type colours ──
-# Directories
-directory_fg         = "#dddddd"
-directory_bg         = ""
+# Marker (gutter strip on left of selected items)
+marker_copied   = { fg = "lightgray", bg = "lightgray" }
+marker_cut      = { fg = "darkgray",  bg = "darkgray" }
+marker_marked   = { fg = "white",     bg = "white" }
+marker_selected = { fg = "gray",      bg = "gray" }
+marker_symbol   = "│"
 
-# Symlinks
-symlink_fg           = "#999999"
-symlink_bg           = ""
+# Count badges (top-right of status bar)
+count_copied   = { fg = "black", bg = "lightgray" }
+count_cut      = { fg = "black", bg = "darkgray" }
+count_selected = { fg = "black", bg = "white" }
 
-# Broken symlinks
-broken_symlink_fg    = "#555555"
-broken_symlink_bg    = ""
+# Border between panes
+border_symbol = "│"
+border_style  = { fg = "darkgray" }
 
-# Executables
-executable_fg        = "#c8c8c8"
-executable_bg        = ""
+# Syntect (code preview) theme
+syntect_theme = "base16-eighties.dark"
 
-# Archives / compressed
-archive_fg           = "#aaaaaa"
-archive_bg           = ""
+[tabs]
+active   = { fg = "black", bg = "white",    bold = true }
+inactive = { fg = "lightgray", bg = "#2a2a2a" }
+sep_inner = { open = "", close = "" }
+sep_outer = { open = "", close = "" }
 
-# Images
-image_fg             = "#bbbbbb"
-image_bg             = ""
+[mode]
+# Normal mode (status bar mode indicator)
+normal_main = { fg = "black", bg = "white",    bold = true }
+normal_alt  = { fg = "white", bg = "#2a2a2a" }
 
-# Videos
-video_fg             = "#bbbbbb"
-video_bg             = ""
+# Select mode
+select_main = { fg = "black", bg = "lightgray", bold = true }
+select_alt  = { fg = "lightgray", bg = "#2a2a2a" }
 
-# Audio
-audio_fg             = "#aaaaaa"
-audio_bg             = ""
+# Unset mode
+unset_main = { fg = "black", bg = "darkgray", bold = true }
+unset_alt  = { fg = "darkgray", bg = "#2a2a2a" }
 
-# Documents / office
-office_fg            = "#aaaaaa"
-office_bg            = ""
-
-# Hidden files
-hidden_fg            = "#555555"
-hidden_bg            = ""
-
-# Orphaned files (no icon match)
-orphan_fg            = "#777777"
-orphan_bg            = ""
-
-# Empty files (0 bytes)
-empty_fg             = "#555555"
-empty_bg             = ""
-
-# ── File-specific highlights ──
-# README, Makefile, etc.
-marked_fg            = "#dddddd"
-marked_bg            = ""
-
-# Locked files (read-only)
-locked_fg            = "#444444"
-locked_bg            = ""
-locked_flavor        = ""
-
-# ── Border ──
-border_style         = "#333333"
-
-# ── Syntect code-preview theme ──
-syntect_theme        = "base16-ocean.dark"
-
-# ── Grid / layout lines ──
-# Line on the left marking current position
-folder_style         = "#444444"
-
-# Lines in tree view / parent-dir indicator
-perm_style           = "#555555"
-size_style           = "#555555"
-
-# ── Header (column headers) ──
-header_style         = "#555555"
-header_sel_style     = "#666666"
-
-# ── Spotlight (preview panel header) ──
-spotlight_style      = "#555555"
-
-# ── Info ──
-info_style           = "#888888"
-
-# ── Marker icons ──
-marker_selected      = "#888888"
-marker_copied        = "#aaaaaa"
-marker_cut           = "#555555"
-
-# ── Highlighting ──
-# What-files-are-selected counter in status bar
-count_copied         = "#aaaaaa"
-count_cut            = "#555555"
-count_selected       = "#888888"
-
-# Tab labels in the preview panel
-tab_style            = "#666666"
-tab_active_style     = "#dddddd"
+[indicator]
+# Hover / cursor indicators
+parent  = { reversed = true }
+current = { reversed = true }
+preview = { underline = true }
+padding = { open = "", close = "" }
 
 [status]
-# ── Separator between panes and status bar ──
-separator_style      = "#2e2e2e"
-separator_open       = ""
-separator_close      = ""
-separator_open_style = "#2e2e2e"
-separator_close_style = "#2e2e2e"
+overall   = {}
+sep_left  = { open = "", close = "" }
+sep_right = { open = "", close = "" }
 
-# ── Progress bar ──
-progress_radius      = 1
-progress_position    = 0
-progress_symbol      = "none"
-progress_fg          = "#888888"
-progress_bg          = "#2a2a2a"
+# Permissions
+perm_sep   = { fg = "darkgray" }
+perm_type  = { fg = "lightgray" }
+perm_read  = { fg = "gray" }
+perm_write = { fg = "gray" }
+perm_exec  = { fg = "lightgray" }
 
-# ── Mode indicator ──
-mode_fg              = "#eeeeee"
-mode_bg              = "#3a3a3a"
-
-# ── Permissions / size / owner ──
-perm_fg              = "#555555"
-size_fg              = "#555555"
-owner_fg             = "#555555"
-
-# ── File count ──
-count_fg             = "#666666"
-count_bg             = ""
-
-# ── Message ──
-msg_fg               = "#c8c8c8"
-msg_bg               = "#222222"
+# Progress bar
+progress_label  = { fg = "white", bold = true }
+progress_normal = { fg = "lightgray", bg = "#2a2a2a" }
+progress_error  = { fg = "white", bg = "darkgray" }
 
 [which]
-# Which-key popup
-cols_fg              = "#eeeeee"
-cols_bg              = "#2a2a2a"
-col_selected_fg      = "#eeeeee"
-col_selected_bg      = "#3a3a3a"
-border_fg            = "#444444"
-border_bg            = "#1a1a1a"
-
-[tasks]
-# Task progress / manager
-tasks_fg             = "#c8c8c8"
-tasks_bg             = "#1a1a1a"
-
-# Individual task lines
-task_fg              = "#c8c8c8"
-task_bg              = ""
-task_line_fg         = "#666666"
-task_line_bg         = ""
-task_line_alt_fg     = "#555555"
-task_line_alt_bg     = ""
-
-# ── Task type indicators ──
-task_cmd_fg          = "#dddddd"
-task_cmd_bg          = ""
-task_cwd_fg          = "#666666"
-task_cwd_bg          = ""
-task_stdout_fg       = "#aaaaaa"
-task_stdout_bg       = ""
-task_stderr_fg       = "#888888"
-task_stderr_bg       = ""
-task_finished_fg     = "#999999"
-task_finished_bg     = ""
-task_failed_fg       = "#666666"
-task_failed_bg       = ""
-
-[input]
-# Input bar (filter, rename, create)
-border_fg            = "#444444"
-border_bg            = ""
-title_fg             = "#888888"
-title_bg             = ""
-value_fg             = "#eeeeee"
-value_bg             = "#222222"
-selected_fg          = "#eeeeee"
-selected_bg          = "#3a3a3a"
-
-[select]
-# Selection mode (checkbox dialogs)
-border_fg            = "#444444"
-border_bg            = ""
-active_fg            = "#eeeeee"
-active_bg            = "#3a3a3a"
-inactive_fg          = "#555555"
-inactive_bg          = ""
-
-[tab]
-# Tab bar
-border_fg             = "#333333"
-border_bg             = ""
-active_fg             = "#eeeeee"
-active_bg             = "#2a2a2a"
-inactive_fg           = "#555555"
-inactive_bg           = "#1a1a1a"
-hovered_fg            = "#cccccc"
-hovered_bg            = "#222222"
-
-[header]
-# Header bar (breadcrumbs, parent directories)
-# Only visible when header is shown
-header_fg            = "#888888"
-header_bg            = ""
-header_border_style  = "#333333"
-
-[notify]
-# Notifications (toast-style)
-title_fg             = "#eeeeee"
-title_bg             = "#2a2a2a"
-info_fg              = "#c8c8c8"
-info_bg              = "#222222"
-success_fg           = "#c8c8c8"
-success_bg           = "#222222"
-warn_fg              = "#bbbbbb"
-warn_bg              = "#2a2a2a"
-error_fg             = "#aaaaaa"
-error_bg             = "#2a2a2a"
-
-[spot]
-# Spotlight / preview area
-spot_fg              = "#c8c8c8"
-spot_bg              = "#1a1a1a"
-spot_header_fg       = "#888888"
-spot_header_bg       = ""
-
-[help]
-# Help menu
-help_fg              = "#c8c8c8"
-help_bg              = "#222222"
-help_header_fg       = "#888888"
-help_header_bg       = ""
-help_desc_fg         = "#666666"
-help_desc_bg         = ""
-help_footer_fg       = "#555555"
-help_footer_bg       = ""
-
-[completion]
-# Tab-completion popup
-completion_fg        = "#c8c8c8"
-completion_bg        = "#222222"
-completion_selected_fg = "#eeeeee"
-completion_selected_bg = "#3a3a3a"
-completion_desc_fg   = "#666666"
-completion_desc_bg   = ""
+cols            = 3
+mask            = { bg = "#1a1a1a" }
+cand            = { fg = "white" }
+rest            = { fg = "darkgray" }
+desc            = { fg = "gray" }
+separator       = "  "
+separator_style = { fg = "darkgray" }
 
 [confirm]
-# Confirm dialog
-confirm_fg           = "#eeeeee"
-confirm_bg           = "#2a2a2a"
-confirm_border_fg    = "#444444"
-confirm_border_bg    = ""
+border     = { fg = "darkgray" }
+title      = { fg = "white", bold = true }
+body       = {}
+list       = {}
+btn_yes    = { reversed = true }
+btn_no     = {}
+btn_labels = [ "  [Y]es  ", "  (N)o  " ]
+
+[spot]
+border = { fg = "darkgray" }
+title  = { fg = "white", bold = true }
+
+# Table
+tbl_col  = { fg = "lightgray", bold = true }
+tbl_cell = { fg = "white", reversed = true }
+
+[notify]
+title_info  = { fg = "lightgray" }
+title_warn  = { fg = "white" }
+title_error = { fg = "white", bold = true }
+
+icon_info  = ""
+icon_warn  = ""
+icon_error = ""
+
+[pick]
+border   = { fg = "darkgray" }
+active   = { fg = "white", bold = true }
+inactive = {}
+
+[input]
+border   = { fg = "darkgray" }
+title    = { fg = "lightgray" }
+value    = {}
+selected = { reversed = true }
+
+[cmp]
+border   = { fg = "darkgray" }
+active   = { reversed = true }
+inactive = {}
+
+icon_file    = ""
+icon_folder  = ""
+icon_command = ""
+
+[tasks]
+border  = { fg = "darkgray" }
+title   = { fg = "white", bold = true }
+hovered = { fg = "white", bold = true }
+
+[help]
+on      = { fg = "white", bold = true }
+run     = { fg = "lightgray" }
+desc    = {}
+hovered = { reversed = true, bold = true }
+footer  = { fg = "black", bg = "lightgray" }
+
+# ── File-name colours ──
+[filetype]
+rules = [
+  # Orphan symlinks
+  { url = "*", is = "orphan", fg = "darkgray" },
+  { url = "*/", is = "orphan", fg = "darkgray" },
+
+  # Symlinks
+  { url = "*", is = "link", fg = "gray", italic = true },
+  { url = "*/", is = "link", fg = "gray", italic = true },
+
+  # Executables
+  { url = "*", is = "exec", fg = "lightgray", bold = true },
+
+  # Dummy
+  { url = "*", is = "dummy", fg = "darkgray" },
+  { url = "*/", is = "dummy", fg = "darkgray" },
+
+  # Empty
+  { mime = "inode/x-empty", fg = "darkgray" },
+
+  # Image / media / archive / doc — single uniform tint
+  { mime = "image/*", fg = "lightgray" },
+  { mime = "{audio,video}/*", fg = "lightgray" },
+  { mime = "application/{zip,rar,7z*,tar,gzip,xz,zstd,bzip*,lzma,compress,archive,cpio,arj,xar,ms-cab*}", fg = "lightgray" },
+  { mime = "application/{pdf,doc,rtf}", fg = "lightgray" },
+
+  # Directories — overrides the default blue fallback
+  { url = "*/", fg = "white", bold = true },
+]
+
+# ── Icons ──
+# Empty arrays wipe the default colourful icons. `conds` provides a
+# minimal monochrome fallback.
+[icon]
+globs = []
+dirs  = []
+files = []
+exts  = []
+
+conds = [
+  # Special states
+  { if = "orphan", text = "", fg = "darkgray" },
+  { if = "link",   text = "", fg = "gray" },
+
+  # Generic
+  { if = "dir",    text = "", fg = "white" },
+  { if = "exec",   text = "", fg = "lightgray" },
+  { if = "!dir",   text = "", fg = "lightgray" },
+]
