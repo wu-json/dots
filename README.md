@@ -14,6 +14,7 @@ This is where I tweak config files till 4am like a goblin. It's pretty cozy in h
 - **[pi](https://github.com/badlogic/pi-mono)** - this is also going to take my job
 - **[wezterm](https://wezterm.org/index.html)** - lua lua lua
 - **[stow](https://www.gnu.org/software/stow/)** - link those symmies
+- **[yazi](https://yazi-rs.github.io/)** - beijing duck
 
 ## Setup
 ```bash
