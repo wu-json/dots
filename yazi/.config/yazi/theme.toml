@@ -1,0 +1,21 @@
+# Monochrome theme — clean, low-noise.
+[manager]
+# Cursor styles
+cursor_style = "steady-block"
+
+# Selection
+selected_bg = "#444444"
+
+# Border
+border_style = "#444444"
+
+# Syntect (code preview) theme
+syntect_theme = "base16-ocean.dark"
+
+[status]
+# Progress bar
+progress_bg = "#333333"
+
+[input]
+# Input bar border
+border_style = "#666666"

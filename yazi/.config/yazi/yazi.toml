@@ -1,0 +1,50 @@
+[manager]
+# Show hidden files by default
+show_hidden = true
+# Sort by directory first, then alphabetical (case-insensitive)
+sort_by = "alphabetical"
+sort_dir_first = true
+sort_case_sensitive = false
+# Use vim-like navigation (yazi's default)
+linemode = "size"
+
+[preview]
+# Image preview (requires protocol support)
+image_filter = "lanczos3"
+image_quality = 75
+# Syntax highlighting for code
+syntax_highlighting = true
+# Max file sizes for preview
+max_width = 800
+max_height = 600
+
+[opener]
+# Open images in the built-in image viewer
+image = [
+  { run = 'open "$1"', desc = "Open in default app" },
+]
+# Open archives with built-in support
+archive = []
+
+[open]
+# Rules for opening files with external programs
+rules = [
+  { mime = "text/*", use = "nvim" },
+  { mime = "image/*", use = "open" },
+  { mime = "video/*", use = "open" },
+  { mime = "audio/*", use = "open" },
+]
+
+[open.nvim]
+exec = "nvim"
+block = true
+
+[open.open]
+exec = "open"
+block = false
+
+[tasks]
+# Show task progress
+micro_workers = 5
+macro_workers = 10
+bizarre_retry = 3
