@@ -5,5 +5,11 @@
   "quietStartup": true,
   "collapseChangelog": true,
   "lastChangelogVersion": "0.70.6",
-  "defaultThinkingLevel": "high"
+  "defaultThinkingLevel": "high",
+  "enabledModels": [
+    "deepseek/deepseek-v4-flash",
+    "deepseek/deepseek-v4-pro",
+    "anthropic/claude-opus-4-7",
+    "ollama/qwen3.6:35b-a3b-coding-mxfp8"
+  ]
 }
