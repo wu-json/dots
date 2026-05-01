@@ -32,7 +32,7 @@ alias tree="eza --tree"
 # Obsidian
 alias o="obsidian"
 alias od="obsidian daily"
-alias c="pi"
+alias p="pi"
 
 # Claudius Codius
 alias cl="claude --dangerously-skip-permissions"
