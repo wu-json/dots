@@ -29,6 +29,9 @@ alias gho="ghome"
 alias ls="eza"
 alias tree="eza --tree"
 
+# Yazi
+alias y="yazi"
+
 # Obsidian
 alias o="obsidian"
 alias od="obsidian daily"

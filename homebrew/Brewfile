@@ -36,6 +36,7 @@ brew "uv"
 brew "wu-json/asahi/curse"
 brew "wu-json/asahi/pickpocket"
 brew "yq"
+brew "yazi"
 brew "yt-dlp"
 brew "zoxide"
 

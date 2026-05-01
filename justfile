@@ -39,6 +39,7 @@ stow:
   stow -t ~ nvim
   stow -t ~ pi
   stow -t ~ wezterm
+  stow -t ~ yazi
 
 init: brew stow init-fish
   @echo "✓ Initialization complete!"
