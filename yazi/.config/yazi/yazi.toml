@@ -1,30 +1,35 @@
 [manager]
 # Show hidden files by default
 show_hidden = true
-# Sort by directory first, then alphabetical (case-insensitive)
-sort_by = "alphabetical"
+# Sort by directory first, then by modified time (newest first)
+sort_by = "mtime"
 sort_dir_first = true
+sort_reverse = true
 sort_case_sensitive = false
-# Use vim-like navigation (yazi's default)
-linemode = "size"
+# Line mode: "none", "size", "mtime", "permissions", "owner"
+linemode = "mtime"
+# Tabs on startup
+tabs = 1
 
 [preview]
-# Image preview (requires protocol support)
+# Image preview quality
 image_filter = "lanczos3"
 image_quality = 75
-# Syntax highlighting for code
+# Syntax highlighting for code previews
 syntax_highlighting = true
-# Max file sizes for preview
+# Max preview dimensions
 max_width = 800
 max_height = 600
+# Show preview tab label
+tab_title = true
+# Cache previews for faster navigation
+cache_dir = ""
 
 [opener]
-# Open images in the built-in image viewer
+# Open images in macOS's default app
 image = [
   { run = 'open "$1"', desc = "Open in default app" },
 ]
-# Open archives with built-in support
-archive = []
 
 [open]
 # Rules for opening files with external programs
@@ -33,6 +38,7 @@ rules = [
   { mime = "image/*", use = "open" },
   { mime = "video/*", use = "open" },
   { mime = "audio/*", use = "open" },
+  { mime = "application/pdf", use = "open" },
 ]
 
 [open.nvim]
@@ -44,7 +50,6 @@ exec = "open"
 block = false
 
 [tasks]
-# Show task progress
-micro_workers = 5
-macro_workers = 10
-bizarre_retry = 3
+micro_workers  = 5
+macro_workers  = 10
+bizarre_retry  = 3

@@ -1,21 +1,199 @@
-# Monochrome theme — clean, low-noise.
-[manager]
-# Cursor styles
-cursor_style = "steady-block"
+# ────────────────────────────────────────
+#  Monochrome — clean, warm gray theme.
+#  No colour, just contrast.
+# ────────────────────────────────────────
+"$schema" = "https://yazi-rs.github.io/schemas/theme.json"
 
-# Selection
-selected_bg = "#444444"
+[flavor]
+dark  = ""
+light = ""
 
-# Border
-border_style = "#444444"
+[mgr]
+cwd = { fg = "white", bold = true }
+
+# Find / search
+find_keyword  = { fg = "white", bold = true, italic = true, underline = true }
+find_position = { fg = "lightgray", bg = "reset", bold = true, italic = true }
+
+# Symlink
+symlink_target = { fg = "darkgray", italic = true }
+
+# Marker (gutter strip on left of selected items)
+marker_copied   = { fg = "lightgray", bg = "lightgray" }
+marker_cut      = { fg = "darkgray",  bg = "darkgray" }
+marker_marked   = { fg = "white",     bg = "white" }
+marker_selected = { fg = "gray",      bg = "gray" }
+marker_symbol   = "│"
+
+# Count badges (top-right of status bar)
+count_copied   = { fg = "black", bg = "lightgray" }
+count_cut      = { fg = "black", bg = "darkgray" }
+count_selected = { fg = "black", bg = "white" }
+
+# Border between panes
+border_symbol = "│"
+border_style  = { fg = "darkgray" }
 
 # Syntect (code preview) theme
-syntect_theme = "base16-ocean.dark"
+syntect_theme = "base16-eighties.dark"
+
+[tabs]
+active   = { fg = "black", bg = "white",    bold = true }
+inactive = { fg = "lightgray", bg = "#2a2a2a" }
+sep_inner = { open = "", close = "" }
+sep_outer = { open = "", close = "" }
+
+[mode]
+# Normal mode (status bar mode indicator)
+normal_main = { fg = "black", bg = "white",    bold = true }
+normal_alt  = { fg = "white", bg = "#2a2a2a" }
+
+# Select mode
+select_main = { fg = "black", bg = "lightgray", bold = true }
+select_alt  = { fg = "lightgray", bg = "#2a2a2a" }
+
+# Unset mode
+unset_main = { fg = "black", bg = "darkgray", bold = true }
+unset_alt  = { fg = "darkgray", bg = "#2a2a2a" }
+
+[indicator]
+# Hover / cursor indicators
+parent  = { reversed = true }
+current = { reversed = true }
+preview = { underline = true }
+padding = { open = "", close = "" }
 
 [status]
+overall   = {}
+sep_left  = { open = "", close = "" }
+sep_right = { open = "", close = "" }
+
+# Permissions
+perm_sep   = { fg = "darkgray" }
+perm_type  = { fg = "lightgray" }
+perm_read  = { fg = "gray" }
+perm_write = { fg = "gray" }
+perm_exec  = { fg = "lightgray" }
+
 # Progress bar
-progress_bg = "#333333"
+progress_label  = { fg = "white", bold = true }
+progress_normal = { fg = "lightgray", bg = "#2a2a2a" }
+progress_error  = { fg = "white", bg = "darkgray" }
+
+[which]
+cols            = 3
+mask            = { bg = "#1a1a1a" }
+cand            = { fg = "white" }
+rest            = { fg = "darkgray" }
+desc            = { fg = "gray" }
+separator       = "  "
+separator_style = { fg = "darkgray" }
+
+[confirm]
+border     = { fg = "darkgray" }
+title      = { fg = "white", bold = true }
+body       = {}
+list       = {}
+btn_yes    = { reversed = true }
+btn_no     = {}
+btn_labels = [ "  [Y]es  ", "  (N)o  " ]
+
+[spot]
+border = { fg = "darkgray" }
+title  = { fg = "white", bold = true }
+
+# Table
+tbl_col  = { fg = "lightgray", bold = true }
+tbl_cell = { fg = "white", reversed = true }
+
+[notify]
+title_info  = { fg = "lightgray" }
+title_warn  = { fg = "white" }
+title_error = { fg = "white", bold = true }
+
+icon_info  = ""
+icon_warn  = ""
+icon_error = ""
+
+[pick]
+border   = { fg = "darkgray" }
+active   = { fg = "white", bold = true }
+inactive = {}
 
 [input]
-# Input bar border
-border_style = "#666666"
+border   = { fg = "darkgray" }
+title    = { fg = "lightgray" }
+value    = {}
+selected = { reversed = true }
+
+[cmp]
+border   = { fg = "darkgray" }
+active   = { reversed = true }
+inactive = {}
+
+icon_file    = ""
+icon_folder  = ""
+icon_command = ""
+
+[tasks]
+border  = { fg = "darkgray" }
+title   = { fg = "white", bold = true }
+hovered = { fg = "white", bold = true }
+
+[help]
+on      = { fg = "white", bold = true }
+run     = { fg = "lightgray" }
+desc    = {}
+hovered = { reversed = true, bold = true }
+footer  = { fg = "black", bg = "lightgray" }
+
+# ── File-name colours ──
+[filetype]
+rules = [
+  # Orphan symlinks
+  { url = "*", is = "orphan", fg = "darkgray" },
+  { url = "*/", is = "orphan", fg = "darkgray" },
+
+  # Symlinks
+  { url = "*", is = "link", fg = "gray", italic = true },
+  { url = "*/", is = "link", fg = "gray", italic = true },
+
+  # Executables
+  { url = "*", is = "exec", fg = "lightgray", bold = true },
+
+  # Dummy
+  { url = "*", is = "dummy", fg = "darkgray" },
+  { url = "*/", is = "dummy", fg = "darkgray" },
+
+  # Empty
+  { mime = "inode/x-empty", fg = "darkgray" },
+
+  # Image / media / archive / doc — single uniform tint
+  { mime = "image/*", fg = "lightgray" },
+  { mime = "{audio,video}/*", fg = "lightgray" },
+  { mime = "application/{zip,rar,7z*,tar,gzip,xz,zstd,bzip*,lzma,compress,archive,cpio,arj,xar,ms-cab*}", fg = "lightgray" },
+  { mime = "application/{pdf,doc,rtf}", fg = "lightgray" },
+
+  # Directories — overrides the default blue fallback
+  { url = "*/", fg = "white", bold = true },
+]
+
+# ── Icons ──
+# Empty arrays wipe the default colourful icons. `conds` provides a
+# minimal monochrome fallback.
+[icon]
+globs = []
+dirs  = []
+files = []
+exts  = []
+
+conds = [
+  # Special states
+  { if = "orphan", text = "", fg = "darkgray" },
+  { if = "link",   text = "", fg = "gray" },
+
+  # Generic
+  { if = "dir",    text = "", fg = "white" },
+  { if = "exec",   text = "", fg = "lightgray" },
+  { if = "!dir",   text = "", fg = "lightgray" },
+]
