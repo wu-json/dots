@@ -1,9 +1,8 @@
 /**
  * Ollama provider extension
  *
- * Mirrors the opencode `ollama` / `ollama-tailnet` providers. Registers two
- * OpenAI-compatible providers pointing at:
- *    - localhost Ollama
+ * Mirrors the opencode `ollama` provider. Registers one
+ * OpenAI-compatible provider pointing at:
  *    - mac-studio over Tailscale
  *
  * Pi auto-discovers this from ~/.pi/agent/extensions/. Use `/login` is not
@@ -71,23 +70,15 @@ function buildModelConfig(m: LocalModel) {
 }
 
 export default function (pi: ExtensionAPI) {
-	pi.registerProvider("ollama-local", {
-		baseUrl: "http://localhost:11434/v1",
-		// Ollama ignores the key, but pi requires one. Literal value, not env var.
-		apiKey: "ollama",
-		api: "openai-completions",
-		models: MODELS.map(buildModelConfig),
-	});
-
-	pi.registerProvider("ollama-tailnet", {
+	pi.registerProvider("ollama", {
 		baseUrl: "https://mac-studio.tailf2675.ts.net:11434/v1",
 		apiKey: "ollama",
 		api: "openai-completions",
 		models: MODELS.map(buildModelConfig),
 	});
 
-	// Inject keep_alive: "1h" into all ollama requests so that the local or remote
-	// Ollama server keeps loaded models for 1 hour instead of unloading after the
+	// Inject keep_alive: "1h" into all ollama requests so that the Ollama server
+	// keeps loaded models for 1 hour instead of unloading after the
 	// default 5 minutes. This avoids cold-start lag when the agent pauses between
 	// agentic turns.
 	// See docs/wu-json/specs/archived/2026-04-26-ollama-model-keepalive.md
