@@ -1,16 +1,3 @@
-# Graphite
-alias gtss="gt sync && gt submit --stack"
-alias gtr="gt restack"
-alias gtl="gt ls"
-alias gtm="gt add -A && gt modify"
-alias gta="gt absorb"
-function gtc
-    gt create $argv
-end
-function gtch
-    gt checkout $argv
-end
-
 # Brew
 function b
     brew update && brew upgrade
