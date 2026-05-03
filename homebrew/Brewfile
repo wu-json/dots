@@ -41,10 +41,6 @@ brew "yt-dlp"
 brew "zoxide"
 
 cask "claude-code"
-# After install on macOS, `just brew` runs: xattr -rd com.apple.quarantine "$(brew --prefix)/Caskroom/cursor-cli/"
-# (Gatekeeper can block cursor-agent native modules; see forum thread below.)
-# https://forum.cursor.com/t/cursor-agent-merkle-tree-napi-darwin-arm64-node-not-opened/155056
-cask "cursor-cli"
 cask "raycast"
 cask "vlc"
 cask "wezterm@nightly"
