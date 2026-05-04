@@ -1,15 +1,17 @@
 {
-  "defaultProvider": "anthropic",
-  "defaultModel": "claude-opus-4-7",
+  "defaultProvider": "deepseek",
+  "defaultModel": "deepseek-v4-flash",
   "theme": "mono",
   "quietStartup": true,
   "collapseChangelog": true,
-  "lastChangelogVersion": "0.70.6",
+  "lastChangelogVersion": "0.72.1",
   "defaultThinkingLevel": "high",
   "enabledModels": [
     "deepseek/deepseek-v4-flash",
     "deepseek/deepseek-v4-pro",
     "anthropic/claude-opus-4-7",
-    "ollama/qwen3.6:35b-a3b-coding-mxfp8"
+    "ollama/qwen3.6:35b-a3b-coding-mxfp8",
+    "xiaomi/mimo-v2.5",
+    "xiaomi/mimo-v2.5-pro"
   ]
 }
