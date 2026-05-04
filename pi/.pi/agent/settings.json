@@ -12,6 +12,7 @@
     "anthropic/claude-opus-4-7",
     "ollama/qwen3.6:35b-a3b-coding-mxfp8",
     "xiaomi/mimo-v2.5",
-    "xiaomi/mimo-v2.5-pro"
+    "xiaomi/mimo-v2.5-pro",
+    "kimi-coding/k2p6"
   ]
 }
