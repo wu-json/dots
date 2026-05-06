@@ -2,8 +2,6 @@
 #  Monochrome — clean, warm gray theme.
 #  No colour, just contrast.
 # ────────────────────────────────────────
-"$schema" = "https://yazi-rs.github.io/schemas/theme.json"
-
 [flavor]
 dark  = ""
 light = ""
