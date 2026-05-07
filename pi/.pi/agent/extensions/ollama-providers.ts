@@ -49,6 +49,20 @@ const MODELS: LocalModel[] = [
 		// Gemma is not a reasoning/thinking model.
 		reasoning: false,
 	},
+	{
+		id: "gemma4:e4b",
+		name: "Gemma 4 E4B",
+		contextWindow: 128000,
+		maxTokens: 4096,
+		reasoning: false,
+	},
+	{
+		id: "gemma4:e2b",
+		name: "Gemma 4 E2B",
+		contextWindow: 128000,
+		maxTokens: 4096,
+		reasoning: false,
+	},
 ];
 
 function buildModelConfig(m: LocalModel) {
@@ -88,7 +102,7 @@ export default function (pi: ExtensionAPI) {
 		const isOllamaModel =
 			modelId.includes("qwen3.6:35b-a3b-coding-mxfp8") ||
 			modelId.includes("qwen3.6:27b-coding-mxfp8") ||
-			modelId.includes("gemma4:26b");
+			modelId.includes("gemma4");
 		if (isOllamaModel) {
 			// Return a new object instead of mutating in place: the runner currently
 			// threads the same reference, but `emitContext` already structuredClones
