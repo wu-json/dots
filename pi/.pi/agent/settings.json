@@ -1,6 +1,6 @@
 {
-  "defaultProvider": "moonshotai",
-  "defaultModel": "kimi-k2.6",
+  "defaultProvider": "deepseek",
+  "defaultModel": "deepseek-v4-flash",
   "theme": "mono",
   "quietStartup": true,
   "collapseChangelog": true,
