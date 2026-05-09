@@ -34,7 +34,7 @@ Then produce the commit:
 Do not push. Do not amend. Do not stage anything else. Print the message after committing and stop.'
 
     pi --no-session \
-        --model ollama/gemma4:e2b \
+        --model ollama-local/gemma4:e2b \
         --tools read,grep,find,ls,bash \
         "$prompt"
 end
