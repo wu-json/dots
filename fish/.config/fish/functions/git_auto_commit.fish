@@ -1,7 +1,7 @@
 function git_auto_commit
     git add .
 
-    # Empty-diff guard — gemma4:e2b will happily hallucinate a message otherwise.
+    # Empty-diff guard — gemma4:e4b will happily hallucinate a message otherwise.
     if git diff --cached --quiet
         echo "Nothing to commit"
         return 0
@@ -37,7 +37,7 @@ Then produce the commit. Each numbered step is one bash tool invocation that you
 Scope of allowed actions: stage is already done by the wrapper, so you only need to run the inspection commands in steps 1-3, the commit in step 5, and the verification in step 6. Once step 6 shows your commit on top, print the message you used and stop.'
 
     pi --no-session \
-        --model ollama-local/gemma4:e2b \
+        --model ollama-local/gemma4:e4b \
         --tools read,grep,find,ls,bash \
         "$prompt"
 end
