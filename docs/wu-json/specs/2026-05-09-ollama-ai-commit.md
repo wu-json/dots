@@ -49,9 +49,10 @@ Privacy: prompt + diff are sent only to the local ollama daemon. No data leaves 
 These were open questions in the draft; closing them now.
 
 - **Alias**: `gc` — short, mnemonic ("git commit"), not currently bound in `config.fish`.
-- **Default behavior**: prompt for confirmation. `-y` opts into zero-prompt commit. Bad commit messages are cheap to amend but annoying to discover after a push; the prompt is one keystroke (`Y`/`Enter`).
+- **Default behavior**: prompt for confirmation. `-y` opts into zero-prompt commit. Bad commit messages are cheap to amend but annoying to discover after a push; the prompt is one keystroke (`Enter` defaults to Yes).
 - **Model**: `gemma4:e2b`. Override via `--model` or `AI_COMMIT_MODEL`.
 - **Confirm read style**: line-based (`read -P`) to match `review.fish` and avoid surprising single-keypress behavior in vi mode.
+- **Visual style**: monochrome with bold/dim accents only — matches the existing `fish_config theme save None` choice in `config.fish`. No external TUI deps (`gum`, etc).
 
 ## Design
 
@@ -103,17 +104,19 @@ Env overrides (read only when the matching flag is *not* passed):
 5. (unless --no-add) git add -A
 6. Capture staged diff:                    git diff --staged
    - If empty → "Nothing to commit." return 0.
-7. Capture context for the prompt:
+7. Print stat preface:                     git diff --staged --stat   (dim)
+8. Capture context for the prompt:
    - git status --short
    - git log -10 --pretty=format:"%s"   (style cues)
-8. Build prompt (see §4) and POST to /api/generate.
-9. Sanitize + validate model output (see §5).
-10. If -y: git commit -m "<msg>"
+9. Start spinner, POST to /api/generate, stop spinner (see §9).
+10. Sanitize + validate model output (see §5).
+11. If -y: git commit -m "<msg>"
     else loop on prompt: [Y]es / [r]egenerate / [e]dit / [n]o
         - Y or empty input → commit
-        - r              → re-call the model (back to step 8)
-        - e              → open $EDITOR with msg pre-filled, commit edited result
+        - r              → re-call the model (back to step 9)
+        - e              → write msg to mktemp, open $EDITOR, read back, commit
         - n              → abort, leave index staged so user can commit manually
+12. On commit, defer to git's native output line. Don't print our own success.
 ```
 
 ### 4. Prompt to the model
@@ -258,6 +261,69 @@ Listing the host's available models in the failure message is the high-value bit
 
 Style-match `review.fish --help`: usage line, args, flags, env vars, examples.
 
+### 9. UX & visual design
+
+The CLI experience should be **minimal and beautiful**: one screen, no noise, native git output owns the success line.
+
+#### Happy-path screen
+
+```
+$ gc
+ fish/.config/fish/config.fish              |   3 +
+ fish/.config/fish/functions/ai_commit.fish | 142 ++++++++++++++++
+ 2 files changed, 145 insertions(+)
+
+feat: add ai_commit fish function
+[Y/r/e/n] › 
+```
+
+Five visual elements, in order:
+
+1. **Stat preface** — `git diff --staged --stat`, rendered with `set_color --dim` so the eye lands on the message, not the file list.
+2. **Blank line** — single separator. No rules, no boxes.
+3. **Proposed message** — `set_color --bold` only. No leading `>` quote marker, no surrounding quotes.
+4. **Prompt** — `[Y/r/e/n] › ` in dim. The `›` is the only typographic flourish; falls back to `>` when `LANG`/`LC_ALL` doesn't include UTF-8.
+5. **Cursor** — sits one space after `›`. `Enter` defaults to `Y`.
+
+Nothing else: no banner, no "Generating with gemma4:e2b…" tagline, no emojis, no version footer, no "Committed!" line (git already prints `[branch hash] subject`).
+
+#### Spinner
+
+While the curl is in flight, replace the cursor with a spinner on the same line that the message will occupy:
+
+```
+ ... stat ...
+
+⠋ thinking
+```
+
+- Frames: `⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏` at ~80ms cadence.
+- Implementation: fork a fish background job that loops `printf '\r%s thinking' $f; sleep 0.08`; on response arrival, `kill` + `wait` the job and `printf '\r\033[K'` to clear the line before printing the message.
+- Trap SIGINT (`function __ai_commit_sigint --on-signal INT` scoped to the call) so Ctrl-C kills the spinner cleanly and exits 130 with the index left staged.
+- Skip the spinner entirely when stdout isn't a TTY (`test -t 1`) — pipes get plain text.
+
+#### Color & accessibility
+
+- Default to monochrome with `--bold` and `--dim` only. No ANSI colors.
+- `NO_COLOR` (per https://no-color.org) and non-TTY stdout both disable styling — the function must remain readable when piped or scripted.
+- The ASCII fallback (`>` instead of `›`) triggers when neither `LANG` nor `LC_ALL` matches `*UTF-8*`.
+
+#### Prompt loop micro-behavior
+
+- Single line: `[Y/r/e/n] › ` via `read --prompt-str`.
+- Case-insensitive, single char or word: `Y/y/yes/<enter>`, `r/regen`, `e/edit`, `n/no`.
+- Invalid input → `printf '\r\033[K'` to overwrite the prompt line and reprint, no scrolling.
+- On `r`, the previous suggestion stays in scrollback (don't try to overwrite history). The new spinner+message render below it. Comparing prior suggestions is a feature; clutter is bounded because regenerate is rare.
+
+#### Edit flow
+
+- Write the proposed subject to `(mktemp -t ai_commit.XXXX)`.
+- Resolve editor: `$EDITOR` → `nvim` (the user's `v` alias) → `vi`.
+- Exec the editor on the temp file.
+- Read first non-empty line back, trim, validate against the regex (§5).
+- Empty file or all-whitespace after edit → treat as abort (`n`), leave index staged.
+- Always `rm -f` the temp file in a cleanup block.
+
 ```
 Usage: ai_commit [-y|--yes] [-m|--model MODEL] [-n|--no-add] [-h|--help]
 
@@ -286,15 +352,16 @@ Examples:
 1. Add `fish/.config/fish/functions/ai_commit.fish` implementing the pipeline above.
 2. Add `alias gc="ai_commit"` to `fish/.config/fish/config.fish` near the existing git aliases (around the `ghc` / `gho` block).
 3. Manually test:
-   - **Happy path**: touch a file, run `gc`. Prompt appears, message is reasonable, `Y` commits.
+   - **Happy path**: touch a file, run `gc`. Stat preface → spinner → bold message → `[Y/r/e/n] › ` prompt. `Enter` commits.
    - `gc` with empty input at prompt → commits (Y is default).
-   - `gc -y` on a one-line change skips the prompt.
+   - `gc -y` on a one-line change skips the prompt entirely (still shows stat + message before committing).
    - `gc` with no changes → `Nothing to commit.` exit 0.
    - `gc --model gemma4:e4b` works.
    - `gc --model bogus/model` → preflight fails with the model-not-pulled message and lists available models.
    - Quit the ollama menu-bar app, `gc` → preflight fails with the ollama-not-running message.
    - `gc -n` after a manual `git add path/to/file` only commits that file.
    - `e` (edit) opens `$EDITOR` (verify `nvim` fallback works by `set -e EDITOR; gc`).
-   - `r` (regenerate) re-calls the model and shows a fresh suggestion.
+   - `r` (regenerate) re-calls the model and shows a fresh suggestion below the prior one.
    - Force the model to emit garbage (e.g. point it at a non-coding model) → validation fails, raw output shown, index stays staged.
+   - **UX**: `NO_COLOR=1 gc` → no bold, no dim. `gc | cat` → no spinner, no color. `LANG=C gc` → `>` instead of `›`. Ctrl-C during the spinner exits cleanly with the index staged.
 4. Once green, archive this spec to `docs/wu-json/specs/archived/`.
