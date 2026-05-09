@@ -1,4 +1,4 @@
-function gc
+function git_auto_commit
     git add .
 
     # Empty-diff guard — gemma4:e2b will happily hallucinate a message otherwise.
