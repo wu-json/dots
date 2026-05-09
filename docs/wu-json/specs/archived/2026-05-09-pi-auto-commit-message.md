@@ -1,12 +1,12 @@
 ---
-status: ready
+status: implemented
 ---
 
 # `gc` — auto commit-message alias
 
 **Date:** 2026-05-09
 **Author:** Jason Wu
-**Status:** Ready
+**Status:** Implemented
 
 ## Problem
 
