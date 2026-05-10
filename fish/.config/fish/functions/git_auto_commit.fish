@@ -1,7 +1,7 @@
 function git_auto_commit
     git add .
 
-    # Empty-diff guard — gemma4:e4b will happily hallucinate a message otherwise.
+    # Empty-diff guard — qwen3.5:9b will happily hallucinate a message otherwise.
     if git diff --cached --quiet
         echo "Nothing to commit"
         return 0
@@ -42,7 +42,7 @@ Then produce the commit:
 The changes are already staged. Run the inspection commands in steps 1-3, EXECUTE the commit in step 5 (actual bash tool call), and verify in step 6. Finish only after step 5 has executed and step 6 confirms the new commit is on top.'
 
     pi --no-session \
-        --model ollama-local/gemma4:e4b \
+        --model ollama-local/qwen3.5:9b \
         --tools read,grep,find,ls,bash \
         "$prompt"
 end
