@@ -1,10 +1,11 @@
 function review_auto
      # Usage: review_auto [--max-iterations N] [--model PATTERN] [--agents 1-3] [--timeout SECS] [--dry-run] [--help]
-     # Drives interactive `pi` (full TUI in each pane so you can watch
-     # progress) with role-specific --tools allowlists (review/triage are
-     # no-edit; fix gets the full mutating set). Default model is
-     # anthropic/claude-opus-4-7 with --thinking high; --model overrides for
-     # all three roles. Default: 1 reviewer (Evelyn) in single-pane layout.
+     # Drives interactive `claude` (full TUI in each pane so you can watch
+     # progress) with --dangerously-skip-permissions so each phase runs
+     # unattended. Phase boundaries (review = read-only, triage = write
+     # verdict file, fix = edit + commit + push) are carried by the prompts.
+     # Default model is claude-opus-4-7 with --effort high; --model
+     # overrides. Default: 1 reviewer (Evelyn) in single-pane layout.
     set -l max_iters 10
     set -l model_override ""
     set -l num_agents 1
@@ -38,10 +39,10 @@ function review_auto
                  # Charset guard: the override is concatenated into a string
                  # that gets sent to the pane's fish via send-text, so a value
                  # like `--model 'foo; rm -rf ~/x'` would be parsed as two
-                 # commands. Restrict to characters that appear in real model
-                 # ids (provider/id[:tag] for both anthropic and ollama).
-                if not string match -rq '^[A-Za-z0-9._/:-]+$' -- $argv[$i]
-                    echo "Invalid --model value: '$argv[$i]' (allowed: A-Z a-z 0-9 . _ / : -)"
+                 # commands. Restrict to characters that appear in real
+                 # claude code model ids/aliases (e.g. opus, claude-opus-4-7).
+                if not string match -rq '^[A-Za-z0-9._-]+$' -- $argv[$i]
+                    echo "Invalid --model value: '$argv[$i]' (allowed: A-Z a-z 0-9 . _ -)"
                     return 1
                 end
                 set model_override $argv[$i]
@@ -78,26 +79,9 @@ function review_auto
     end
 
 
-     # Resolve model aliases: opus, qwen, deepseek, or pass through full provider strings
-    switch $model_override
-        case ''
-              # Empty — no alias resolution needed, skip to assignment below
-        case opus
-            set model_override "anthropic/claude-opus-4-7"
-        case qwen
-            set model_override "ollama-tailnet/qwen3.6:35b-a3b-coding-mxfp8"
-        case deepseek
-            set model_override "deepseek/deepseek-v4-pro"
-        case '*'
-              # Not a recognized alias — check if it's a full provider string (contains '/')
-            if not string match -q '*/*' -- $model_override
-                echo "Unknown model alias: '$model_override'" >&2
-                echo "Full provider strings (containing '/') are passed through as-is." >&2
-                echo "Available aliases: opus, qwen, deepseek" >&2
-                return 1
-            end
-              # Full provider string — no conversion needed; fall through
-    end
+     # claude code accepts both short aliases (opus, sonnet, haiku) and full
+     # model ids (claude-opus-4-7) on --model, so pass the override through
+     # unchanged.
 
     if test $num_agents -lt 1 -o $num_agents -gt 3
         echo "Agent count must be between 1 and 3"
@@ -107,37 +91,31 @@ function review_auto
     if test $show_help = true
         echo "Usage: review_auto [--max-iterations N] [--model PATTERN] [--agents 1-3] [--timeout SECS] [--dry-run] [--help]"
         echo ""
-        echo "Drives interactive pi auto-review with orchestrator + reviewer(s),"
+        echo "Drives interactive claude code auto-review with orchestrator + reviewer(s),"
         echo "triage, and fix phases in a Wezterm multi-pane layout."
         echo ""
         echo "Arguments:"
         echo "  --max-iterations N   Max review-fix iterations (default: 10)"
-        echo "  --model PATTERN      Provider/model id, e.g. anthropic/claude-opus-4-7"
-        echo "                       or ollama-tailnet/qwen3.6:35b-a3b-coding-mxfp8"
+        echo "  --model PATTERN      Claude code model alias or id, e.g."
+        echo "                         opus"
+        echo "                         claude-opus-4-7"
+        echo "                         claude-sonnet-4-6"
         echo "  --agents 1-3         Number of reviewer agents (default: 1)"
         echo "  --timeout SECS       Per-phase timeout in seconds (default: 3600)"
         echo "  --dry-run            Stop after triage without auto-fixing"
         echo "  --help, -h           Show this help message"
         echo ""
         echo "Input configuration:"
-        echo "  - model is set via --model (default: anthropic/claude-opus-4-7)."
+        echo "  - model is set via --model (default: claude-opus-4-7)."
         echo "  - agent count via --agents (default: 1, max 3)."
         echo "  - max iterations via --max-iterations (default: 10)."
         echo "  - phase timeout via --timeout in seconds (default: 3600, i.e. 1 hour)."
         echo ""
-        echo "Aliases:"
-        echo "   opus             -> anthropic/claude-opus-4-7"
-        echo "   qwen             -> ollama-tailnet/qwen3.6:35b-a3b-coding-mxfp8"
-        echo "   deepseek         -> deepseek/deepseek-v4-pro"
-        echo "   Full provider strings (e.g. openai/gpt-5.5-high) are passed through as-is."
-        echo ""
         echo "Examples:"
-        echo "  review_auto                                    # 1 reviewer, 10 iterations"
+        echo "  review_auto                                    # 1 reviewer, 10 iterations, Opus 4.7"
         echo "  review_auto --agents 3 --max-iterations 3      # 3 reviewers, up to 3 iterations"
-        echo "  review_auto --model opus                       # Opus 4.7"
-        echo "  review_auto --model qwen                       # Qwen 3.6 on tailnet"
-        echo "  review_auto --model deepseek                   # DeepSeek V4 Pro"
-        echo "  review_auto --model ollama-local/qwen3.6        # use local model"
+        echo "  review_auto --model sonnet                     # latest Sonnet"
+        echo "  review_auto --model claude-opus-4-7            # pinned Opus 4.7 id"
         return 0
     end
 
@@ -149,28 +127,19 @@ function review_auto
         return 1
     end
 
-     # Resolve model: default to anthropic/claude-opus-4-7, allow --model override.
-     # If the override encodes a thinking level as the trailing :level suffix
-     # (matching pi's vocabulary), suppress the explicit --thinking flag to
-     # avoid double-specifying. Last-:-suffix detection is required because
-     # ollama tags use ':' natively (e.g. qwen3.6:35b-a3b-coding-mxfp8).
-    set -l model anthropic/claude-opus-4-7
+     # Resolve model: default to claude-opus-4-7, allow --model override.
+    set -l model claude-opus-4-7
     if test -n "$model_override"
         set model $model_override
     end
 
-    set -l thinking_levels off minimal low medium high xhigh
-    set -l suffix (string match -rg '^.*:([^:]+)$' -- $model)
-    set -l pi_base "pi --no-session"
-    if not contains -- "$suffix" $thinking_levels
-        set pi_base "$pi_base --thinking high"
-    end
-    set pi_base "$pi_base --model $model"
+     # No --tools flag: it's variadic and would swallow the trailing prompt
+     # argument. Bypass-permissions already auto-approves every tool call,
+     # so phase boundaries (review = read-only, triage = write verdict file,
+     # fix = edit + commit + push) are carried by the prompts instead.
+    set -l claude_cmd "claude --dangerously-skip-permissions --effort high --model $model"
 
     set -l session_dir (mktemp -d /tmp/review_auto.XXXXXX)
-    set -l review_cmd "$pi_base --tools read,grep,find,ls,bash"
-    set -l triage_cmd "$pi_base --tools read,grep,find,ls,bash,write"
-    set -l fix_cmd "$pi_base --tools read,grep,find,ls,bash,edit,write"
 
      # Make the orchestrator terminal robust to stray keystrokes while the
      # spinner animates: disable echo and canonical line buffering, and hide
@@ -377,7 +346,7 @@ function review_auto
             set -l prompt "$base_prompts[$j] IMPORTANT: When done, write your complete review to $outfile using the Write tool. Then run this shell command: touch $sentinel"
             set -l prompt_file "$iter_dir/prompt_review_$name.txt"
             printf '%s' "$prompt" >$prompt_file
-            set -l cmd "$review_cmd \"\$(cat $prompt_file)\""
+            set -l cmd "$claude_cmd \"\$(cat $prompt_file)\""
             printf '%s\r' "$cmd" | wezterm cli send-text --no-paste --pane-id $pane_ids[$j]
             sleep 0.5 # stagger to avoid cli-config.json race condition
         end
@@ -456,7 +425,7 @@ function review_auto
 
         set -l triage_prompt_file "$iter_dir/prompt_triage.txt"
         printf '%s' "$triage_prompt" >$triage_prompt_file
-        set -l cmd "$triage_cmd \"\$(cat $triage_prompt_file)\""
+        set -l cmd "$claude_cmd \"\$(cat $triage_prompt_file)\""
         printf '%s\r' "$cmd" | wezterm cli send-text --no-paste --pane-id $work_pane
 
         set -l triage_start (date +%s)
@@ -539,7 +508,7 @@ function review_auto
 
         set -l fix_prompt_file "$iter_dir/prompt_fix.txt"
         printf '%s' "$fix_prompt" >$fix_prompt_file
-        set -l cmd "$fix_cmd \"\$(cat $fix_prompt_file)\""
+        set -l cmd "$claude_cmd \"\$(cat $fix_prompt_file)\""
         printf '%s\r' "$cmd" | wezterm cli send-text --no-paste --pane-id $work_pane
 
         set -l fix_start (date +%s)
