@@ -5,8 +5,7 @@
       "WebSearch(*)",
       "Shell(ls)",
       "Shell(git)",
-      "Shell(gh)",
-      "Shell(gt)"
+      "Shell(gh)"
     ],
     "deny": []
   },
