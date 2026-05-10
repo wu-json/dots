@@ -13,6 +13,7 @@
     "ollama-tailnet/qwen3.6:35b-a3b-coding-mxfp8",
     "ollama-local/gemma4:e4b",
     "ollama-local/gemma4:e2b",
+    "ollama-local/qwen3.5:9b",
     "ollama-tailnet/gemma4:26b",
     "xiaomi/mimo-v2.5",
     "xiaomi/mimo-v2.5-pro",
