@@ -7,6 +7,7 @@ end
 alias ghc="git reset --hard && git clean -fd"
 alias gho="ghome"
 alias gc="git_auto_commit"
+alias gp="git push"
 
 # Eza
 alias ls="eza"
