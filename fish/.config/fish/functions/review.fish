@@ -1,9 +1,10 @@
 function review
      # Usage: review [1-4] [--model PATTERN] [--help]
-     # Drives interactive `pi` (full TUI in each pane so you can watch
-     # progress) with the no-edit review tool allowlist
-     # (read,grep,find,ls,bash). Default model is anthropic/claude-opus-4-7
-     # with --thinking high; --model overrides. Default: 1 reviewer (Evelyn).
+     # Drives interactive `claude` (full TUI in each pane so you can watch
+     # progress) with --dangerously-skip-permissions so the session runs
+     # unattended. The /review skill prompt keeps each agent in read-only
+     # mode. Default model is claude-opus-4-7 with --effort high; --model
+     # overrides. Default: 1 reviewer (Evelyn).
     set -l num_panes 1
     set -l model_override ""
     set -l saw_panes false
@@ -24,10 +25,10 @@ function review
                  # Charset guard: the override is concatenated into a string
                  # that gets sent to the pane's fish via send-text, so a value
                  # like `--model 'foo; rm -rf ~/x'` would be parsed as two
-                 # commands. Restrict to characters that appear in real model
-                 # ids (provider/id[:tag] for both anthropic and ollama).
-                if not string match -rq '^[A-Za-z0-9._/:-]+$' -- $argv[$i]
-                    echo "Invalid --model value: '$argv[$i]' (allowed: A-Z a-z 0-9 . _ / : -)"
+                 # commands. Restrict to characters that appear in real
+                 # claude code model ids/aliases (e.g. opus, claude-opus-4-7).
+                if not string match -rq '^[A-Za-z0-9._-]+$' -- $argv[$i]
+                    echo "Invalid --model value: '$argv[$i]' (allowed: A-Z a-z 0-9 . _ -)"
                     return 1
                 end
                 set model_override $argv[$i]
@@ -48,26 +49,9 @@ function review
     end
 
 
-    # Resolve model aliases: opus, qwen, deepseek, or pass through full provider strings
-    switch $model_override
-        case ''
-            # Empty — no alias resolution needed, skip to assignment below
-        case opus
-            set model_override "anthropic/claude-opus-4-7"
-        case qwen
-            set model_override "ollama-tailnet/qwen3.6:35b-a3b-coding-mxfp8"
-        case deepseek
-            set model_override "deepseek/deepseek-v4-pro"
-        case '*'
-            # Not a recognized alias — check if it's a full provider string (contains '/')
-            if not string match -q '*/*' -- $model_override
-                echo "Unknown model alias: '$model_override'" >&2
-                echo "Full provider strings (containing '/') are passed through as-is." >&2
-                echo "Available aliases: opus, qwen, deepseek" >&2
-                return 1
-            end
-            # Full provider string — no conversion needed; fall through
-    end
+    # claude code accepts both short aliases (opus, sonnet, haiku) and full
+    # model ids (claude-opus-4-7) on --model, so pass the override through
+    # unchanged.
 
     if test $num_panes -lt 1 -o $num_panes -gt 4
         echo "Number of panes must be between 1 and 4"
@@ -77,31 +61,25 @@ function review
     if test $show_help = true
         echo "Usage: review [1-4] [--model PATTERN] [--help]"
         echo ""
-        echo "Drives interactive pi review in a Wezterm multi-pane layout."
+        echo "Drives interactive claude code review in a Wezterm multi-pane layout."
         echo ""
         echo "Arguments:"
         echo "   1-4                 Number of reviewer panes (default: 1)"
-        echo "   --model PATTERN     Provider/model id, e.g."
-        echo "                         anthropic/claude-opus-4-7"
-        echo "                         ollama-tailnet/qwen3.6:35b-a3b-coding-mxfp8"
+        echo "   --model PATTERN     Claude code model alias or id, e.g."
+        echo "                         opus"
+        echo "                         claude-opus-4-7"
+        echo "                         claude-sonnet-4-6"
         echo "   --help, -h          Show this help message"
         echo ""
         echo "Input configuration:"
-        echo "   - model is set via --model (default: anthropic/claude-opus-4-7)."
+        echo "   - model is set via --model (default: claude-opus-4-7)."
         echo "   - agent count via positional arg 1-4 (default: 1)."
         echo ""
-        echo "Aliases:"
-        echo "   opus          → anthropic/claude-opus-4-7"
-        echo "   qwen          → ollama-tailnet/qwen3.6:35b-a3b-coding-mxfp8"
-        echo "   deepseek      → deepseek/deepseek-v4-pro"
-        echo "   Full provider strings (e.g. openai/gpt-5.5-high) are passed through as-is."
-        echo ""
         echo "Examples:"
-        echo "  review                                   # 1 reviewer (Evelyn), default model"
-        echo "  review 3 --model opus                    # 3 reviewers, Opus 4.7"
-        echo "  review 3 --model qwen                    # 3 reviewers, Qwen 3.6 on tailnet"
-        echo "  review 3 --model deepseek                # 3 reviewers, DeepSeek V4 Pro"
-        echo "  review 3 --model ollama-local/qwen3.6    # 3 reviewers, local model"
+        echo "  review                              # 1 reviewer (Evelyn), Opus 4.7"
+        echo "  review 3                            # 3 reviewers, Opus 4.7"
+        echo "  review 3 --model sonnet             # 3 reviewers, latest Sonnet"
+        echo "  review --model claude-opus-4-7      # 1 reviewer, pinned Opus 4.7 id"
         return 0
     end
 
@@ -112,24 +90,16 @@ function review
         return 1
     end
 
-     # Resolve model: default to anthropic/claude-opus-4-7, allow --model override.
-     # Suppress explicit --thinking when the override encodes a :level suffix 
-     # matching pi's thinking vocabulary (off|minimal|low|medium|high|xhigh).
-     # Last-:-suffix detection is required because ollama tags use ':' natively.
-    set -l model anthropic/claude-opus-4-7
+     # Resolve model: default to claude-opus-4-7, allow --model override.
+    set -l model claude-opus-4-7
     if test -n "$model_override"
         set model $model_override
     end
 
-    set -l thinking_levels off minimal low medium high xhigh
-    set -l suffix (string match -rg '^.*:([^:]+)$' -- $model)
-    set -l pi_base "pi --no-session"
-    if not contains -- "$suffix" $thinking_levels
-        set pi_base "$pi_base --thinking high"
-    end
-    set pi_base "$pi_base --model $model"
-
-    set -l review_cmd "$pi_base --tools read,grep,find,ls,bash"
+     # No --tools flag: it's variadic and would swallow the trailing prompt
+     # argument. Bypass-permissions already auto-approves every tool call,
+     # so the read-only contract is carried by the prompt instead.
+    set -l review_cmd "claude --dangerously-skip-permissions --effort high --model $model"
 
      # pane identities
      # 0 - top left
