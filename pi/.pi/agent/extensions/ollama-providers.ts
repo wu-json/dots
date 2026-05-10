@@ -71,6 +71,13 @@ const LOCAL_MODELS: LocalModel[] = [
 		maxTokens: 4096,
 		reasoning: false,
 	},
+	{
+		id: "qwen3.5:9b",
+		name: "Qwen 3.5 9B",
+		contextWindow: 128000,
+		maxTokens: 4096,
+		reasoning: true,
+	},
 ];
 
 function buildModelConfig(m: LocalModel) {
@@ -117,6 +124,7 @@ export default function (pi: ExtensionAPI) {
 		const isOllamaModel =
 			modelId.includes("qwen3.6:35b-a3b-coding-mxfp8") ||
 			modelId.includes("qwen3.6:27b-coding-mxfp8") ||
+			modelId.includes("qwen3.5:9b") ||
 			modelId.includes("gemma4");
 		if (isOllamaModel) {
 			// Return a new object instead of mutating in place: the runner currently
