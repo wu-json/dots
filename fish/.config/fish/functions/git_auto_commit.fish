@@ -24,7 +24,7 @@ Then:
 4. Pick ONE message: <type>(<optional scope>): <summary>
    - Types: feat, fix, chore, docs, refactor, style, test, perf, build, ci
    - Summary starts lowercase (uppercase mid-sentence is fine for identifiers, acronyms, proper nouns).
-   - 60 chars or fewer, single line, ends with a letter, bare text.
+   - Aim for ~60 chars (rough heuristic — slightly over is fine, the point is to keep it from getting verbose), single line, ends with a letter, bare text.
    - Name the concrete value, flag, identifier, file, or behavior that moved so a reader can match the summary to the diff at a glance. When the diff touches several things, lead with the single most distinctive sub-change.
    - Use a verb that names the operation: rename, drop, switch, add, remove, raise, lower, merge, split, inline, extract.
    - Examples:
