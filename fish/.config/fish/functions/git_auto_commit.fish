@@ -32,7 +32,7 @@ Then:
      - "refactor: rename gc function to git_auto_commit"
      - "fix: handle empty diff in git_auto_commit"
      - "docs(llm): archive pi auto-commit-message research"
-     - "chore: remove graphite, jj, k9s from brew"
+     - "chore: remove jj, k9s from brew"
 5. Execute `git commit -m "<your message>"` via the bash tool.
 6. Run `git log -1 --oneline` — when your new commit sits on top, the task is complete.'
 
