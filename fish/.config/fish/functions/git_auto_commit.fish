@@ -7,7 +7,11 @@ function git_auto_commit
         return 0
     end
 
-    set -l prompt 'You are running inside the user\'s shell. The user has staged changes and is waiting for you to commit them. Your job is to create a real new git commit on this branch by running `git commit`. The task is complete only once `git log -1` shows your new commit on top.
+    set -l prompt 'You are running inside the user\'s shell. The user has staged changes and is waiting for you to commit them.
+
+YOU MUST EXECUTE THE COMMIT. The one action that completes this task is invoking the bash tool to actually run `git commit -m "<message>"`, and then confirming with `git log -1 --oneline` that your new commit sits on top of the branch. Success means the new commit exists in `git log` after this run finishes.
+
+The staged changes have already been verified to exist — there is real work to commit, and an actual `git commit` execution via the bash tool is required before you stop.
 
 Orient yourself first. You will write a far better summary if you understand the project, what branch you are on, and what work this commit fits into. Explore freely with the tools you have — read, grep, find, ls, bash:
   - Check what kind of repo this is: ls the root, read README.md or CLAUDE.md if present.
@@ -32,10 +36,10 @@ Then produce the commit:
      - "fix: handle empty diff in git_auto_commit"
      - "docs(llm): archive pi auto-commit-message research"
      - "chore: remove graphite, jj, k9s from brew"
-5. git commit -m "<your message>"  ← this is the commit. The user is waiting for it.
-6. git log -1 --oneline  ← if the new commit is on top, the task is complete. Otherwise return to step 5 and run the commit again.
+5. EXECUTE `git commit -m "<your message>"` via the bash tool right now. Make an actual bash tool call so the commit lands on the branch. This step is the whole point of the run.
+6. git log -1 --oneline  ← when the new commit is on top, the task is complete. If it is not yet on top, return to step 5 and execute `git commit` again until it lands.
 
-The changes are already staged. Run the inspection commands in steps 1-3, the commit in step 5, and the verification in step 6. Once step 6 shows your commit on top, print the message you used and stop.'
+The changes are already staged. Run the inspection commands in steps 1-3, EXECUTE the commit in step 5 (actual bash tool call), and verify in step 6. Finish only after step 5 has executed and step 6 confirms the new commit is on top.'
 
     pi --no-session \
         --model ollama-local/gemma4:e4b \
