@@ -30,8 +30,6 @@ return {
         "pkl",
         "python",
         "rst",
-        "starlark",
-        "terraform",
         "toml",
         "yaml",
       })
