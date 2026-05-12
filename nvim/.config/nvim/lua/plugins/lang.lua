@@ -3,63 +3,6 @@ return {
     "neovim/nvim-lspconfig",
     opts = {
       inlay_hints = { enabled = false },
-      setup = {
-        -- Buck2 LSP
-        buck2_lsp = function()
-          local lspconfig = require("lspconfig")
-          local configs = require("lspconfig.configs")
-
-          if not configs.buck2_lsp then
-            configs.buck2_lsp = {
-              default_config = {
-                cmd = { "buck2", "lsp" },
-                filetypes = { "bzl", "starlark" },
-                root_dir = lspconfig.util.root_pattern(".buckconfig", ".buckroot", "BUCK", "TARGETS", ".git"),
-              },
-            }
-          end
-
-          lspconfig.buck2_lsp.setup({})
-        end,
-
-        -- Custom setup for sand LSP
-        sand = function()
-          local lspconfig = require("lspconfig")
-          local configs = require("lspconfig.configs")
-
-          if not configs.sand then
-            configs.sand = {
-              default_config = {
-                cmd = { "sand", "lsp", "--stdio" },
-                filetypes = { "sand" },
-                root_dir = lspconfig.util.root_pattern("sand.mod.json"),
-                handlers = {
-                  ["window/showMessage"] = function(_, result)
-                    local message = result.message or "Unknown message"
-                    local message_type = result.type or 1
-
-                    if message_type == 1 then
-                      require("snacks").notify.error(message)
-                    elseif message_type == 2 then
-                      require("snacks").notify.warn(message)
-                    elseif message_type == 3 then
-                      require("snacks").notify.info(message)
-                    elseif message_type == 4 then
-                      require("snacks").notify(message)
-                    else
-                      require("snacks").notify(message)
-                    end
-
-                    return vim.NIL
-                  end,
-                },
-              },
-            }
-          end
-
-          lspconfig.sand.setup({})
-        end,
-      },
       servers = {
         gopls = {},
         pyright = {},
@@ -68,41 +11,14 @@ return {
         tailwindcss = {},
         terraformls = {},
         yamlls = {},
-        sand = {},
-        buck2_lsp = {},
 
-        -- These are all for TypeScript but we disable them because they are hella slow.
-        -- Instead we opt to use typescript-tools: https://github.com/pmizio/typescript-tools.nvim
-        tsserver = { enabled = false },
-        ts_ls = { enabled = false },
         vtsls = { enabled = false },
+        tsgo = {},
       },
     },
   },
   {
-    "pmizio/typescript-tools.nvim",
-    dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
-    config = function()
-      require("typescript-tools").setup({
-        on_attach = function(client)
-          -- Disable formatting from typescript-tools since lazyvim uses conform for
-          -- formatting making this redundant: https://github.com/pmizio/typescript-tools.nvim/issues/288
-          client.server_capabilities.documentFormattingProvider = false
-          client.server_capabilities.documentRangeFormattingProvider = false
-        end,
-      })
-    end,
-  },
-  {
     "nvim-treesitter/nvim-treesitter",
-    init = function()
-      vim.api.nvim_create_autocmd("FileType", {
-        pattern = "sand",
-        callback = function(ev)
-          pcall(vim.treesitter.start, ev.buf, "sand")
-        end,
-      })
-    end,
     opts = function(_, opts)
       opts.ensure_installed = opts.ensure_installed or {}
       vim.list_extend(opts.ensure_installed, {
@@ -119,49 +35,7 @@ return {
         "toml",
         "yaml",
       })
-      -- Configure custom sand parser across old and new nvim-treesitter APIs.
-      local parsers = require("nvim-treesitter.parsers")
-      local sand_parser_config = {
-        install_info = {
-          url = "/Users/jasonwu/GitHub/forge/treesitter-sand",
-          files = { "src/parser.c" },
-          generate_requires_npm = false,
-          requires_generate_from_grammar = false,
-        },
-        filetype = "sand",
-        used_by = { "sand" },
-      }
-      if parsers.get_parser_configs then
-        parsers.get_parser_configs().sand = sand_parser_config
-      else
-        parsers.sand = sand_parser_config
-      end
-      if vim.treesitter and vim.treesitter.language then
-        vim.treesitter.language.register("sand", "sand")
-      end
     end,
-  },
-  {
-    -- Need this to set up biome v2
-    "stevearc/conform.nvim",
-    opts = {
-      formatters_by_ft = {
-        javascript = { "biome" },
-        javascriptreact = { "biome" },
-        typescript = { "biome" },
-        typescriptreact = { "biome" },
-        json = { "biome" },
-        jsonc = { "biome" },
-      },
-      formatters = {
-        biome = {
-          command = "./node_modules/.bin/biome",
-          args = { "format", "--stdin-file-path", "$FILENAME" },
-          stdin = true,
-          require_cwd = true, -- Requires biome.json in project root
-        },
-      },
-    },
   },
   {
     "apple/pkl-neovim",
