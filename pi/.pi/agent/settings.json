@@ -1,10 +1,10 @@
 {
-  "defaultProvider": "deepseek",
-  "defaultModel": "deepseek-v4-flash",
+  "defaultProvider": "ollama-local",
+  "defaultModel": "qwen3.5:9b",
   "theme": "mono",
   "quietStartup": true,
   "collapseChangelog": true,
-  "lastChangelogVersion": "0.74.0",
+  "lastChangelogVersion": "0.75.3",
   "defaultThinkingLevel": "high",
   "enabledModels": [
     "deepseek/deepseek-v4-flash",
