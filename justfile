@@ -37,5 +37,32 @@ stow:
   stow -t ~ wezterm
   stow -t ~ yazi
 
+# Obscura (headless browser) ships prebuilt binaries but isn't on Homebrew, so fetch the release tarball into ~/.local/bin.
+obscura_version := "0.1.8"
+init-obscura:
+  #!/usr/bin/env bash
+  set -euo pipefail
+  case "$(uname -s)" in
+    Darwin) os=macos ;;
+    Linux)  os=linux ;;
+    *) echo "unsupported OS: $(uname -s)"; exit 1 ;;
+  esac
+  case "$(uname -m)" in
+    arm64|aarch64) arch=aarch64 ;;
+    x86_64)        arch=x86_64 ;;
+    *) echo "unsupported arch: $(uname -m)"; exit 1 ;;
+  esac
+  asset="obscura-${arch}-${os}.tar.gz"
+  url="https://github.com/h4ckf0r0day/obscura/releases/download/v{{obscura_version}}/${asset}"
+  mkdir -p ~/.local/bin
+  tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
+  echo "downloading $asset ..."
+  curl -fsL "$url" -o "$tmp/o.tar.gz"
+  tar xzf "$tmp/o.tar.gz" -C ~/.local/bin obscura obscura-worker
+  chmod +x ~/.local/bin/obscura ~/.local/bin/obscura-worker
+  # Strip Gatekeeper quarantine on macOS so the binary runs without a prompt.
+  [ "$os" = macos ] && xattr -d com.apple.quarantine ~/.local/bin/obscura ~/.local/bin/obscura-worker 2>/dev/null || true
+  echo "✓ installed $(~/.local/bin/obscura --version)"
+
 init: brew stow init-fish
   @echo "✓ Initialization complete!"
