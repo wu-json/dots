@@ -41,5 +41,6 @@
       "Bash(gh gist view:*)"
     ]
   },
-  "skipDangerousModePermissionPrompt": true
+  "skipDangerousModePermissionPrompt": true,
+  "theme": "dark"
 }
