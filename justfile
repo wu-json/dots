@@ -29,8 +29,6 @@ init-obsidian-cli:
 
 stow:
   stow -t ~ claude
-  # Cursor owns ~/.cursor/cli-config.json (auth/model/etc. state), so skip it.
-  stow --ignore='cli-config\.json' -t ~ cursor
   stow -t ~ fish
   stow -t ~ nvim
   stow -t ~ pi

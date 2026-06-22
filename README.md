@@ -7,7 +7,6 @@ This is where I tweak config files till 4am like a goblin. It's pretty cozy in h
 ## My Cursed Tools
 
 - **[claude](https://code.claude.com/)** - this is going to take my job
-- **[cursor](https://cursor.com/)** - this is also going to take my job
 - **[fish](https://fishshell.com/)** - I eat the fish
 - **[homebrew](https://brew.sh/)** - cyber alcoholic
 - **[neovim](https://neovim.io/)** - female repellent
@@ -24,7 +23,7 @@ just init
 
 ## Skills
 
-`skills/<name>/SKILL.md` is the only file you edit. Each agent's skills dir (`claude/.claude/skills`, `cursor/.cursor/skills`, `pi/.pi/agent/skills`) is a symlink to `skills/`, so one copy is shared across all three agents.
+`skills/<name>/SKILL.md` is the only file you edit. Each agent's skills dir (`claude/.claude/skills`, `pi/.pi/agent/skills`) is a symlink to `skills/`, so one copy is shared across all agents.
 
 ```yaml
 ---
