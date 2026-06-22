@@ -25,9 +25,6 @@ alias p="pi"
 # Claudius Codius
 alias cl="claude --dangerously-skip-permissions"
 
-# Cursor
-alias cr="cursor-agent --yolo --model claude-opus-4-7-high"
-
 # Cloudflared
 function cftunnel
     cloudflared tunnel --url localhost:$argv[1]
