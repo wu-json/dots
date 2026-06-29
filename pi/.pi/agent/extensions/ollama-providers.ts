@@ -1,16 +1,14 @@
 /**
  * Ollama provider extension
  *
- * Mirrors the opencode `ollama` provider. Registers two OpenAI-compatible
- * providers:
- *    - `ollama-tailnet` → mac-studio over Tailscale (heavy models)
- *    - `ollama-local`   → localhost (small models that fit on any device)
+ * Registers a single OpenAI-compatible provider:
+ *    - `ollama` → localhost
  *
- * Pi auto-discovers this from ~/.pi/agent/extensions/. Use `/login` is not
+ * Pi auto-discovers this from ~/.pi/agent/extensions/. `/login` is not
  * needed — Ollama doesn't authenticate, but pi requires *some* apiKey on
  * the provider config, so we pass a literal placeholder.
  *
- * Edit the `TAILNET_MODELS` / `LOCAL_MODELS` lists below to add more models.
+ * Edit the `MODELS` list below to add more models.
  */
 
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
@@ -23,54 +21,9 @@ interface LocalModel {
 	reasoning: boolean;
 }
 
-// Models served by the Ollama hosts below. Pi expects the model id to match
+// Models served by the Ollama host below. Pi expects the model id to match
 // what the OpenAI-compatible endpoint returns (e.g. `ollama list`).
-const TAILNET_MODELS: LocalModel[] = [
-	{
-		id: "qwen3.6:35b-a3b-coding-mxfp8",
-		name: "Qwen3.6 35B A3B Coding (mxfp8)",
-		// Qwen3 ships with 32k native context; bumped to 256k for pi agent's extended context needs.
-		contextWindow: 256000,
-		maxTokens: 4096,
-		reasoning: true,
-	},
-	{
-		id: "qwen3.6:27b-coding-mxfp8",
-		name: "Qwen3.6 27B Coding (mxfp8)",
-		contextWindow: 256000,
-		maxTokens: 4096,
-		reasoning: true,
-	},
-	{
-		id: "gemma4:26b",
-		name: "Gemma 4 26B",
-		// Gemma 4 ships with a smaller native context; bumped to 256k for pi agent's extended context needs.
-		contextWindow: 256000,
-		maxTokens: 4096,
-		// Gemma is not a reasoning/thinking model.
-		reasoning: false,
-	},
-];
-
-// Gemma 4 E4B and E2B are small enough to run on most of the devices I have,
-// so might as well serve them off localhost instead of round-tripping to the
-// beefy mac-studio over Tailscale every time. Just these two — the heavier
-// models above still need the mac-studio's GPU.
-const LOCAL_MODELS: LocalModel[] = [
-	{
-		id: "gemma4:e4b",
-		name: "Gemma 4 E4B",
-		contextWindow: 128000,
-		maxTokens: 4096,
-		reasoning: false,
-	},
-	{
-		id: "gemma4:e2b",
-		name: "Gemma 4 E2B",
-		contextWindow: 128000,
-		maxTokens: 4096,
-		reasoning: false,
-	},
+const MODELS: LocalModel[] = [
 	{
 		id: "qwen3.5:9b",
 		name: "Qwen 3.5 9B",
@@ -99,18 +52,11 @@ function buildModelConfig(m: LocalModel) {
 }
 
 export default function (pi: ExtensionAPI) {
-	pi.registerProvider("ollama-tailnet", {
-		baseUrl: "https://mac-studio.tailf2675.ts.net:11434/v1",
-		apiKey: "ollama",
-		api: "openai-completions",
-		models: TAILNET_MODELS.map(buildModelConfig),
-	});
-
-	pi.registerProvider("ollama-local", {
+	pi.registerProvider("ollama", {
 		baseUrl: "http://localhost:11434/v1",
 		apiKey: "ollama",
 		api: "openai-completions",
-		models: LOCAL_MODELS.map(buildModelConfig),
+		models: MODELS.map(buildModelConfig),
 	});
 
 	// Inject keep_alive: "1h" into all ollama requests so that the Ollama server
@@ -121,11 +67,7 @@ export default function (pi: ExtensionAPI) {
 	pi.on("before_provider_request", (event) => {
 		const p = event.payload as Record<string, unknown> | undefined;
 		const modelId = p?.model?.toString() ?? "";
-		const isOllamaModel =
-			modelId.includes("qwen3.6:35b-a3b-coding-mxfp8") ||
-			modelId.includes("qwen3.6:27b-coding-mxfp8") ||
-			modelId.includes("qwen3.5:9b") ||
-			modelId.includes("gemma4");
+		const isOllamaModel = modelId.includes("qwen3.5:9b");
 		if (isOllamaModel) {
 			// Return a new object instead of mutating in place: the runner currently
 			// threads the same reference, but `emitContext` already structuredClones

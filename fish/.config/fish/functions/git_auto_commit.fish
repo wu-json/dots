@@ -37,7 +37,7 @@ Then:
 6. Run `git log -1 --oneline` — when your new commit sits on top, the task is complete.'
 
     pi --no-session \
-        --model ollama-local/qwen3.5:9b \
+        --model ollama/qwen3.5:9b \
         --tools read,grep,find,ls,bash \
         "$prompt"
 end
