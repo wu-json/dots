@@ -14,6 +14,13 @@ claude/.claude/*
 pi/.pi/agent/auth.json
 pi/.pi/agent/sessions/
 
-# Same idea for opencode: keep config, drop any secrets it may write into the config dir
+# Same idea for opencode: keep config/themes, drop secrets and runtime junk
+# (opencode regenerates node_modules + package files and a migration backup on launch)
 opencode/.config/opencode/auth.json
+opencode/.config/opencode/node_modules/
+opencode/.config/opencode/package.json
+opencode/.config/opencode/package-lock.json
+opencode/.config/opencode/bun.lock
+opencode/.config/opencode/.gitignore
+opencode/.config/opencode/*.tui-migration.bak
 
