@@ -14,3 +14,6 @@ claude/.claude/*
 pi/.pi/agent/auth.json
 pi/.pi/agent/sessions/
 
+# Same idea for opencode: keep config, drop any secrets it may write into the config dir
+opencode/.config/opencode/auth.json
+

@@ -25,6 +25,9 @@ alias p="pi"
 # Claudius Codius
 alias cl="claude --dangerously-skip-permissions"
 
+# OpenCode
+alias oc="opencode"
+
 # Cloudflared
 function cftunnel
     cloudflared tunnel --url localhost:$argv[1]
