@@ -1,6 +1,6 @@
 {
-  "defaultProvider": "ollama-tailnet",
-  "defaultModel": "qwen3.6:35b-a3b-coding-mxfp8",
+  "defaultProvider": "ollama",
+  "defaultModel": "qwen3.5:9b",
   "theme": "mono",
   "quietStartup": true,
   "collapseChangelog": true,
@@ -9,11 +9,7 @@
   "enabledModels": [
     "deepseek/deepseek-v4-flash",
     "deepseek/deepseek-v4-pro",
-    "ollama-tailnet/qwen3.6:35b-a3b-coding-mxfp8",
-    "ollama-local/gemma4:e4b",
-    "ollama-local/gemma4:e2b",
-    "ollama-local/qwen3.5:9b",
-    "ollama-tailnet/gemma4:26b",
+    "ollama/qwen3.5:9b",
     "xiaomi/mimo-v2.5",
     "xiaomi/mimo-v2.5-pro"
   ]
