@@ -4,21 +4,17 @@
   "theme": "mono",
   "quietStartup": true,
   "collapseChangelog": true,
-  "lastChangelogVersion": "0.78.1",
+  "lastChangelogVersion": "0.80.2",
   "defaultThinkingLevel": "high",
   "enabledModels": [
     "deepseek/deepseek-v4-flash",
     "deepseek/deepseek-v4-pro",
-    "anthropic/claude-opus-4-7",
     "ollama-tailnet/qwen3.6:35b-a3b-coding-mxfp8",
     "ollama-local/gemma4:e4b",
     "ollama-local/gemma4:e2b",
     "ollama-local/qwen3.5:9b",
     "ollama-tailnet/gemma4:26b",
     "xiaomi/mimo-v2.5",
-    "xiaomi/mimo-v2.5-pro",
-    "openai/gpt-5.5",
-    "openai/gpt-5.5-pro",
-    "anthropic/claude-sonnet-4-6"
+    "xiaomi/mimo-v2.5-pro"
   ]
 }
