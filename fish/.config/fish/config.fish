@@ -23,7 +23,7 @@ alias od="obsidian daily"
 alias p="pi"
 
 # Claudius Codius
-alias cl="claude --dangerously-skip-permissions"
+alias cl="env TZ=America/Los_Angeles claude --dangerously-skip-permissions"
 
 # OpenCode
 alias oc="opencode"
