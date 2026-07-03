@@ -25,7 +25,7 @@ interface LocalModel {
 // what the OpenAI-compatible endpoint returns (e.g. `ollama list`).
 const MODELS: LocalModel[] = [
 	{
-		id: "qwen3.5:9b",
+		id: "qwen3.5:9b-mlx",
 		name: "Qwen 3.5 9B",
 		contextWindow: 128000,
 		maxTokens: 4096,
@@ -67,7 +67,7 @@ export default function (pi: ExtensionAPI) {
 	pi.on("before_provider_request", (event) => {
 		const p = event.payload as Record<string, unknown> | undefined;
 		const modelId = p?.model?.toString() ?? "";
-		const isOllamaModel = modelId.includes("qwen3.5:9b");
+		const isOllamaModel = modelId.includes("qwen3.5:9b-mlx");
 		if (isOllamaModel) {
 			// Return a new object instead of mutating in place: the runner currently
 			// threads the same reference, but `emitContext` already structuredClones
