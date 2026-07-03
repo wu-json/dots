@@ -1,15 +1,15 @@
 {
   "defaultProvider": "ollama",
-  "defaultModel": "qwen3.5:9b",
+  "defaultModel": "qwen3.5:9b-mlx",
   "theme": "mono",
   "quietStartup": true,
   "collapseChangelog": true,
-  "lastChangelogVersion": "0.80.2",
+  "lastChangelogVersion": "0.80.3",
   "defaultThinkingLevel": "high",
   "enabledModels": [
     "deepseek/deepseek-v4-flash",
     "deepseek/deepseek-v4-pro",
-    "ollama/qwen3.5:9b",
+    "ollama/qwen3.5:9b-mlx",
     "xiaomi/mimo-v2.5",
     "xiaomi/mimo-v2.5-pro"
   ]
