@@ -16,7 +16,8 @@ map("n", "<leader>mg", function()
     return
   end
   local width = math.min(vim.api.nvim_win_get_width(0) - 4, 120)
-  local result = vim.system({ "glow", "-w", tostring(width), file }, { text = true }):wait()
+  -- an explicit style keeps glow from dropping colors when piped (not a TTY)
+  local result = vim.system({ "glow", "-s", vim.o.background, "-w", tostring(width), file }, { text = true }):wait()
   if result.code ~= 0 then
     vim.notify("glow failed: " .. (result.stderr or ""), vim.log.levels.ERROR)
     return
