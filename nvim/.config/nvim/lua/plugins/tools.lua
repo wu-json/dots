@@ -40,14 +40,6 @@ return {
     },
   },
   {
-    "ellisonleao/glow.nvim",
-    cmd = "Glow",
-    opts = {},
-    keys = {
-      { "<leader>mg", "<cmd>Glow<cr>", ft = "markdown", desc = "Markdown Glow (float)" },
-    },
-  },
-  {
     "sotte/presenting.nvim",
     opts = {
       -- fill in your options here
