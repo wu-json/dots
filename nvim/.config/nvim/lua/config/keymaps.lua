@@ -7,32 +7,28 @@ map("n", "<leader>E", "<cmd>Explore<cr>", { desc = "Open netrw explorer" })
 map("n", "<leader>bo", "<cmd>BufOnly<cr>", { desc = "Delete all other buffers" })
 map("n", "<leader>yp", "<cmd>let @+ = expand('%:p')<cr>", { desc = "Copy absolute path to clipboard" })
 
--- Read the current markdown file with glow in a terminal, taking over the
--- window; quitting glow (q) drops you back into the file.
+-- Render the current markdown file with glow into a read-only buffer that
+-- keeps glow's colors but behaves like a normal buffer (motions, search, :bd).
 map("n", "<leader>mg", function()
   local file = vim.api.nvim_buf_get_name(0)
   if file == "" then
     vim.notify("glow: buffer has no file", vim.log.levels.WARN)
     return
   end
-  local prev_buf = vim.api.nvim_get_current_buf()
+  local width = math.min(vim.api.nvim_win_get_width(0) - 4, 120)
+  local result = vim.system({ "glow", "-w", tostring(width), file }, { text = true }):wait()
+  if result.code ~= 0 then
+    vim.notify("glow failed: " .. (result.stderr or ""), vim.log.levels.ERROR)
+    return
+  end
+  local name = "glow://" .. file
+  local existing = vim.fn.bufnr(name)
+  if existing ~= -1 then
+    vim.api.nvim_buf_delete(existing, { force = true })
+  end
   vim.cmd("enew")
-  local term_buf = vim.api.nvim_get_current_buf()
-  vim.bo[term_buf].bufhidden = "wipe"
-  vim.fn.jobstart({ "glow", "--pager", file }, {
-    term = true,
-    on_exit = function()
-      vim.schedule(function()
-        if not vim.api.nvim_buf_is_valid(term_buf) then
-          return
-        end
-        for _, win in ipairs(vim.fn.win_findbuf(term_buf)) do
-          if vim.api.nvim_buf_is_valid(prev_buf) then
-            vim.api.nvim_win_set_buf(win, prev_buf)
-          end
-        end
-      end)
-    end,
-  })
-  vim.cmd("startinsert")
+  local buf = vim.api.nvim_get_current_buf()
+  vim.api.nvim_buf_set_name(buf, name)
+  local chan = vim.api.nvim_open_term(buf, {})
+  vim.api.nvim_chan_send(chan, (result.stdout:gsub("\n", "\r\n")))
 end, { desc = "Read markdown with glow" })
