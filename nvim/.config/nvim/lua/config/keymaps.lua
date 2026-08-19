@@ -35,4 +35,24 @@ map("n", "<leader>mg", function()
   vim.api.nvim_buf_set_name(buf, name)
   local chan = vim.api.nvim_open_term(buf, {})
   vim.api.nvim_chan_send(chan, (result.stdout:gsub("\n", "\r\n")))
+  -- nvim's mouse handling swallows clicks before the terminal emulator can
+  -- detect URLs, so open the link under the cursor ourselves on click (and gx)
+  local function open_url_at_cursor()
+    local line = vim.api.nvim_get_current_line()
+    local col = vim.api.nvim_win_get_cursor(0)[2] + 1
+    local from = 1
+    while true do
+      local s, e = line:find("https?://[^%s%)%]>\"'`]+", from)
+      if not s then
+        return
+      end
+      if col >= s and col <= e then
+        vim.ui.open((line:sub(s, e):gsub("[.,;:]+$", "")))
+        return
+      end
+      from = e + 1
+    end
+  end
+  vim.keymap.set("n", "<LeftRelease>", open_url_at_cursor, { buffer = buf, desc = "Open link under cursor" })
+  vim.keymap.set("n", "gx", open_url_at_cursor, { buffer = buf, desc = "Open link under cursor" })
 end, { desc = "Read markdown with glow" })
