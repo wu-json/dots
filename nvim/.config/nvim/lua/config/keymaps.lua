@@ -29,6 +29,9 @@ map("n", "<leader>mg", function()
   end
   vim.cmd("enew")
   local buf = vim.api.nvim_get_current_buf()
+  -- no swapfile: this is a throwaway render, and naming it glow:// while it's
+  -- still a normal buffer would otherwise create one and trigger E325 prompts
+  vim.bo[buf].swapfile = false
   vim.api.nvim_buf_set_name(buf, name)
   local chan = vim.api.nvim_open_term(buf, {})
   vim.api.nvim_chan_send(chan, (result.stdout:gsub("\n", "\r\n")))
