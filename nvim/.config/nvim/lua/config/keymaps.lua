@@ -22,7 +22,7 @@ map("n", "<leader>mg", function()
     vim.notify("glow failed: " .. (result.stderr or ""), vim.log.levels.ERROR)
     return
   end
-  local name = "glow://" .. vim.fn.fnamemodify(file, ":t")
+  local name = "glow://" .. vim.fn.fnamemodify(file, ":~:.")
   local existing = vim.fn.bufnr(name)
   if existing ~= -1 then
     vim.api.nvim_buf_delete(existing, { force = true })
