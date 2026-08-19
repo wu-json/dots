@@ -35,22 +35,56 @@ map("n", "<leader>mg", function()
   vim.api.nvim_buf_set_name(buf, name)
   local chan = vim.api.nvim_open_term(buf, {})
   vim.api.nvim_chan_send(chan, (result.stdout:gsub("\n", "\r\n")))
+  -- Map link positions from glow's OSC 8 hyperlink escapes (\27]8;id;url BEL),
+  -- which carry the full url even where the visible text is hard-wrapped
+  -- mid-link. The terminal buffer drops these escapes, so scraping visible
+  -- text would truncate wrapped urls; parse the raw stdout instead.
+  local links = {} -- links[lnum] = { { s = byte, e = byte, url = url }, ... }
+  local lnum = 0
+  for line in (result.stdout .. "\n"):gmatch("(.-)\n") do
+    lnum = lnum + 1
+    local ranges, url, start, pos, vis = {}, nil, nil, 1, 0
+    while pos <= #line do
+      local s, e, u = line:find("^\27]8;[^;\27\7]*;([^\27\7]*)\7", pos)
+      if not s then
+        s, e, u = line:find("^\27]8;[^;\27]*;([^\27]*)\27\\", pos)
+      end
+      if s then
+        if url and start then
+          ranges[#ranges + 1] = { s = start, e = vis, url = url }
+        end
+        url = u ~= "" and u or nil
+        start = url and vis + 1 or nil
+        pos = e + 1
+      else
+        s, e = line:find("^\27%[[^%a\27]*%a", pos) -- SGR color/style sequences
+        if s then
+          pos = e + 1
+        else
+          if line:byte(pos) ~= 27 then
+            vis = vis + 1 -- visible byte; offsets match the terminal buffer text
+          end
+          pos = pos + 1
+        end
+      end
+    end
+    if url and start then
+      ranges[#ranges + 1] = { s = start, e = vis, url = url }
+    end
+    if #ranges > 0 then
+      links[lnum] = ranges
+    end
+  end
   -- nvim's mouse handling swallows clicks before the terminal emulator can
   -- detect URLs, so open the link under the cursor ourselves on click (and gx)
   local function open_url_at_cursor()
-    local line = vim.api.nvim_get_current_line()
-    local col = vim.api.nvim_win_get_cursor(0)[2] + 1
-    local from = 1
-    while true do
-      local s, e = line:find("https?://[^%s%)%]>\"'`]+", from)
-      if not s then
+    local cur = vim.api.nvim_win_get_cursor(0)
+    local col = cur[2] + 1
+    for _, r in ipairs(links[cur[1]] or {}) do
+      if col >= r.s and col <= r.e then
+        vim.ui.open(r.url)
         return
       end
-      if col >= s and col <= e then
-        vim.ui.open((line:sub(s, e):gsub("[.,;:]+$", "")))
-        return
-      end
-      from = e + 1
     end
   end
   vim.keymap.set("n", "<LeftRelease>", open_url_at_cursor, { buffer = buf, desc = "Open link under cursor" })
