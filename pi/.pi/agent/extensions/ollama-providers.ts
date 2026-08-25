@@ -1,14 +1,15 @@
 /**
  * Ollama provider extension
  *
- * Registers a single OpenAI-compatible provider:
- *    - `ollama` → localhost
+ * Registers two OpenAI-compatible providers:
+ *    - `ollama`         → localhost (small models)
+ *    - `ollama-tailnet` → mac-studio over Tailscale (heavy models)
  *
  * Pi auto-discovers this from ~/.pi/agent/extensions/. `/login` is not
  * needed — Ollama doesn't authenticate, but pi requires *some* apiKey on
  * the provider config, so we pass a literal placeholder.
  *
- * Edit the `MODELS` list below to add more models.
+ * Edit the `MODELS` / `TAILNET_MODELS` lists below to add more models.
  */
 
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
@@ -28,6 +29,18 @@ const MODELS: LocalModel[] = [
 		id: "qwen3.5:9b-mlx",
 		name: "Qwen 3.5 9B",
 		contextWindow: 128000,
+		maxTokens: 4096,
+		reasoning: true,
+	},
+];
+
+// Heavy models served by the mac-studio over Tailscale.
+const TAILNET_MODELS: LocalModel[] = [
+	{
+		id: "qwen3.8:27b-mlx",
+		name: "Qwen3.8 27B (mlx)",
+		// Bumped to 256k for pi agent's extended context needs.
+		contextWindow: 256000,
 		maxTokens: 4096,
 		reasoning: true,
 	},
@@ -59,6 +72,13 @@ export default function (pi: ExtensionAPI) {
 		models: MODELS.map(buildModelConfig),
 	});
 
+	pi.registerProvider("ollama-tailnet", {
+		baseUrl: "https://mac-studio.tailf2675.ts.net:11434/v1",
+		apiKey: "ollama",
+		api: "openai-completions",
+		models: TAILNET_MODELS.map(buildModelConfig),
+	});
+
 	// Inject keep_alive: "1h" into all ollama requests so that the Ollama server
 	// keeps loaded models for 1 hour instead of unloading after the
 	// default 5 minutes. This avoids cold-start lag when the agent pauses between
@@ -67,7 +87,9 @@ export default function (pi: ExtensionAPI) {
 	pi.on("before_provider_request", (event) => {
 		const p = event.payload as Record<string, unknown> | undefined;
 		const modelId = p?.model?.toString() ?? "";
-		const isOllamaModel = modelId.includes("qwen3.5:9b-mlx");
+		const isOllamaModel =
+			modelId.includes("qwen3.5:9b-mlx") ||
+			modelId.includes("qwen3.8:27b-mlx");
 		if (isOllamaModel) {
 			// Return a new object instead of mutating in place: the runner currently
 			// threads the same reference, but `emitContext` already structuredClones
