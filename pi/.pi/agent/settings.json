@@ -4,12 +4,13 @@
   "theme": "mono",
   "quietStartup": true,
   "collapseChangelog": true,
-  "lastChangelogVersion": "0.80.6",
+  "lastChangelogVersion": "0.84.3",
   "defaultThinkingLevel": "high",
   "enabledModels": [
     "deepseek/deepseek-v4-flash",
     "deepseek/deepseek-v4-pro",
     "ollama/qwen3.5:9b-mlx",
+    "ollama-tailnet/qwen3.8:27b-mlx",
     "xiaomi/mimo-v2.5",
     "xiaomi/mimo-v2.5-pro"
   ]
