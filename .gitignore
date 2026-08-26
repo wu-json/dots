@@ -13,6 +13,7 @@ claude/.claude/*
 # Same idea for pi: keep configs/extensions/themes, drop secrets and session logs
 pi/.pi/agent/auth.json
 pi/.pi/agent/sessions/
+pi/.pi/agent/models-store.json
 
 # Same idea for opencode: keep config/themes, drop secrets and runtime junk
 # (opencode regenerates node_modules + package files and a migration backup on launch)

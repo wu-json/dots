@@ -3,7 +3,7 @@
  *
  * Registers two OpenAI-compatible providers:
  *    - `ollama`         → localhost (small models)
- *    - `ollama-tailnet` → mac-studio over Tailscale (heavy models)
+ *    - `ollama-tailnet` → "ollama" tailnet node (heavy models)
  *
  * Pi auto-discovers this from ~/.pi/agent/extensions/. `/login` is not
  * needed — Ollama doesn't authenticate, but pi requires *some* apiKey on
@@ -34,7 +34,9 @@ const MODELS: LocalModel[] = [
 	},
 ];
 
-// Heavy models served by the mac-studio over Tailscale.
+// Heavy models served by whichever host runs `ollama_tailnet up`, which
+// starts a tailscale sidecar container that joins the tailnet as the
+// "ollama" node and proxies ollama.<tailnet>.ts.net to the host's Ollama.
 const TAILNET_MODELS: LocalModel[] = [
 	{
 		id: "qwen3.8:27b-mlx",
@@ -73,7 +75,7 @@ export default function (pi: ExtensionAPI) {
 	});
 
 	pi.registerProvider("ollama-tailnet", {
-		baseUrl: "https://mac-studio.tailf2675.ts.net:11434/v1",
+		baseUrl: "https://ollama.tailf2675.ts.net/v1",
 		apiKey: "ollama",
 		api: "openai-completions",
 		models: TAILNET_MODELS.map(buildModelConfig),
