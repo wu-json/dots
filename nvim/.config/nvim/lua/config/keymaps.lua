@@ -18,6 +18,12 @@ map("n", "<leader>mg", function()
     return
   end
   local name = "glow://" .. vim.fn.fnamemodify(file, ":~:.")
+  -- custom glamour style matching the yuki colorscheme; falling back to glow's
+  -- stock dark/light style if the file is missing
+  local style = vim.fn.stdpath("config") .. "/glow/yuki.json"
+  if vim.fn.filereadable(style) == 0 then
+    style = vim.o.background
+  end
   local replacing = false -- a refresh swaps buffers; don't treat that as closing
 
   local function stop_watch()
@@ -40,9 +46,12 @@ map("n", "<leader>mg", function()
         wins[#wins + 1] = { win = win, cursor = vim.api.nvim_win_get_cursor(win) }
       end
     end
-    local width = math.min(vim.api.nvim_win_get_width(wins[1] and wins[1].win or show_win or 0) - 4, 120)
+    -- 80 fallback: an undisplayed terminal buffer sizes to 80 columns, and
+    -- glow output wider than the terminal hard-wraps into a doubled-line mess
+    local target = wins[1] and wins[1].win or show_win
+    local width = math.min((target and vim.api.nvim_win_get_width(target) or 80) - 4, 120)
     -- an explicit style keeps glow from dropping colors when piped (not a TTY)
-    local result = vim.system({ "glow", "-s", vim.o.background, "-w", tostring(width), file }, { text = true }):wait()
+    local result = vim.system({ "glow", "-s", style, "-w", tostring(width), file }, { text = true }):wait()
     if result.code ~= 0 then
       vim.notify("glow failed: " .. (result.stderr or ""), vim.log.levels.ERROR)
       return false
@@ -55,6 +64,19 @@ map("n", "<leader>mg", function()
     -- scratch: no swapfile, so naming the buffer glow:// can't trigger E325 prompts
     local buf = vim.api.nvim_create_buf(true, true)
     vim.api.nvim_buf_set_name(buf, name)
+    -- show the buffer in its window(s) BEFORE opening the terminal channel, so
+    -- the terminal sizes to the window instead of the hidden-buffer 80 columns
+    if #wins == 0 then
+      if show_win then
+        vim.api.nvim_win_set_buf(show_win, buf)
+      end
+    else
+      for _, w in ipairs(wins) do
+        if vim.api.nvim_win_is_valid(w.win) then
+          vim.api.nvim_win_set_buf(w.win, buf)
+        end
+      end
+    end
     local chan = vim.api.nvim_open_term(buf, {})
     vim.api.nvim_chan_send(chan, (result.stdout:gsub("\n", "\r\n")))
     -- Map link positions from glow's OSC 8 hyperlink escapes (\27]8;id;url BEL),
@@ -120,16 +142,9 @@ map("n", "<leader>mg", function()
         end
       end,
     })
-    if #wins == 0 then
-      if show_win then
-        vim.api.nvim_win_set_buf(show_win, buf)
-      end
-    else
-      for _, w in ipairs(wins) do
-        if vim.api.nvim_win_is_valid(w.win) then
-          vim.api.nvim_win_set_buf(w.win, buf)
-          pcall(vim.api.nvim_win_set_cursor, w.win, { math.min(w.cursor[1], vim.api.nvim_buf_line_count(buf)), w.cursor[2] })
-        end
+    for _, w in ipairs(wins) do
+      if vim.api.nvim_win_is_valid(w.win) then
+        pcall(vim.api.nvim_win_set_cursor, w.win, { math.min(w.cursor[1], vim.api.nvim_buf_line_count(buf)), w.cursor[2] })
       end
     end
     return true
