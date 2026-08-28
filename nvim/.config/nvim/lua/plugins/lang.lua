@@ -8,6 +8,7 @@ return {
         pyright = {},
         ruff_lsp = {},
         rust_analyzer = {},
+        sourcekit = { mason = false },
         tailwindcss = {},
         terraformls = {},
         yamlls = {},
@@ -30,6 +31,7 @@ return {
         "pkl",
         "python",
         "rst",
+        "swift",
         "toml",
         "yaml",
       })
