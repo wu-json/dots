@@ -13,8 +13,28 @@ map("n", "<leader>yp", "<cmd>let @+ = expand('%:p')<cr>", { desc = "Copy absolut
 local glow_watchers = {} -- name -> fs_event handle; re-invoking replaces the watch
 map("n", "<leader>mg", function()
   local file = vim.api.nvim_buf_get_name(0)
-  if file == "" then
-    vim.notify("glow: buffer has no file", vim.log.levels.WARN)
+  local show_win = vim.api.nvim_get_current_win()
+  if vim.bo.filetype == "neo-tree" then
+    -- invoked from the tree: render the file under the cursor into a normal
+    -- window (reusing one if present) instead of clobbering the tree itself
+    local state = require("neo-tree.sources.manager").get_state_for_window()
+    local node = state and state.tree and state.tree:get_node()
+    file = (node and node.type == "file" and node.path) or ""
+    show_win = nil
+    for _, w in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+      local b = vim.api.nvim_win_get_buf(w)
+      if vim.api.nvim_win_get_config(w).relative == "" and vim.bo[b].filetype ~= "neo-tree" then
+        show_win = w
+        break
+      end
+    end
+    if not show_win then
+      vim.cmd("botright vsplit")
+      show_win = vim.api.nvim_get_current_win()
+    end
+  end
+  if file == "" or vim.fn.filereadable(file) == 0 then
+    vim.notify("glow: buffer has no readable file", vim.log.levels.WARN)
     return
   end
   local name = "glow://" .. vim.fn.fnamemodify(file, ":~:.")
@@ -79,6 +99,14 @@ map("n", "<leader>mg", function()
     end
     local chan = vim.api.nvim_open_term(buf, {})
     vim.api.nvim_chan_send(chan, (result.stdout:gsub("\n", "\r\n")))
+    -- this terminal has no process behind it, so terminal-mode just swallows
+    -- every keypress; bounce straight back to normal mode
+    vim.api.nvim_create_autocmd("TermEnter", {
+      buffer = buf,
+      callback = function()
+        vim.schedule(vim.cmd.stopinsert)
+      end,
+    })
     -- Map link positions from glow's OSC 8 hyperlink escapes (\27]8;id;url BEL),
     -- which carry the full url even where the visible text is hard-wrapped
     -- mid-link. The terminal buffer drops these escapes, so scraping visible
@@ -150,7 +178,7 @@ map("n", "<leader>mg", function()
     return true
   end
 
-  if not render(vim.api.nvim_get_current_win()) then
+  if not render(show_win) then
     return
   end
 
