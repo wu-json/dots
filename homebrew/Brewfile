@@ -43,6 +43,7 @@ brew "zoxide"
 
 cask "audacity"
 cask "claude-code@latest"
+cask "handy"
 cask "orbstack"
 cask "raycast"
 cask "tamnd/tap/kage"

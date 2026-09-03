@@ -41,7 +41,7 @@
       "Bash(gh gist view:*)"
     ]
   },
-  "model": "claude-fable-5[1m]",
+  "model": "fable[1m]",
   "skipDangerousModePermissionPrompt": true,
   "theme": "dark",
   "inputNeededNotifEnabled": true,
