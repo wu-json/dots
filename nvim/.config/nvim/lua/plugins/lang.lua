@@ -5,7 +5,34 @@ return {
       inlay_hints = { enabled = false },
       servers = {
         gopls = {},
-        pyright = {},
+        pyright = {
+          -- Point pyright at the nearest `.venv`, walking up from the server root
+          -- (nearest pyproject.toml) but never past the enclosing git repo. Covers
+          -- per-subproject venvs and a shared uv-workspace venv at the repo root
+          -- without repo-side config or a manual activate. Pyright itself never
+          -- auto-detects `.venv`; it falls back to whatever `python3` is on PATH.
+          on_init = function(client)
+            local root = client.root_dir
+            if not root then
+              return
+            end
+            local repo = vim.fs.root(root, ".git")
+            local venv = vim.fs.find(".venv", {
+              path = root,
+              upward = true,
+              type = "directory",
+              -- `stop` is exclusive, so pass the repo's parent to include the repo root itself.
+              stop = vim.fs.dirname(repo or root),
+            })[1]
+            if not venv then
+              return
+            end
+            client.settings = vim.tbl_deep_extend("force", client.settings or {}, {
+              python = { pythonPath = venv .. "/bin/python" },
+            })
+            client:notify("workspace/didChangeConfiguration", { settings = client.settings })
+          end,
+        },
         ruff_lsp = {},
         rust_analyzer = {},
         sourcekit = { mason = false },
