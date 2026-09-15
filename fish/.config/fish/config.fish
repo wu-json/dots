@@ -29,7 +29,7 @@ alias cl="env TZ=America/Los_Angeles claude --dangerously-skip-permissions"
 alias oc="opencode"
 
 # Codex
-alias cx="codex"
+alias cx="codex --yolo"
 
 # Cloudflared
 function cftunnel --description 'Start a Cloudflare quick tunnel to a local port, then show and copy its URL'
