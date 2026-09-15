@@ -28,6 +28,9 @@ alias cl="env TZ=America/Los_Angeles claude --dangerously-skip-permissions"
 # OpenCode
 alias oc="opencode"
 
+# Codex
+alias cx="codex"
+
 # Cloudflared
 function cftunnel --description 'Start a Cloudflare quick tunnel to a local port, then show and copy its URL'
     set -l port $argv[1]
