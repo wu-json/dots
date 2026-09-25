@@ -28,3 +28,7 @@ opencode/.config/opencode/bun.lock
 opencode/.config/opencode/.gitignore
 opencode/.config/opencode/*.tui-migration.bak
 
+
+# Claude Code syncs claude.ai account skills into ~/.claude/skills/synced,
+# which resolves into this repo via the skills symlink
+skills/synced/
