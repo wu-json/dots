@@ -1,38 +1,27 @@
 [manager]
-# Show hidden files by default
 show_hidden = true
-# Sort by directory first, then by modified time (newest first)
 sort_by = "mtime"
 sort_dir_first = true
 sort_reverse = true
 sort_case_sensitive = false
-# Line mode: "none", "size", "mtime", "permissions", "owner"
 linemode = "mtime"
-# Tabs on startup
 tabs = 1
 
 [preview]
-# Image preview quality
 image_filter = "lanczos3"
 image_quality = 75
-# Syntax highlighting for code previews
 syntax_highlighting = true
-# Max preview dimensions
 max_width = 800
 max_height = 600
-# Show preview tab label
 tab_title = true
-# Cache previews for faster navigation
 cache_dir = ""
 
 [opener]
-# Open images in macOS's default app
 image = [
   { run = 'open "$1"', desc = "Open in default app" },
 ]
 
 [open]
-# Rules for opening files with external programs
 rules = [
   { mime = "text/*", use = "nvim" },
   { mime = "image/*", use = "open" },
