@@ -7,11 +7,6 @@
   "lastChangelogVersion": "0.85.1",
   "defaultThinkingLevel": "high",
   "enabledModels": [
-    "deepseek/deepseek-v4-flash",
-    "deepseek/deepseek-v4-pro",
-    "ollama/*",
-    "ollama-tailnet/*",
-    "xiaomi/mimo-v2.5",
-    "xiaomi/mimo-v2.5-pro"
+    "ollama/*"
   ]
 }

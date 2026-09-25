@@ -1,9 +1,7 @@
 /**
  * Ollama provider extension
  *
- * Registers two OpenAI-compatible providers:
- *    - `ollama`         → localhost (small models)
- *    - `ollama-tailnet` → "ollama" tailnet node (heavy models)
+ * Registers an OpenAI-compatible `ollama` provider for localhost.
  *
  * Pi auto-discovers this from ~/.pi/agent/extensions/. `/login` is not
  * needed — Ollama doesn't authenticate, but pi requires *some* apiKey on
@@ -48,23 +46,6 @@ const HOSTS: OllamaHost[] = [
 				id: "qwen3.5:9b-mlx",
 				name: "Qwen 3.5 9B",
 				contextWindow: 128000,
-				maxTokens: 4096,
-				reasoning: true,
-			},
-		],
-	},
-	// Heavy models served by whichever host runs `ollama_tailnet up`, which
-	// starts a tailscale sidecar container that joins the tailnet as the
-	// "ollama" node and proxies ollama.<tailnet>.ts.net to the host's Ollama.
-	{
-		provider: "ollama-tailnet",
-		baseUrl: "https://ollama.tailf2675.ts.net",
-		timeoutMs: 3000,
-		fallback: [
-			{
-				id: "qwen3.8:27b-mlx",
-				name: "Qwen3.8 27B (mlx)",
-				contextWindow: 256000,
 				maxTokens: 4096,
 				reasoning: true,
 			},
