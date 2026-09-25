@@ -7,7 +7,7 @@
  * opencode's behavior in packages/opencode/src/tool/mcp-exa.ts).
  */
 
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
 
 const MCP_URL = process.env.EXA_API_KEY
