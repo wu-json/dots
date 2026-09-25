@@ -1,20 +1,3 @@
-/**
- * Ollama provider extension
- *
- * Registers an OpenAI-compatible `ollama` provider for localhost.
- *
- * Pi auto-discovers this from ~/.pi/agent/extensions/. `/login` is not
- * needed — Ollama doesn't authenticate, but pi requires *some* apiKey on
- * the provider config, so we pass a literal placeholder.
- *
- * Models are discovered dynamically from each host's `/api/tags` (filtered
- * to tool-capable models, since the agent needs tool calling) and cached in
- * ~/.cache/pi/ollama-models.json. Startup never touches the network: the
- * cached list (or the hardcoded seeds below, when a host has never been
- * reachable) registers immediately, then a background refresh re-registers
- * the provider and updates the cache.
- */
-
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import * as path from "node:path";
@@ -79,7 +62,6 @@ function writeCache(provider: string, models: LocalModel[]) {
 		mkdirSync(path.dirname(CACHE_FILE), { recursive: true });
 		writeFileSync(CACHE_FILE, JSON.stringify(cache, null, "\t"));
 	} catch {
-		// Cache is best-effort; discovery still worked.
 	}
 }
 
@@ -95,8 +77,6 @@ async function discoverModels(host: OllamaHost): Promise<LocalModel[]> {
 	});
 	if (!res.ok) throw new Error(`${host.baseUrl}/api/tags: HTTP ${res.status}`);
 	const tags = (await res.json()) as { models?: TagModel[] };
-	// Agent use requires tool calling, so skip models without it (OCR/vision-only
-	// models, embedders, etc.).
 	const usable = (tags.models ?? []).filter((m) => m.capabilities?.includes("tools"));
 
 	return Promise.all(
@@ -104,8 +84,6 @@ async function discoverModels(host: OllamaHost): Promise<LocalModel[]> {
 			const caps = m.capabilities ?? [];
 			let contextWindow = m.details?.context_length;
 			if (!contextWindow) {
-				// mlx/safetensors models don't report context_length in /api/tags;
-				// /api/show has it under model_info["<arch>.context_length"].
 				try {
 					const show = await fetch(`${host.baseUrl}/api/show`, {
 						method: "POST",
@@ -116,7 +94,6 @@ async function discoverModels(host: OllamaHost): Promise<LocalModel[]> {
 					const key = Object.keys(info).find((k) => k.endsWith(".context_length"));
 					if (key && typeof info[key] === "number") contextWindow = info[key] as number;
 				} catch {
-					// Fall through to the default below.
 				}
 			}
 			return {
@@ -140,10 +117,6 @@ function buildModelConfig(m: LocalModel) {
 		cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
 		contextWindow: m.contextWindow,
 		maxTokens: m.maxTokens,
-		// Only Qwen-compatible local servers (Ollama, llama.cpp) read the
-		// thinking toggle from chat_template_kwargs.enable_thinking, so only
-		// claim the format for qwen models even when others report a
-		// "thinking" capability.
 		...(m.reasoning && /^qwen/i.test(m.id)
 			? { compat: { thinkingFormat: "qwen-chat-template" as const } }
 			: {}),
@@ -151,9 +124,6 @@ function buildModelConfig(m: LocalModel) {
 }
 
 export default async function (pi: ExtensionAPI) {
-	// Every model id ever registered this session, for the keep_alive hook.
-	// Ids from models that disappear on refresh linger here; that only means a
-	// harmless keep_alive field on a request that would fail anyway.
 	const ollamaModelIds = new Set<string>();
 
 	const register = (host: OllamaHost, models: LocalModel[]) => {
@@ -173,9 +143,6 @@ export default async function (pi: ExtensionAPI) {
 		writeCache(host.provider, models);
 	};
 
-	// Never block startup on the network: register from cache (or the fallback
-	// seeds) synchronously, then refresh in the background — pi applies
-	// re-registered providers immediately, so a fresh list lands mid-session.
 	const cache = readCache();
 	for (const host of HOSTS) {
 		const cached = cache[host.provider];
@@ -183,18 +150,10 @@ export default async function (pi: ExtensionAPI) {
 		void refresh(host).catch(() => {});
 	}
 
-	// Inject keep_alive: "1h" into all ollama requests so that the Ollama server
-	// keeps loaded models for 1 hour instead of unloading after the
-	// default 5 minutes. This avoids cold-start lag when the agent pauses between
-	// agentic turns.
 	pi.on("before_provider_request", (event) => {
 		const p = event.payload as Record<string, unknown> | undefined;
 		const modelId = p?.model?.toString() ?? "";
 		if (ollamaModelIds.has(modelId)) {
-			// Return a new object instead of mutating in place: the runner currently
-			// threads the same reference, but `emitContext` already structuredClones
-			// its payload, and `emitBeforeProviderRequest` could be refactored to do
-			// the same — at which point an in-place mutation would silently drop.
 			return { ...(p as object), keep_alive: "1h" };
 		}
 		return event.payload;

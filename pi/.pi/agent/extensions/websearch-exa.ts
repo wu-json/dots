@@ -1,12 +1,3 @@
-/**
- * Websearch tool via Exa AI's public MCP endpoint.
- *
- * Registers a `websearch` tool that wraps Exa's hosted MCP server at
- * https://mcp.exa.ai/mcp. The endpoint works unauthenticated for the free
- * tier; if EXA_API_KEY is set it's appended for paid-tier limits (matches
- * opencode's behavior in packages/opencode/src/tool/mcp-exa.ts).
- */
-
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
 
@@ -77,14 +68,11 @@ export default function (pi: ExtensionAPI) {
 				const text = extract(parsed);
 				if (text) return { content: [{ type: "text", text }], details: {} };
 			}
-			// Fallback: server may have honored `application/json` from our Accept
-			// header and returned a plain JSON-RPC response instead of SSE frames.
 			try {
 				const parsed = JSON.parse(body);
 				const text = extract(parsed);
 				if (text) return { content: [{ type: "text", text }], details: {} };
 			} catch {
-				// Not JSON either — fall through to empty-results sentinel.
 			}
 			return { content: [{ type: "text", text: "No results." }], details: {} };
 		},
