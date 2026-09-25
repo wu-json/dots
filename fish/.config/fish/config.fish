@@ -117,10 +117,6 @@ function wdc
     echo "Copied working directory to clipboard: "(pwd)
 end
 
-# Review fish function
-alias r="review"
-alias ra="review_auto"
-
 # OrbStack
 source ~/.orbstack/shell/init.fish 2>/dev/null || :
 
