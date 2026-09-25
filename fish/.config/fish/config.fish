@@ -17,12 +17,7 @@ alias tree="eza --tree"
 # Yazi
 alias y="yazi"
 
-# Obsidian
-alias o="obsidian"
-alias od="obsidian daily"
-alias p="pi"
-
-# Claudius Codius
+# Claude Code
 alias cl="env TZ=America/Los_Angeles claude --dangerously-skip-permissions"
 
 # Codex
