@@ -127,7 +127,10 @@ source ~/.orbstack/shell/init2.fish 2>/dev/null || :
 
 set fish_greeting ""
 
-# Turn on vi mode by default
+# Turn on vi mode without showing Fish's default mode indicator
+function fish_mode_prompt
+end
+
 fish_vi_key_bindings
 
 # Custom key bindings for word-by-word completion
