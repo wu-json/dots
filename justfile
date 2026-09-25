@@ -28,7 +28,6 @@ init-obsidian-cli:
   echo "✓ Obsidian MacOS dir added to fish's universal PATH"
 
 stow:
-  stow -t ~ claude
   stow -t ~ fish
   stow -t ~ nvim
   stow -t ~ pi

@@ -4,20 +4,9 @@
 **/nvim/queries/sand
 *.local.*
 
-# Ignore Claude Code files except skills and settings for security reasons
-# (prevents committing session data, logs, and potentially sensitive information)
-claude/.claude/*
-!claude/.claude/skills
-!claude/.claude/settings.json
-
 # Same idea for pi: allowlist configs/extensions/themes, ignore everything else
 # (secrets, session logs, and whatever new runtime state pi grows over time)
 pi/.pi/agent/*
 !pi/.pi/agent/extensions
 !pi/.pi/agent/settings.json
-!pi/.pi/agent/skills
 !pi/.pi/agent/themes
-
-# Claude Code syncs claude.ai account skills into ~/.claude/skills/synced,
-# which resolves into this repo via the skills symlink
-skills/synced/

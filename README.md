@@ -20,18 +20,3 @@ This is where I tweak config files till 4am like a goblin. It's pretty cozy in h
 brew install just
 just init
 ```
-
-## Skills
-
-`skills/<name>/SKILL.md` is the only file you edit. Each agent's skills dir (`claude/.claude/skills`, `pi/.pi/agent/skills`) is a symlink to `skills/`, so one copy is shared across all agents.
-
-```yaml
----
-name: <name>
-description: One-line trigger blurb. "Use when the user asks for X."
----
-
-# <name>
-
-Body of the skill.
-```
