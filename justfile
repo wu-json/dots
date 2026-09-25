@@ -13,6 +13,7 @@ init-latte:
   if ! brew list --cask swiftbar >/dev/null 2>&1; then brew install --cask swiftbar; fi
   stow -t "$HOME" swiftbar
   defaults write com.ameba.SwiftBar PluginDirectory -string "$HOME/.config/swiftbar/plugins"
+  pkill -x SwiftBar 2>/dev/null || true
   launchctl bootout "gui/$UID" "$HOME/Library/LaunchAgents/com.wu-json.swiftbar-login.plist" 2>/dev/null || true
   launchctl bootstrap "gui/$UID" "$HOME/Library/LaunchAgents/com.wu-json.swiftbar-login.plist"
 

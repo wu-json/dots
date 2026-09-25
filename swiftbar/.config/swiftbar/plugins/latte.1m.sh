@@ -26,11 +26,12 @@ if [[ "${1:-}" == toggle ]]; then
 fi
 
 if running_pid; then
-    echo '☕ Latte: On'
-    label='Turn Off'
+    symbol='cup.and.saucer.fill'
+    checked=true
 else
-    echo '☕ Latte: Off'
-    label='Turn On'
+    symbol='cup.and.saucer'
+    checked=false
 fi
+printf '| sfimage=%s\n' "$symbol"
 echo '---'
-printf '%s | bash="%s" param1=toggle terminal=false refresh=true shortcut=CTRL+OPTION+CMD+L\n' "$label" "$0"
+printf 'Keep Mac Awake | checked=%s bash="%s" param1=toggle terminal=false refresh=true shortcut=CTRL+OPTION+CMD+L\n' "$checked" "$0"
