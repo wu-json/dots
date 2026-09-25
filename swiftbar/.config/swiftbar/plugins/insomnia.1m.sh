@@ -39,4 +39,4 @@ else
 fi
 printf '| sfimage=%s\n' "$symbol"
 echo '---'
-printf 'Keep Mac Awake | checked=%s bash="%s" param1=toggle terminal=false refresh=true shortcut=CTRL+OPTION+CMD+I\n' "$checked" "$0"
+printf 'Keep Mac Awake | checked=%s bash="%s" param1=toggle terminal=false refresh=true shortcut=CTRL+CMD+I\n' "$checked" "$0"
