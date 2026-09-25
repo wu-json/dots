@@ -13,6 +13,7 @@ This is where I tweak config files till 4am like a goblin. It's pretty cozy in h
 - **[pi](https://github.com/badlogic/pi-mono)**
 - **[wezterm](https://wezterm.org/index.html)**
 - **[stow](https://www.gnu.org/software/stow/)**
+- **[SwiftBar](https://github.com/swiftbar/SwiftBar)**
 - **[yazi](https://yazi-rs.github.io/)**
 
 ## Setup
@@ -20,3 +21,8 @@ This is where I tweak config files till 4am like a goblin. It's pretty cozy in h
 brew install just
 just init
 ```
+
+On macOS, `just init` installs Latte in the menu bar and starts SwiftBar at login.
+Run `just init-latte` to set up only Latte on an existing machine.
+Choose **Turn On** or **Turn Off** from the ☕ menu, or press Control–Option–Command–L.
+Latte keeps the display and Mac awake until you turn it off. Its state resets after a reboot.
