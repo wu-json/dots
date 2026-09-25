@@ -1,6 +1,7 @@
 #!/bin/bash
 # <xbar.title>Insomnia</xbar.title>
 # <xbar.desc>Toggle macOS sleep prevention.</xbar.desc>
+# <swiftbar.refreshOnOpen>true</swiftbar.refreshOnOpen>
 
 pid_file="$HOME/Library/Caches/insomnia/caffeinate.pid"
 legacy_pid_file="$HOME/Library/Caches/latte/caffeinate.pid"
