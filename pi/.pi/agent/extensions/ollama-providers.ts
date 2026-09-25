@@ -206,7 +206,6 @@ export default async function (pi: ExtensionAPI) {
 	// keeps loaded models for 1 hour instead of unloading after the
 	// default 5 minutes. This avoids cold-start lag when the agent pauses between
 	// agentic turns.
-	// See docs/wu-json/specs/archived/2026-04-26-ollama-model-keepalive.md
 	pi.on("before_provider_request", (event) => {
 		const p = event.payload as Record<string, unknown> | undefined;
 		const modelId = p?.model?.toString() ?? "";

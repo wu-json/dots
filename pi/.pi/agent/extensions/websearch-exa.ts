@@ -5,8 +5,6 @@
  * https://mcp.exa.ai/mcp. The endpoint works unauthenticated for the free
  * tier; if EXA_API_KEY is set it's appended for paid-tier limits (matches
  * opencode's behavior in packages/opencode/src/tool/mcp-exa.ts).
- *
- * See docs/wu-json/specs/archived/2026-04-26-pi-agent-websearch-exa.md
  */
 
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
