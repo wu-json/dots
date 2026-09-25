@@ -1,8 +1,13 @@
 #!/bin/bash
-# <xbar.title>Latte</xbar.title>
+# <xbar.title>Insomnia</xbar.title>
 # <xbar.desc>Toggle macOS sleep prevention.</xbar.desc>
 
-pid_file="$HOME/Library/Caches/latte/caffeinate.pid"
+pid_file="$HOME/Library/Caches/insomnia/caffeinate.pid"
+legacy_pid_file="$HOME/Library/Caches/latte/caffeinate.pid"
+if [[ -f "$legacy_pid_file" && ! -e "$pid_file" ]]; then
+    mkdir -p "${pid_file%/*}"
+    mv "$legacy_pid_file" "$pid_file"
+fi
 
 running_pid() {
     local command
@@ -26,12 +31,12 @@ if [[ "${1:-}" == toggle ]]; then
 fi
 
 if running_pid; then
-    symbol='mug.fill'
+    symbol='eye.fill'
     checked=true
 else
-    symbol='mug'
+    symbol='eye'
     checked=false
 fi
 printf '| sfimage=%s\n' "$symbol"
 echo '---'
-printf 'Keep Mac Awake | checked=%s bash="%s" param1=toggle terminal=false refresh=true shortcut=CTRL+OPTION+CMD+L\n' "$checked" "$0"
+printf 'Keep Mac Awake | checked=%s bash="%s" param1=toggle terminal=false refresh=true shortcut=CTRL+OPTION+CMD+I\n' "$checked" "$0"

@@ -3,10 +3,10 @@ brew_prefix := if os() == "macos" { "/opt/homebrew" } else { "/home/linuxbrew/.l
 brew:
   brew bundle install --file=homebrew/Brewfile
 
-init: brew init-pi-extensions init-fish init-latte
+init: brew init-pi-extensions init-fish init-insomnia
   @echo "✓ Initialization complete!"
 
-init-latte:
+init-insomnia:
   #!/usr/bin/env bash
   set -euo pipefail
   if [ "$(uname -s)" != Darwin ]; then echo "skip: macOS only"; exit 0; fi
