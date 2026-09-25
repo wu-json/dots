@@ -26,10 +26,10 @@ if [[ "${1:-}" == toggle ]]; then
 fi
 
 if running_pid; then
-    symbol='cup.and.saucer.fill'
+    symbol='mug.fill'
     checked=true
 else
-    symbol='cup.and.saucer'
+    symbol='mug'
     checked=false
 fi
 printf '| sfimage=%s\n' "$symbol"

@@ -24,6 +24,6 @@ just init
 
 On macOS, `just init` installs Latte in the menu bar and starts SwiftBar at login.
 Run `just init-latte` to set up only Latte on an existing machine.
-Click **Keep Mac Awake** in the cup menu, or press Control–Option–Command–L.
-The cup is outlined when off and filled when on.
+Click **Keep Mac Awake** in the mug menu, or press Control–Option–Command–L.
+The mug is outlined when off and filled when on.
 Latte keeps the display and Mac awake until you turn it off. Its state resets after a reboot.
