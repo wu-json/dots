@@ -4,13 +4,11 @@ local act = wezterm.action
 local module = {}
 
 local keymaps = {
-	-- close the current pane
 	{
 		key = "w",
 		mods = "CMD",
 		action = act.CloseCurrentPane({ confirm = true }),
 	},
-	-- split pane vertically (30% height)
 	{
 		key = "d",
 		mods = "CMD",
@@ -19,13 +17,11 @@ local keymaps = {
 			size = { Percent = 30 },
 		}),
 	},
-	-- split pane vertically
 	{
 		key = "e",
 		mods = "CMD",
 		action = act.SplitVertical({ domain = "CurrentPaneDomain" }),
 	},
-	-- split pane horizontally (30% width)
 	{
 		key = "f",
 		mods = "CMD",
@@ -34,13 +30,11 @@ local keymaps = {
 			size = { Percent = 30 },
 		}),
 	},
-	-- split pane horizontally
 	{
 		key = "r",
 		mods = "CMD",
 		action = act.SplitHorizontal({ domain = "CurrentPaneDomain" }),
 	},
-	-- navigate between panes
 	{
 		key = "h",
 		mods = "CMD",
@@ -61,7 +55,6 @@ local keymaps = {
 		mods = "CMD",
 		action = act.ActivatePaneDirection("Down"),
 	},
-	-- adjust pane size
 	{
 		key = "h",
 		mods = "CMD|SHIFT",
@@ -97,7 +90,6 @@ local keymaps = {
 		mods = "CMD|SHIFT",
 		action = wezterm.action.MoveTabRelative(1),
 	},
-	-- toggle pane zoom
 	{
 		key = "z",
 		mods = "CMD",
