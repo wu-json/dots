@@ -1,7 +1,7 @@
 # latte: friendlier `caffeinate` wrapper that takes hours or minutes instead
 # of seconds. Handy for keeping the Mac awake while long-running agents /
 # background jobs do their thing. `latte -a` stays awake only as long as
-# coding agents (claude, opencode, codex, pi) are running, then exits.
+# coding agents (claude, codex, pi) are running, then exits.
 function latte --description 'caffeinate with -h HOURS, -m MINUTES, or -a until coding agents finish'
     argparse 'h/hours=' 'm/minutes=' 'a/agents' -- $argv
     or return
@@ -29,7 +29,6 @@ function latte --description 'caffeinate with -h HOURS, -m MINUTES, or -a until 
     # lowercase so this won't match the Claude desktop app (capital C).
     function __latte_agents_running -S
         pgrep -qx claude; and echo claude
-        pgrep -qx opencode; and echo opencode
         pgrep -qx codex; and echo codex
         pgrep -qf pi-coding-agent; and echo pi
     end
