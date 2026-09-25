@@ -31,7 +31,6 @@ stow:
   stow -t ~ claude
   stow -t ~ fish
   stow -t ~ nvim
-  stow -t ~ opencode
   stow -t ~ pi
   stow -t ~ wezterm
   stow -t ~ yazi
