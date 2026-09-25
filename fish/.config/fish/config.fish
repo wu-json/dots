@@ -25,9 +25,6 @@ alias p="pi"
 # Claudius Codius
 alias cl="env TZ=America/Los_Angeles claude --dangerously-skip-permissions"
 
-# OpenCode
-alias oc="opencode"
-
 # Codex
 alias cx="codex --yolo"
 
