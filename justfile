@@ -3,8 +3,19 @@ brew_prefix := if os() == "macos" { "/opt/homebrew" } else { "/home/linuxbrew/.l
 brew:
   brew bundle install --file=homebrew/Brewfile
 
-init: brew init-pi-extensions init-fish
+init: brew init-pi-extensions init-fish init-insomnia
   @echo "✓ Initialization complete!"
+
+init-insomnia:
+  #!/usr/bin/env bash
+  set -euo pipefail
+  if [ "$(uname -s)" != Darwin ]; then echo "skip: macOS only"; exit 0; fi
+  if ! brew list --cask swiftbar >/dev/null 2>&1; then brew install --cask swiftbar; fi
+  stow -t "$HOME" swiftbar
+  defaults write com.ameba.SwiftBar PluginDirectory -string "$HOME/.config/swiftbar/plugins"
+  pkill -x SwiftBar 2>/dev/null || true
+  launchctl bootout "gui/$UID" "$HOME/Library/LaunchAgents/com.wu-json.swiftbar-login.plist" 2>/dev/null || true
+  launchctl bootstrap "gui/$UID" "$HOME/Library/LaunchAgents/com.wu-json.swiftbar-login.plist"
 
 init-fish:
   grep -qxF "{{brew_prefix}}/bin/fish" /etc/shells || echo "{{brew_prefix}}/bin/fish" | sudo tee -a /etc/shells
