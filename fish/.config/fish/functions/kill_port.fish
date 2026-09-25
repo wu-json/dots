@@ -1,3 +1,3 @@
-function free_port
+function kill_port
     kill -9 $(lsof -ti:$argv)
 end

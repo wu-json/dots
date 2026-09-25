@@ -1,4 +1,4 @@
-function flush_dns_cache
+function flush_dns
     sudo dscacheutil -flushcache
     sudo killall -HUP mDNSResponder
 end

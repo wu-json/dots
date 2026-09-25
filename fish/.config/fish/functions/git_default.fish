@@ -1,4 +1,4 @@
-function gdefault
+function git_default
     git fetch --all --prune
     or return
 
@@ -9,7 +9,7 @@ function gdefault
         else if git show-ref --verify --quiet refs/remotes/origin/master
             set def master
         else
-            echo "gdefault: could not determine default branch (set origin/HEAD or use main/master)" >&2
+            echo "git_default: could not determine default branch (set origin/HEAD or use main/master)" >&2
             return 1
         end
     end

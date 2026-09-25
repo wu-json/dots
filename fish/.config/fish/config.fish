@@ -5,7 +5,7 @@ end
 
 # Git
 alias ghc="git reset --hard && git clean -fd"
-alias gdf="gdefault"
+alias gdf="git_default"
 alias gpr="gh pr view --web"
 
 # Eza
