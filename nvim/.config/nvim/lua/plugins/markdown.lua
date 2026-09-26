@@ -19,8 +19,7 @@ end
 
 return {
   {
-    dir = vim.fn.stdpath("config") .. "/local/link-preview.nvim",
-    name = "link-preview.nvim",
+    "wu-json/link-preview.nvim",
     main = "link-preview",
     event = "VeryLazy",
     dependencies = { "folke/snacks.nvim" },
