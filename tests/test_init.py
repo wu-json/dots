@@ -22,8 +22,6 @@ class SetupTests(unittest.TestCase):
         for item in ('scripts', 'homebrew', 'pi'):
             shutil.copytree(ROOT / item, self.repo / item, ignore=shutil.ignore_patterns('node_modules', '__pycache__'))
         shutil.copy(ROOT / 'justfile', self.repo)
-        # Redirect fallback Homebrew discovery inside the copied script as well;
-        # even tests with brew absent must never find the host installation.
         script = self.repo / 'scripts/init.sh'
         content = script.read_text()
         for index, prefix in enumerate(('/opt/homebrew', '/usr/local', '/home/linuxbrew/.linuxbrew')):
@@ -40,8 +38,6 @@ class SetupTests(unittest.TestCase):
         driver.chmod(0o755)
         for tool in TOOLS:
             (self.bin / tool).symlink_to(driver)
-        # Only safe, local utilities can escape the doubles. No real package
-        # manager, network client, sudo, shell changer, or desktop tool on PATH.
         for tool in ('bash', 'dirname', 'mktemp', 'rm', 'cat', 'awk', 'cut', 'cksum', 'mkdir', 'tar', 'install', 'ln'):
             (self.bin / tool).symlink_to(shutil.which(tool))
         self.env = {'PATH': str(self.bin), 'HOME': str(self.home), 'TEST_STATE': str(self.base), 'NO_COLOR': '1', 'LC_ALL': 'C', 'TMPDIR': str(self.base)}
@@ -214,7 +210,6 @@ class SetupTests(unittest.TestCase):
             (runtime_bin / tool).symlink_to(self.base / 'driver')
             (self.bin / tool).unlink()
         self.env['FNM_DIR'] = str(runtime_dir)
-        # Only exec may reach the real fnm: any attempted install fails closed.
         real_fnm = shutil.which('fnm')
         (self.bin / 'fnm').unlink()
         (self.bin / 'fnm').write_text(
@@ -249,7 +244,6 @@ class SetupTests(unittest.TestCase):
         self.assertTrue(config.exists())
         self.assertEqual(config.resolve(), (self.repo / 'fish/.config/fish/config.fish').resolve())
         self.assertIn('already linked', self.run_setup('stow'))
-        # Unfold the linked directory into independent files before creating a conflict.
         fish_dir = self.home / '.config/fish'
         if (self.home / '.config').is_symlink():
             target = (self.home / '.config').resolve()

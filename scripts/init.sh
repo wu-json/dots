@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# Compatible with macOS's Bash 3.2.
 set -Eeuo pipefail
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 cd "$ROOT"
@@ -14,7 +13,6 @@ section() { printf '\n%s%s%s\n' "$blue" "$*" "$reset"; }
 fail() { printf '  ✗ %s\n' "$*" >&2; exit 1; }
 trap 'printf "  ✗ Setup stopped. Fix the error above, then rerun the same command.\n" >&2' ERR
 
-# Quiet on success, full diagnostics on failure.
 run() {
   local label=$1 log
   shift
@@ -46,7 +44,6 @@ ensure_brew() {
       rm -f "$installer"
       fail 'Could not download Homebrew. Check your network connection and rerun.'
     fi
-    # Keep installer prerequisites and privilege prompts visible.
     if ! /bin/bash "$installer"; then
       rm -f "$installer"
       fail 'Homebrew installation failed. Complete the prerequisites printed above and rerun.'
@@ -74,7 +71,6 @@ init_brew() {
   if brew bundle check --no-upgrade --file="$ROOT/homebrew/Brewfile" >/dev/null 2>&1; then
     ok 'All Brewfile packages already installed'
   else
-    # Casks can prompt for passwords: leave this command attached to the terminal.
     printf '  → Install missing Brewfile packages\n'
     brew bundle install --no-upgrade --file="$ROOT/homebrew/Brewfile"
     ok 'Brewfile packages installed'
@@ -84,7 +80,6 @@ link_configs() {
   require_tool stow stow
   local preview
   preview=$(mktemp)
-  # Check the entire group before applying links; never overwrite/adopt files.
   if ! stow --dir="$ROOT" --target="$HOME" --simulate --verbose "$@" >"$preview" 2>&1; then
     cat "$preview" >&2
     rm -f "$preview"
@@ -123,9 +118,6 @@ init_pi() {
   require_tool fnm fnm
   local dir fingerprint stamp
   local runtime=(fnm exec --using 24)
-  # Reuse an installed Node 24 without resolving/downloading updates each run.
-  # fnm exec works in this noninteractive Bash process without sourcing Fish
-  # startup or changing the user's active/default Node version.
   if "${runtime[@]}" node --version >/dev/null 2>&1; then
     ok 'Node 24 already available through fnm'
   else
@@ -251,9 +243,7 @@ init_tailscale() {
     return
   fi
   require_tool fish fish
-  # Leave existing /usr/local/bin executables alone.
-  # shellcheck disable=SC2016 # Expanded by Fish, not Bash.
-  if fish --no-config -c 'contains -- /Applications/Tailscale.app/Contents/MacOS $fish_user_paths'; then
+  if fish --no-config -c "contains -- /Applications/Tailscale.app/Contents/MacOS \$fish_user_paths"; then
     ok 'Tailscale app directory already on Fish PATH'
   else
     run 'Add Tailscale app directory to Fish PATH' fish --no-config -c 'fish_add_path -U /Applications/Tailscale.app/Contents/MacOS'

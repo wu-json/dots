@@ -1,4 +1,3 @@
-"""Stateful external-command doubles. This file never calls a real command."""
 import json
 import os
 from pathlib import Path
@@ -71,7 +70,6 @@ if name in ('dscl', 'getent'):
     shell = state.get('shell', '/bin/zsh')
     done(output='UserShell: ' + shell if name == 'dscl' else 'tester:x:501:20::/tmp:' + shell)
 if name == 'grep':
-    # Only /etc/shells is mocked; the other patterns are handled in Python.
     if args[-1] == '/etc/shells':
         done(0 if state.get('registered') else 1)
     import re
@@ -147,6 +145,5 @@ if name == 'fish':
     state['fish_path'] = True
     done()
 if name == 'just':
-    done()  # bootstrap handoff, never run a real installer
-# Fail closed for all unexpected invocations, including network commands.
+    done()
 done(97, f'UNEXPECTED COMMAND: {name} {args}')
