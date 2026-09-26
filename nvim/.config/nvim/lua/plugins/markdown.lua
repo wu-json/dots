@@ -18,14 +18,26 @@ local function markdown_highlights()
 end
 
 return {
+  {
+    dir = vim.fn.stdpath("config") .. "/local/link-preview.nvim",
+    name = "link-preview.nvim",
+    main = "link-preview",
+    event = "VeryLazy",
+    dependencies = { "folke/snacks.nvim" },
+    opts = {},
+  },
+  { "nvim-treesitter/nvim-treesitter", opts = { ensure_installed = { "html", "markdown", "markdown_inline" } } },
   { "bullets-vim/bullets.vim" },
   {
     "folke/snacks.nvim",
     opts = {
       image = {
         enabled = true,
+        resolve = function(_, src)
+          return require("link-preview").resolve_image(nil, src)
+        end,
         -- Show images at the cursor without rendering them inline while scrolling.
-        doc = { inline = false, float = true },
+        doc = { inline = false, float = true, max_width = 40, max_height = 12 },
         math = { enabled = false },
       },
     },
