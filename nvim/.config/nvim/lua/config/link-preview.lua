@@ -18,7 +18,6 @@ local function http(url)
   return url and url:match("^https?://") and url or nil
 end
 
--- Use the syntax tree so hovering the label works too, and images/code are excluded.
 function M.url_at_cursor()
   local parsed, parser = pcall(vim.treesitter.get_parser, 0)
   if parsed and parser then
@@ -53,7 +52,6 @@ function M.url_at_cursor()
   if url then
     return http(metadata.decode(url))
   end
-  -- Bare URLs and HTML iframe src URLs (including YouTube embeds).
   local line, col = vim.api.nvim_get_current_line(), vim.api.nvim_win_get_cursor(0)[2] + 1
   local start = 1
   while true do
@@ -62,7 +60,6 @@ function M.url_at_cursor()
       return nil
     end
     local candidate = line:sub(first, last):gsub("[.,;!?]+$", "")
-    -- Strip unmatched closing delimiters, preserving parentheses inside URLs.
     for _, pair in ipairs({ { "(", ")" }, { "[", "]" } }) do
       local _, opens = candidate:gsub(vim.pesc(pair[1]), "")
       local _, closes = candidate:gsub(vim.pesc(pair[2]), "")
@@ -181,8 +178,6 @@ local function show(data, url)
     })
     return
   end
-  -- Cursor-relative floats can be shifted by Neovim at the screen edge after
-  -- Snacks has positioned the terminal image. Use explicit, bounded coordinates.
   local source = vim.api.nvim_get_current_win()
   local origin = vim.api.nvim_win_get_position(source)
   local cursor = vim.api.nvim_win_get_cursor(source)
@@ -225,8 +220,6 @@ local function show(data, url)
       end
     end,
   })
-  -- Snacks writes conversion errors into the image buffer, but this float is
-  -- hidden until the first successful render. Surface failures ourselves.
   local deadline = vim.uv.now() + 10000
   local function check_image()
     if hover ~= current or updated then
@@ -301,8 +294,6 @@ function M.setup(opts)
     group = group,
     callback = function(event)
       if tonumber(event.match) == vim.api.nvim_get_current_win() then
-        -- A cursor move can scroll the source window after scheduling a hover.
-        -- Restart the delay at the new viewport instead of cancelling it.
         M.schedule()
       end
     end,

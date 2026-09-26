@@ -25,8 +25,6 @@ return {
     opts = {
       image = {
         enabled = true,
-        -- Notes also use ![](YouTube URL) as video embeds. Give Snacks the
-        -- thumbnail instead of trying to decode the watch page as an image.
         resolve = function(_, src)
           return require("config.link-preview.metadata").youtube(src)
         end,

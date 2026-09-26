@@ -75,10 +75,7 @@ function M.youtube(url)
   end
 end
 
--- Reuse Neovim's HTML parser instead of matching HTML with regular expressions.
 function M.parse(html, url)
-  -- Metadata lives in the head. Avoid parsing a large application/document body
-  -- on Neovim's UI thread just to extract a handful of tags.
   local _, head_end = html:find("</[Hh][Ee][Aa][Dd]%s*>")
   if head_end then
     html = html:sub(1, head_end)

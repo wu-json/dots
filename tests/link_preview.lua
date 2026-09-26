@@ -1,5 +1,3 @@
--- nvim --headless -u NONE -l tests/link_preview.lua
--- Requires installed html, markdown, and markdown_inline Tree-sitter parsers.
 vim.opt.rtp:prepend(vim.fn.getcwd() .. "/nvim/.config/nvim")
 local preview = require("config.link-preview")
 local metadata = require("config.link-preview.metadata")
@@ -103,7 +101,6 @@ end
 buffer({ "```", "https://example.org/code", "```" }, 2, 8)
 assert(preview.url_at_cursor() == nil, "fenced code must not preview")
 
--- Stub network/rendering to exercise race handling without a graphics terminal.
 local requests, shown, closed = {}, 0, 0
 vim.system = function(_, _, callback)
   requests[#requests + 1] = callback
@@ -142,7 +139,6 @@ assert(vim.wait(300, function()
 end))
 assert(#requests == 2, "cache hit fetched again")
 preview.close()
--- Reload the module to simulate a new Neovim session with an empty memory cache.
 package.loaded["config.link-preview"] = nil
 preview = require("config.link-preview")
 preview.setup({ delay = 10, cache_dir = cache_dir })
@@ -153,8 +149,6 @@ assert(vim.wait(300, function()
 end))
 assert(#requests == 2, "fresh session did not use the disk cache")
 preview.close()
--- CursorMoved is followed by WinScrolled when moving across the screen edge.
--- Scrolling must restart the delay instead of cancelling the preview forever.
 local before_scroll = shown
 preview.schedule()
 vim.api.nvim_exec_autocmds("WinScrolled", { pattern = tostring(vim.api.nvim_get_current_win()) })
@@ -174,7 +168,6 @@ assert(
   "returning to normal mode did not restart the hover"
 )
 preview.close()
--- Verify the image popup sizes once, cleans up its placement, and ignores late updates.
 local update, image_closed, image_shown = nil, 0, 0
 local placement_options
 local image_failed, fallback_text = false, nil
@@ -239,7 +232,6 @@ assert(image_shown == 1 and image_win.opts.width == 40 and image_win.opts.height
 preview.close()
 update()
 assert(image_closed == 1 and image_shown == 1)
--- A narrow split must contain both the border and the image, even near its edge.
 vim.cmd("vsplit")
 buffer({ "https://youtu.be/dQw4w9WgXcQ" }, 1, 24)
 vim.cmd("redraw")
@@ -258,7 +250,6 @@ assert(image_win.opts.col + image_win.opts.width + 2 <= source_pos[2] + source_w
 assert(image_win.opts.row >= source_pos[1])
 assert(image_win.opts.row + image_win.opts.height + 2 <= source_pos[1] + source_height)
 preview.close()
--- A failed image never reaches on_update_pre; it must still produce a popup.
 image_failed, update = true, nil
 preview.schedule()
 assert(
@@ -269,7 +260,6 @@ assert(
 )
 assert(fallback_text[1] == "YouTube" and fallback_text[3] == "Preview image unavailable")
 preview.close()
--- Late failures must not reopen a popup after moving away.
 fallback_text, update = nil, nil
 buffer({ "https://youtu.be/dQw4w9WgXcQ?t=1" }, 1, 8)
 preview.schedule()

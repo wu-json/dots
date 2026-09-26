@@ -9,7 +9,6 @@ local function filename(dir, url)
   return vim.fs.joinpath(dir, vim.fn.sha256(url) .. ".json")
 end
 
--- Cache failures must never interfere with previews (e.g. a full temp volume).
 function M.get(dir, url)
   local path = filename(dir, url)
   local ok, entry = pcall(function()
@@ -34,7 +33,7 @@ end
 
 function M.put(dir, url, entry, max_entries)
   pcall(function()
-    vim.fn.mkdir(dir, "p", 448) -- 0700: metadata can contain private URLs/titles.
+    vim.fn.mkdir(dir, "p", tonumber("700", 8))
     local encoded = vim.json.encode(entry)
     if #encoded > 65536 then
       return
