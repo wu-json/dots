@@ -1,7 +1,7 @@
-vim.opt.rtp:prepend(vim.fn.getcwd() .. "/nvim/.config/nvim")
-local preview = require("config.link-preview")
-local metadata = require("config.link-preview.metadata")
-local disk_cache = require("config.link-preview.cache")
+local root = vim.fn.fnamemodify(debug.getinfo(1, "S").source:sub(2), ":p:h:h")
+vim.opt.rtp:prepend(root)
+local preview = require("link-preview")
+local disk_cache = require("link-preview.cache")
 local cache_dir = vim.fn.tempname()
 local cache_url = "https://example.org/cache-test"
 disk_cache.put(cache_dir, cache_url, { data = { title = "Cached" }, expires = os.time() + 60 }, 128)
@@ -14,55 +14,8 @@ for i = 1, 5 do
   disk_cache.put(cache_dir, cache_url .. i, { data = { title = tostring(i) }, expires = os.time() + 60 }, 2)
 end
 assert(#vim.fn.glob(cache_dir .. "/*.json", false, true) == 2, "disk cache exceeded entry limit")
-local data = metadata.parse(
-  [[
-  <title>Fallback &amp; title</title>
-  <META CONTENT="A &amp; B" PROPERTY="og:title">
-  <meta name='twitter:image' content='https://example.org/fallback.jpg'>
-  <meta content='../cover.jpg?a=1&amp;b=2' property='og:image'>
-]],
-  "https://note.com/writer/n/article"
-)
-assert(data.title == "A & B")
-assert(data.image == "https://note.com/writer/cover.jpg?a=1&b=2")
-data = metadata.parse(
-  [[
-  <!-- <meta property="og:image" content="bad.jpg"> -->
-  <script>const fake = '<meta property="og:image" content="bad.jpg">';</script>
-  <base href="https://cdn.example.org/assets/">
-  <meta property="og:image" content="file:///etc/passwd">
-  <meta name="twitter:image" content="cover.jpg">
-]],
-  "https://example.org"
-)
-assert(data.image == "https://cdn.example.org/assets/cover.jpg")
-assert(metadata.parse("<title>A &amp; B</title>", "https://example.org").title == "A & B")
-data = metadata.parse(
-  '<html><head><title>Head only</title></head><body><meta property="og:image" content="body.jpg"></body></html>',
-  "https://example.org"
-)
-assert(data.title == "Head only" and data.image == nil, "metadata parsing must stop at the end of the head")
-assert(metadata.decode("&#65;&#x42;&quot;") == 'AB"')
-assert(
-  metadata.absolute("https://example.org/a/page", "//cdn.example.org/image.jpg") == "https://cdn.example.org/image.jpg"
-)
-for _, url in ipairs({
-  "https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=30",
-  "https://youtu.be/dQw4w9WgXcQ?si=abc",
-  "https://m.youtube.com/shorts/dQw4w9WgXcQ",
-  "https://youtube.com/live/dQw4w9WgXcQ",
-  "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
-}) do
-  assert(metadata.youtube(url) == "https://i.ytimg.com/vi/dQw4w9WgXcQ/mqdefault.jpg", url)
-end
-assert(metadata.youtube("https://youtube.com.evil.org/watch?v=dQw4w9WgXcQ") == nil)
-assert(metadata.youtube("https://youtube.com/watch?v=bad") == nil)
-local image_resolver
-for _, plugin in ipairs(dofile("nvim/.config/nvim/lua/plugins/markdown.lua")) do
-  if plugin[1] == "folke/snacks.nvim" then
-    image_resolver = plugin.opts.image.resolve
-  end
-end
+dofile(root .. "/tests/metadata.lua")
+local image_resolver = preview.resolve_image
 assert(image_resolver, "YouTube image embeds need a Snacks resolver")
 for _, url in ipairs({
   "https://www.youtube.com/watch?v=7IUshdNnzuw",
@@ -81,25 +34,7 @@ local function buffer(lines, row, col)
   vim.treesitter.get_parser(0, "markdown"):parse()
   vim.api.nvim_win_set_cursor(0, { row or 1, col or 3 })
 end
-for _, case in ipairs({
-  { "[note](https://note.com/example)", 2, "https://note.com/example" },
-  { "![image](https://example.org/image.png)", 18, false },
-  { "![](https://www.youtube.com/watch?v=7IUshdNnzuw)", 18, false },
-  { "`https://example.org/code`", 8, false },
-  { "<https://example.org/auto>", 8, "https://example.org/auto" },
-  { "See https://example.org/a_(b).", 12, "https://example.org/a_(b)" },
-  {
-    '<iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ"></iframe>',
-    25,
-    "https://www.youtube.com/embed/dQw4w9WgXcQ",
-  },
-  { "[local](../notes.md)", 3, false },
-}) do
-  buffer({ case[1] }, 1, case[2])
-  assert(preview.url_at_cursor() == (case[3] or nil), case[1] .. ": " .. tostring(preview.url_at_cursor()))
-end
-buffer({ "```", "https://example.org/code", "```" }, 2, 8)
-assert(preview.url_at_cursor() == nil, "fenced code must not preview")
+dofile(root .. "/tests/links.lua")
 
 local requests, shown, closed = {}, 0, 0
 vim.system = function(_, _, callback)
@@ -139,8 +74,8 @@ assert(vim.wait(300, function()
 end))
 assert(#requests == 2, "cache hit fetched again")
 preview.close()
-package.loaded["config.link-preview"] = nil
-preview = require("config.link-preview")
+package.loaded["link-preview"] = nil
+preview = require("link-preview")
 preview.setup({ delay = 10, cache_dir = cache_dir })
 local before_reload = shown
 preview.schedule()

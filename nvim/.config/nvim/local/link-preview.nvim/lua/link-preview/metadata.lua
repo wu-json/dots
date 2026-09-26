@@ -28,8 +28,11 @@ function M.absolute(base, value)
   if value:sub(1, 2) == "//" then
     return scheme .. ":" .. value
   end
+  if value == "" or value:sub(1, 1) == "#" then
+    return base:gsub("#.*$", "") .. value
+  end
   path = path:gsub("[?#].*$", "")
-  if value:sub(1, 1) == "?" or value:sub(1, 1) == "#" then
+  if value:sub(1, 1) == "?" then
     return scheme .. "://" .. authority .. path .. value
   end
   local joined = value:sub(1, 1) == "/" and value or (path:match("^(.*)/") or "") .. "/" .. value
@@ -47,6 +50,7 @@ function M.absolute(base, value)
 end
 
 function M.youtube(url)
+  url = url:gsub("#.*$", "")
   local host, path = url:match("^https?://([^/]+)(/.*)$")
   if not host then
     return
@@ -108,6 +112,7 @@ function M.parse(html, url)
     end
     if tag == "meta" then
       local key = (attrs.property or attrs.name or ""):lower()
+      attrs.content = attrs.content and vim.trim(attrs.content)
       if attrs.content and attrs.content ~= "" then
         meta[key] = meta[key] or attrs.content
       end
