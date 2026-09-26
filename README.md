@@ -25,18 +25,12 @@ bash scripts/bootstrap.sh
 
 ## Markdown images in Neovim
 
-[image.nvim](https://github.com/3rd/image.nvim) displays images inline in Markdown
-buffers, including the banner above, without moving the cursor onto the image.
-It reserves space for the image and updates it as you scroll.
+Move the cursor onto an image line (like `banner` above) to show a floating preview
+with [Snacks image](https://github.com/folke/snacks.nvim/blob/main/docs/image.md).
+Inline image rendering is disabled.
 
 Run `just bootstrap brew` to install ImageMagick, reload your WezTerm configuration,
-then restart Neovim and let Lazy install image.nvim. Images use WezTerm's Sixel
-support; Snacks' image module is disabled to avoid competing renderers.
+and restart Neovim. `<leader>cp` toggles the full Markdown preview in a browser.
 
-Sixel redraws the image scene rather than relying on Kitty placements, which left
-image strips behind text when scrolling in WezTerm. This is a mitigation pending
-visual confirmation; Sixel can be slower during scrolling. `<leader>cp` still
-opens the full Markdown preview in a browser if terminal rendering misbehaves.
-
-If images do not appear, ensure `magick` is on PATH
-and install the Markdown parsers with `:TSInstall markdown markdown_inline`.
+If images do not appear, run `:checkhealth snacks`. The `markdown` and
+`markdown_inline` Tree-sitter parsers must be installed (`:TSInstall markdown markdown_inline`).

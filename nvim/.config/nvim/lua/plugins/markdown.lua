@@ -21,30 +21,13 @@ return {
   { "bullets-vim/bullets.vim" },
   {
     "folke/snacks.nvim",
-    opts = { image = { enabled = false } },
-  },
-  {
-    "3rd/image.nvim",
-    ft = { "markdown", "markdown.mdx" },
-    build = false,
     opts = {
-      -- Avoid stale Kitty placements breaking into strips when WezTerm scrolls.
-      backend = "sixel",
-      processor = "magick_cli",
-      integrations = {
-        markdown = {
-          enabled = true,
-          only_render_image_at_cursor = false,
-          filetypes = { "markdown", "markdown.mdx" },
-        },
-        asciidoc = { enabled = false },
-        typst = { enabled = false },
-        neorg = { enabled = false },
-        syslang = { enabled = false },
+      image = {
+        enabled = true,
+        -- Show images at the cursor without rendering them inline while scrolling.
+        doc = { inline = false, float = true },
+        math = { enabled = false },
       },
-      max_height_window_percentage = 50,
-      window_overlap_clear_enabled = true,
-      hijack_file_patterns = {},
     },
   },
   {
