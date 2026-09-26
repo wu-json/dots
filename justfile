@@ -3,8 +3,17 @@ brew_prefix := if os() == "macos" { "/opt/homebrew" } else { "/home/linuxbrew/.l
 brew:
   brew bundle install --file=homebrew/Brewfile
 
-init: brew init-pi-extensions init-fish init-insomnia
+init: brew init-gh-extensions init-pi-extensions init-fish init-insomnia
   @echo "✓ Initialization complete!"
+
+init-gh-extensions:
+  #!/usr/bin/env bash
+  set -euo pipefail
+  extensions=$(gh extension list)
+  if ! printf '%s\n' "$extensions" | grep -qE '(^|[[:space:]])dlvhdr/gh-dash([[:space:]]|$)'; then
+    gh extension install dlvhdr/gh-dash
+  fi
+  stow -t "$HOME" gh-dash
 
 init-insomnia:
   #!/usr/bin/env bash
@@ -61,6 +70,7 @@ init-tailscale-cli:
 
 stow:
   stow -t ~ fish
+  stow -t ~ gh-dash
   stow -t ~ nvim
   stow -t ~ pi
   stow -t ~ wezterm

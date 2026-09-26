@@ -5,6 +5,7 @@ end
 alias ghc="git reset --hard && git clean -fd"
 alias gdf="git_default"
 alias gpr="gh pr view --web"
+alias ghd="gh dash"
 
 alias ls="eza"
 alias tree="eza --tree"

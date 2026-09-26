@@ -1,0 +1,9 @@
+prSections:
+  - title: My PRs
+    filters: is:open author:@me
+  - title: Review requests
+    filters: is:open review-requested:@me
+
+issuesSections:
+  - title: Assigned issues
+    filters: is:open assignee:@me
