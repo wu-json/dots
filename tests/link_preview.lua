@@ -135,6 +135,7 @@ preview.close()
 -- Verify the image popup sizes once, cleans up its placement, and ignores late updates.
 local update, image_closed, image_shown = nil, 0, 0
 local placement_options
+local image_failed, fallback_text = false, nil
 local image_win = {
   buf = 123,
   opts = {},
@@ -151,7 +152,8 @@ package.loaded.snacks = {
       return {}
     end,
   }, {
-    __call = function()
+    __call = function(_, opts)
+      fallback_text = opts.text
       return image_win
     end,
   }),
@@ -168,6 +170,11 @@ package.loaded.snacks = {
         assert(src == "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg")
         update = opts.on_update_pre
         return {
+          img = {
+            failed = function()
+              return image_failed
+            end,
+          },
           state = function()
             return { loc = { width = math.min(40, opts.max_width), height = math.min(15, opts.max_height) } }
           end,
@@ -209,5 +216,25 @@ assert(image_win.opts.col + image_win.opts.width + 2 <= source_pos[2] + source_w
 assert(image_win.opts.row >= source_pos[1])
 assert(image_win.opts.row + image_win.opts.height + 2 <= source_pos[1] + source_height)
 preview.close()
+-- A failed image never reaches on_update_pre; it must still produce a popup.
+image_failed, update = true, nil
+preview.schedule()
+assert(
+  vim.wait(500, function()
+    return fallback_text ~= nil
+  end),
+  "failed image left the popup hidden"
+)
+assert(fallback_text[1] == "YouTube" and fallback_text[3] == "Preview image unavailable")
+preview.close()
+-- Late failures must not reopen a popup after moving away.
+fallback_text, update = nil, nil
+preview.schedule()
+assert(vim.wait(300, function()
+  return update ~= nil
+end))
+preview.close()
+vim.wait(150)
+assert(fallback_text == nil, "failed image reopened a dismissed preview")
 print("Link preview detection, lifecycle, and cache tests passed")
 vim.cmd("qa!")

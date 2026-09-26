@@ -148,7 +148,12 @@ local function show(data)
   if not data.image then
     local title = vim.fn.strcharpart((data.title or "Link preview"):gsub("%c", " "), 0, 160)
     current.win = snacks.win({
-      text = { title, "", data.unavailable and "Preview unavailable" or "No preview image available" },
+      text = {
+        title,
+        "",
+        data.image_error and "Preview image unavailable"
+          or (data.unavailable and "Preview unavailable" or "No preview image available"),
+      },
       relative = "cursor",
       row = 1,
       col = 0,
@@ -205,6 +210,21 @@ local function show(data)
       end
     end,
   })
+  -- Snacks writes conversion errors into the image buffer, but this float is
+  -- hidden until the first successful render. Surface failures ourselves.
+  local deadline = vim.uv.now() + 10000
+  local function check_image()
+    if hover ~= current or updated then
+      return
+    end
+    if current.img.img:failed() or vim.uv.now() >= deadline then
+      M.close()
+      show({ title = data.title, image_error = true })
+      return
+    end
+    vim.defer_fn(check_image, 100)
+  end
+  vim.defer_fn(check_image, 100)
 end
 
 function M.schedule()

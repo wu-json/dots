@@ -29,7 +29,8 @@ In Neovim, rest the cursor on a Markdown link label, URL, or YouTube iframe URL
 for 200 ms to preview its image. The first visit also needs time to fetch the page
 and image. Webpages use Open Graph images with a
 Twitter image fallback; YouTube watch, short, live, and embed URLs use thumbnails.
-Pages without an image show their title instead. Moving away closes the popup.
+Pages without an image show their title instead. Broken images also fall back to
+the title with an unavailable message. Moving away closes the popup.
 Markdown image syntax keeps using Snacks' existing image hover.
 
 The local module `nvim/.config/nvim/lua/config/link-preview.lua` exposes
