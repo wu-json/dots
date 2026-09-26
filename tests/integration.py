@@ -63,7 +63,7 @@ def main():
             'HOMEBREW_NO_INSTALL_CLEANUP': '1',
         }
 
-        def run(*args, success=True):
+        def run(*args, success=True, show_output=True):
             print('→ ' + ' '.join(args), flush=True)
             result = subprocess.run(args, cwd=repo, env=env, stdin=subprocess.DEVNULL,
                                     stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
@@ -72,10 +72,18 @@ def main():
                 print(result.stdout, flush=True)
                 raise AssertionError(f'Unexpected exit {result.returncode}: {args}')
             if success:
-                print(result.stdout, flush=True)
+                if show_output:
+                    print(result.stdout, flush=True)
             else:
                 print('✓ Command refused as expected; checking the resulting state.', flush=True)
             return result.stdout
+
+        formulae = run('brew', 'bundle', 'list', '--formula',
+                       '--file=homebrew/Brewfile', show_output=False).splitlines()
+        for tap in sorted({name.rsplit('/', 1)[0] for name in formulae if '/' in name}):
+            run('brew', 'tap', tap)
+        run('brew', 'info', '--formula', '--json=v2', *formulae, show_output=False)
+        print('✓ Brewfile formula names resolve in Homebrew.', flush=True)
 
         runtime = ('fnm', 'exec', '--using', '24')
         require(not Path(env['FNM_DIR']).exists(), 'fnm must start empty')
