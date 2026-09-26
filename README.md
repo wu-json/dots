@@ -37,7 +37,11 @@ The local module `nvim/.config/nvim/lua/config/link-preview.lua` exposes
 `setup({ delay = 200, ttl = 3600, max_width = 60, max_height = 20 })`.
 It uses asynchronous curl requests and Neovim's HTML Tree-sitter parser for
 metadata, and Snacks/WezTerm for image rendering. Hovering fetches the URL and its
-preview image; metadata is cached in memory for an hour, failures for a minute.
+preview image; metadata is cached in memory and in a per-user directory under
+`$TMPDIR` (or `/tmp`) for an hour, failures for a minute. The disk cache survives
+Neovim restarts and holds at most 128 entries. Expired entries are ignored and
+removed on access. `cache_dir`, `ttl`, `failure_ttl`, and `max_entries` are
+configurable through `setup()`. Snacks maintains its own downloaded-image cache.
 Private or fetch-blocked pages show an unavailable message. Reference-style
 Markdown link labels are not currently resolved.
 

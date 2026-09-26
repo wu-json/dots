@@ -3,6 +3,19 @@
 vim.opt.rtp:prepend(vim.fn.getcwd() .. "/nvim/.config/nvim")
 local preview = require("config.link-preview")
 local metadata = require("config.link-preview.metadata")
+local disk_cache = require("config.link-preview.cache")
+local cache_dir = vim.fn.tempname()
+local cache_url = "https://example.org/cache-test"
+disk_cache.put(cache_dir, cache_url, { data = { title = "Cached" }, expires = os.time() + 60 }, 128)
+assert(disk_cache.get(cache_dir, cache_url).data.title == "Cached")
+disk_cache.put(cache_dir, cache_url, { data = { title = "Expired" }, expires = os.time() - 1 }, 128)
+assert(disk_cache.get(cache_dir, cache_url) == nil, "expired entry was reused")
+vim.fn.writefile({ "broken json" }, cache_dir .. "/" .. vim.fn.sha256(cache_url) .. ".json")
+assert(disk_cache.get(cache_dir, cache_url) == nil, "corrupt entry was reused")
+for i = 1, 5 do
+  disk_cache.put(cache_dir, cache_url .. i, { data = { title = tostring(i) }, expires = os.time() + 60 }, 2)
+end
+assert(#vim.fn.glob(cache_dir .. "/*.json", false, true) == 2, "disk cache exceeded entry limit")
 local data = metadata.parse(
   [[
   <title>Fallback &amp; title</title>
@@ -87,7 +100,7 @@ package.loaded.snacks = {
     }
   end,
 }
-preview.setup({ delay = 10 })
+preview.setup({ delay = 10, cache_dir = cache_dir })
 buffer({ "https://example.org/first", "https://example.org/second" }, 1, 8)
 preview.schedule()
 assert(vim.wait(300, function()
@@ -110,6 +123,17 @@ assert(vim.wait(300, function()
   return shown == 2
 end))
 assert(#requests == 2, "cache hit fetched again")
+preview.close()
+-- Reload the module to simulate a new Neovim session with an empty memory cache.
+package.loaded["config.link-preview"] = nil
+preview = require("config.link-preview")
+preview.setup({ delay = 10, cache_dir = cache_dir })
+local before_reload = shown
+preview.schedule()
+assert(vim.wait(300, function()
+  return shown == before_reload + 1
+end))
+assert(#requests == 2, "fresh session did not use the disk cache")
 preview.close()
 -- CursorMoved is followed by WinScrolled when moving across the screen edge.
 -- Scrolling must restart the delay instead of cancelling the preview forever.
@@ -229,6 +253,7 @@ assert(fallback_text[1] == "YouTube" and fallback_text[3] == "Preview image unav
 preview.close()
 -- Late failures must not reopen a popup after moving away.
 fallback_text, update = nil, nil
+buffer({ "https://youtu.be/dQw4w9WgXcQ?t=1" }, 1, 8)
 preview.schedule()
 assert(vim.wait(300, function()
   return update ~= nil
@@ -236,5 +261,6 @@ end))
 preview.close()
 vim.wait(150)
 assert(fallback_text == nil, "failed image reopened a dismissed preview")
+vim.fn.delete(cache_dir, "rf")
 print("Link preview detection, lifecycle, and cache tests passed")
 vim.cmd("qa!")

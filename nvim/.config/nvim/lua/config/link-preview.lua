@@ -1,6 +1,15 @@
 local M = {}
 local metadata = require("config.link-preview.metadata")
-local options = { delay = 200, ttl = 3600, max_entries = 128, max_width = 60, max_height = 20 }
+local disk_cache = require("config.link-preview.cache")
+local options = {
+  delay = 200,
+  ttl = 3600,
+  failure_ttl = 60,
+  max_entries = 128,
+  max_width = 60,
+  max_height = 20,
+  cache_dir = disk_cache.directory(),
+}
 local cache, pending = {}, {}
 local generation = 0
 local hover
@@ -70,13 +79,18 @@ function M.url_at_cursor()
 end
 
 local function resolve(url, callback)
-  local thumbnail = metadata.youtube(url)
-  if thumbnail then
-    return callback({ title = "YouTube", image = thumbnail })
-  end
   local entry = cache[url]
   if entry and entry.expires > os.time() then
     return callback(entry.data)
+  end
+  entry = disk_cache.get(options.cache_dir, url)
+  if entry then
+    cache[url] = entry
+    return callback(entry.data)
+  end
+  local thumbnail = metadata.youtube(url)
+  if thumbnail then
+    return callback({ title = "YouTube", image = thumbnail })
   end
   if pending[url] then
     table.insert(pending[url], callback)
@@ -119,7 +133,8 @@ local function resolve(url, callback)
       if vim.tbl_count(cache) >= options.max_entries then
         cache = {}
       end
-      cache[url] = { data = data, expires = os.time() + (data.unavailable and 60 or options.ttl) }
+      cache[url] = { data = data, expires = os.time() + (data.unavailable and options.failure_ttl or options.ttl) }
+      disk_cache.put(options.cache_dir, url, cache[url], options.max_entries)
       local callbacks = pending[url]
       pending[url] = nil
       for _, cb in ipairs(callbacks) do
@@ -141,7 +156,7 @@ function M.close()
   end
 end
 
-local function show(data)
+local function show(data, url)
   local snacks = require("snacks")
   local current = {}
   hover = current
@@ -218,8 +233,13 @@ local function show(data)
       return
     end
     if current.img.img:failed() or vim.uv.now() >= deadline then
+      local fallback = { title = data.title, image_error = true }
+      if url then
+        cache[url] = { data = fallback, expires = os.time() + options.failure_ttl }
+        disk_cache.put(options.cache_dir, url, cache[url], options.max_entries)
+      end
       M.close()
-      show({ title = data.title, image_error = true })
+      show(fallback)
       return
     end
     vim.defer_fn(check_image, 100)
@@ -251,7 +271,7 @@ function M.schedule()
     if url then
       resolve(url, function(data)
         if valid() then
-          show(data)
+          show(data, url)
         end
       end)
     end
