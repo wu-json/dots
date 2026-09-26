@@ -1,0 +1,40 @@
+name: Test Neovim configuration
+
+on:
+  pull_request:
+    paths:
+      - 'nvim/.config/nvim/init.lua'
+      - 'nvim/.config/nvim/lua/config/**'
+      - 'nvim/.config/nvim/lazy-lock.json'
+      - 'tests/daily-note.lua'
+      - '.github/workflows/test-neovim.yml'
+      - '.github/scripts/setup-neovim-tests.sh'
+  push:
+    branches: [main]
+    paths:
+      - 'nvim/.config/nvim/init.lua'
+      - 'nvim/.config/nvim/lua/config/**'
+      - 'nvim/.config/nvim/lazy-lock.json'
+      - 'tests/daily-note.lua'
+      - '.github/workflows/test-neovim.yml'
+      - '.github/scripts/setup-neovim-tests.sh'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: neovim-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install test dependencies
+        run: |
+          bash .github/scripts/setup-neovim-tests.sh "$RUNNER_TEMP/neovim"
+          echo "$RUNNER_TEMP/neovim/nvim/bin" >> "$GITHUB_PATH"
+      - name: Test daily note editor state
+        run: SNACKS_TEST_DIR="$RUNNER_TEMP/neovim/snacks.nvim" nvim --headless -u NONE -l tests/daily-note.lua
