@@ -222,8 +222,11 @@ function M.setup(opts)
     vim.notify("Link previews require curl", vim.log.levels.WARN)
     return
   end
-  vim.api.nvim_create_autocmd({ "CursorMoved", "BufEnter" }, { group = group, callback = M.schedule })
-  vim.api.nvim_create_autocmd({ "ModeChanged", "BufLeave", "WinLeave", "TextChanged", "VimLeavePre" }, {
+  vim.api.nvim_create_autocmd({ "CursorMoved", "BufEnter", "WinEnter", "ModeChanged", "TextChanged" }, {
+    group = group,
+    callback = M.schedule,
+  })
+  vim.api.nvim_create_autocmd({ "BufLeave", "WinLeave", "VimLeavePre" }, {
     group = group,
     callback = M.close,
   })
@@ -231,7 +234,9 @@ function M.setup(opts)
     group = group,
     callback = function(event)
       if tonumber(event.match) == vim.api.nvim_get_current_win() then
-        M.close()
+        -- A cursor move can scroll the source window after scheduling a hover.
+        -- Restart the delay at the new viewport instead of cancelling it.
+        M.schedule()
       end
     end,
   })

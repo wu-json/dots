@@ -106,6 +106,27 @@ assert(vim.wait(300, function()
 end))
 assert(#requests == 2, "cache hit fetched again")
 preview.close()
+-- CursorMoved is followed by WinScrolled when moving across the screen edge.
+-- Scrolling must restart the delay instead of cancelling the preview forever.
+local before_scroll = shown
+preview.schedule()
+vim.api.nvim_exec_autocmds("WinScrolled", { pattern = tostring(vim.api.nvim_get_current_win()) })
+assert(
+  vim.wait(300, function()
+    return shown == before_scroll + 1
+  end),
+  "scrolling cancelled the hover without rescheduling it"
+)
+preview.close()
+local before_mode = shown
+vim.api.nvim_exec_autocmds("ModeChanged", { pattern = "i:n" })
+assert(
+  vim.wait(300, function()
+    return shown == before_mode + 1
+  end),
+  "returning to normal mode did not restart the hover"
+)
+preview.close()
 -- Verify the image popup sizes once, cleans up its placement, and ignores late updates.
 local update, image_closed, image_shown = nil, 0, 0
 local image_win = {
