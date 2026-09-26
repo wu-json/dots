@@ -1,4 +1,3 @@
-# Login shells on a fresh machine may not inherit Homebrew's PATH.
 if command -q brew
     brew shellenv fish | source
 else
