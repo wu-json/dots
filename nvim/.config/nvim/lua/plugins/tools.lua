@@ -24,12 +24,4 @@ return {
       { "<leader>mm", "<cmd>MarkdownPreviewToggle<cr>", ft = "markdown", desc = "Markdown Preview (browser)" },
     },
   },
-  {
-    "sotte/presenting.nvim",
-    opts = {
-      -- fill in your options here
-      -- see :help Presenting.config
-    },
-    cmd = { "Presenting" },
-  },
 }
