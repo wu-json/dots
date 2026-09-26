@@ -4,7 +4,7 @@ return {
     opts = {
       inlay_hints = { enabled = false },
       servers = {
-        gopls = {},
+        gopls = { enabled = vim.fn.executable("go") == 1 },
         pyright = {
           -- Point pyright at the nearest `.venv`, walking up from the server root
           -- (nearest pyproject.toml) but never past the enclosing git repo. Covers
