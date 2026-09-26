@@ -10,9 +10,11 @@ init-gh-extensions:
   #!/usr/bin/env bash
   set -euo pipefail
   extensions=$(gh extension list)
-  if ! printf '%s\n' "$extensions" | grep -qE '(^|[[:space:]])dlvhdr/gh-dash([[:space:]]|$)'; then
-    gh extension install dlvhdr/gh-dash
-  fi
+  for extension in dlvhdr/gh-dash github/gh-stack; do
+    if ! printf '%s\n' "$extensions" | grep -qE "(^|[[:space:]])${extension}([[:space:]]|$)"; then
+      gh extension install "$extension"
+    fi
+  done
   stow -t "$HOME" gh-dash
 
 init-insomnia:

@@ -25,7 +25,7 @@ just init
 
 ### GitHub dashboard
 
-`just init` installs gh-dash and links its configuration. On an existing machine, run
+`just init` installs gh-dash and gh-stack and links the dashboard configuration. On an existing machine, run
 `just init-gh-extensions` and `just stow`, then restart Fish and Neovim.
 Authenticate with `gh auth login` if needed.
 
@@ -33,6 +33,7 @@ Open the dashboard with `gh dash` (or `ghd` in Fish), or press `<Space>gd` in
 Neovim for a floating terminal. Press `q` to quit and `?` for dashboard help.
 The shared config includes your open PRs, review requests, and assigned issues.
 Update the extension with `gh extension upgrade dash`.
+The stacking extension is available as `gh stack`; update it with `gh extension upgrade stack`.
 
 ### Insomnia
 
