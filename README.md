@@ -63,7 +63,7 @@ paths in the copied script are redirected into the fixture too. They exercise
 fresh setup, repeated runs, missing prerequisites, and failures without touching
 your packages, login shell, preferences, or running apps. A separate integration
 test uses real GNU Stow when available, targeting only the disposable home.
-CI runs the same tests on macOS and Linux.
+CI runs the same tests on macOS.
 
 These tests validate orchestration, not live Homebrew downloads or macOS privilege
 prompts. For a full installation smoke test, use a disposable macOS VM and run
