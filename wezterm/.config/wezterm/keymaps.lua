@@ -58,22 +58,22 @@ local keymaps = {
 	{
 		key = "h",
 		mods = "CMD|SHIFT",
-		action = act.AdjustPaneSize({ "Left", 1 }),
+		action = act.AdjustPaneSize({ "Left", 5 }),
 	},
 	{
 		key = "l",
 		mods = "CMD|SHIFT",
-		action = act.AdjustPaneSize({ "Right", 1 }),
+		action = act.AdjustPaneSize({ "Right", 5 }),
 	},
 	{
 		key = "k",
 		mods = "CMD|SHIFT",
-		action = act.AdjustPaneSize({ "Up", 1 }),
+		action = act.AdjustPaneSize({ "Up", 5 }),
 	},
 	{
 		key = "j",
 		mods = "CMD|SHIFT",
-		action = act.AdjustPaneSize({ "Down", 1 }),
+		action = act.AdjustPaneSize({ "Down", 5 }),
 	},
 	{
 		key = "w",
