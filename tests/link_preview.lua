@@ -55,7 +55,7 @@ for _, url in ipairs({
   "https://youtube.com/live/dQw4w9WgXcQ",
   "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
 }) do
-  assert(metadata.youtube(url) == "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg", url)
+  assert(metadata.youtube(url) == "https://i.ytimg.com/vi/dQw4w9WgXcQ/mqdefault.jpg", url)
 end
 assert(metadata.youtube("https://youtube.com.evil.org/watch?v=dQw4w9WgXcQ") == nil)
 assert(metadata.youtube("https://youtube.com/watch?v=bad") == nil)
@@ -72,7 +72,7 @@ for _, url in ipairs({
   "https://www.youtube.com/watch?v=t2SahnNVULA&t=12s",
 }) do
   local id = url:match("[?&]v=([^&]+)")
-  assert(image_resolver("recipe.md", url) == "https://i.ytimg.com/vi/" .. id .. "/hqdefault.jpg")
+  assert(image_resolver("recipe.md", url) == "https://i.ytimg.com/vi/" .. id .. "/mqdefault.jpg")
 end
 assert(image_resolver("recipe.md", "images/dish.png") == nil, "local images must retain default resolution")
 assert(image_resolver("recipe.md", "https://example.org/image.png") == nil)
@@ -209,7 +209,7 @@ package.loaded.snacks = {
     placement = {
       new = function(_, src, opts)
         placement_options = opts
-        assert(src == "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg")
+        assert(src == "https://i.ytimg.com/vi/dQw4w9WgXcQ/mqdefault.jpg")
         update = opts.on_update_pre
         return {
           img = {

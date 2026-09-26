@@ -71,7 +71,7 @@ function M.youtube(url)
     end
   end
   if video and #video == 11 and video:match("^[%w_-]+$") then
-    return "https://i.ytimg.com/vi/" .. video .. "/hqdefault.jpg"
+    return "https://i.ytimg.com/vi/" .. video .. "/mqdefault.jpg"
   end
 end
 
