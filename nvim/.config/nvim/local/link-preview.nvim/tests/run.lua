@@ -130,6 +130,15 @@ package.loaded.snacks = {
   }),
   image = {
     config = { doc = {} },
+    image = {
+      new = function()
+        return {
+          failed = function()
+            return false
+          end,
+        }
+      end,
+    },
     terminal = {
       env = function()
         return {}

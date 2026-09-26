@@ -38,4 +38,6 @@ jobs:
           echo "$RUNNER_TEMP/link-preview/nvim/bin" >> "$GITHUB_PATH"
       - name: Run offline Lua tests
         working-directory: nvim/.config/nvim/local/link-preview.nvim
-        run: nvim --headless -u NONE -l tests/run.lua
+        run: |
+          nvim --headless -u NONE -l tests/run.lua
+          SNACKS_TEST_DIR="$RUNNER_TEMP/link-preview/snacks.nvim" nvim --headless -u NONE -l tests/retry.lua

@@ -2,6 +2,9 @@
 set -euo pipefail
 
 install_dir="${1:?Usage: setup-link-preview-tests.sh INSTALL_DIR}"
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+snacks_revision=$(python3 -c 'import json, sys; print(json.load(open(sys.argv[1]))["snacks.nvim"]["commit"])' \
+  "$script_dir/../../nvim/.config/nvim/lazy-lock.json")
 neovim_version=v0.11.5
 html_revision=73a3947324f6efddf9e17c0ea58d454843590cc02
 markdown_revision=f969cd3ae3f9fbd4e43205431d0ae286014c05b5
@@ -37,3 +40,7 @@ download_archive \
 build_parser html "$install_dir/html/src"
 build_parser markdown "$install_dir/markdown/tree-sitter-markdown/src"
 build_parser markdown_inline "$install_dir/markdown/tree-sitter-markdown-inline/src"
+
+download_archive \
+  "https://github.com/folke/snacks.nvim/archive/$snacks_revision.tar.gz" \
+  "$install_dir/snacks.nvim"

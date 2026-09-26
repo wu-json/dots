@@ -148,6 +148,11 @@ local function show(data, url)
   current.win = win
   win:open_buf()
   local updated = false
+  local img = snacks.image.image.new(data.image)
+  if img:failed() then
+    img:convert()
+    img:run()
+  end
   current.img = snacks.image.placement.new(win.buf, data.image, {
     inline = false,
     max_width = math.min(options.max_width, right - left - 2),
