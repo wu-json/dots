@@ -66,7 +66,8 @@ your packages, login shell, preferences, or running apps. A separate integration
 test uses real GNU Stow when available, targeting only the disposable home.
 Real Fish startup and `fnm exec` are also checked when installed; the fnm check
 uses a disposable fake runtime and blocks installation commands.
-CI runs the same tests on macOS.
+CI runs the same tests on macOS for PRs and main-branch pushes that change
+setup scripts, dependencies, startup configuration, tests, or the workflow.
 
 These tests validate orchestration, not live Homebrew downloads or macOS privilege
 prompts. For a full installation smoke test, use a disposable macOS VM and run

@@ -1,7 +1,30 @@
 name: Test setup
 on:
   push:
+    branches: [main]
+    paths:
+      - '.github/workflows/test-init.yml'
+      - 'justfile'
+      - 'scripts/**'
+      - 'tests/**'
+      - 'homebrew/Brewfile'
+      - 'fish/.config/fish/config.fish'
+      - 'fish/.config/fish/conf.d/**'
+      - 'pi/.pi/agent/extensions/package*.json'
+      - 'swiftbar/Library/LaunchAgents/**'
+      - '**/.stow-local-ignore'
   pull_request:
+    paths:
+      - '.github/workflows/test-init.yml'
+      - 'justfile'
+      - 'scripts/**'
+      - 'tests/**'
+      - 'homebrew/Brewfile'
+      - 'fish/.config/fish/config.fish'
+      - 'fish/.config/fish/conf.d/**'
+      - 'pi/.pi/agent/extensions/package*.json'
+      - 'swiftbar/Library/LaunchAgents/**'
+      - '**/.stow-local-ignore'
 permissions:
   contents: read
 jobs:
