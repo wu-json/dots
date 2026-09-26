@@ -34,8 +34,6 @@ def main():
         and os.environ.get('RUNNER_ENVIRONMENT') == 'github-hosted'
     ):
         raise SystemExit('Real installation tests run only on disposable GitHub-hosted macOS runners.')
-    for tool in ('just', 'stow', 'fish', 'fnm'):
-        require(shutil.which(tool), f'The runner needs {tool}.')
 
     with tempfile.TemporaryDirectory(prefix='dots-integration-') as temporary:
         base = Path(temporary).resolve()
@@ -77,8 +75,9 @@ def main():
 
         runtime = ('fnm', 'exec', '--using', '24')
         require(not Path(env['FNM_DIR']).exists(), 'fnm must start empty')
-        run(*runtime, 'node', '--version', success=False)
-        run('just', 'stow')
+        if shutil.which('fnm'):
+            run(*runtime, 'node', '--version', success=False)
+        run('bash', 'scripts/init.sh', 'bootstrap', 'stow')
         first = run('just', 'init-pi-extensions')
         require('Install Node 24 with fnm' in first, 'Fresh setup must install Node')
         require('Install Pi dependencies' in first, 'Fresh setup must install dependencies')
@@ -96,11 +95,6 @@ def main():
             target = home / source.relative_to(repo / package)
             require(target.resolve() == source.resolve(), f'Incorrect Stow target: {target}')
 
-        run('fish', '--no-config', '-c',
-            'source "$HOME/.config/fish/conf.d/00-homebrew.fish"; '
-            'source "$HOME/.config/fish/conf.d/fnm.fish"; '
-            'command -q brew; or exit 1; command -q fnm; or exit 1; '
-            'node --version; npm --version')
         account_shell = run('dscl', '.', '-read', '/Users/' + run('id', '-un').strip(), 'UserShell')
         shells = Path('/etc/shells').read_bytes()
         run('just', 'init-fish')
@@ -108,8 +102,14 @@ def main():
                 'Noninteractive setup changed the account shell')
         require(Path('/etc/shells').read_bytes() == shells, 'Noninteractive setup changed /etc/shells')
 
+        run('fish', '--no-config', '-c',
+            'source "$HOME/.config/fish/conf.d/00-homebrew.fish"; '
+            'source "$HOME/.config/fish/conf.d/fnm.fish"; '
+            'command -q brew; or exit 1; command -q fnm; or exit 1; '
+            'node --version; npm --version')
+
         before = {str(path): snapshot(path) for path in (home, pi / 'node_modules')}
-        second = run('just', 'stow') + run('just', 'init-pi-extensions')
+        second = run('bash', 'scripts/init.sh', 'bootstrap', 'stow') + run('just', 'init-pi-extensions')
         require('→' not in second, 'Second run unexpectedly performed setup work')
         require('Pi dependencies already installed' in second, 'Second run did not reuse dependencies')
         for path, state in before.items():

@@ -11,8 +11,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
-      - name: Install test dependencies
-        run: brew install just stow shellcheck fish fnm
+      - name: Install shell linter
+        run: brew install shellcheck
       - run: bash -n scripts/init.sh && shellcheck scripts/init.sh
       - name: Test real setup and reruns in a disposable home
-        run: just test
+        run: python3 tests/integration.py
