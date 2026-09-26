@@ -96,7 +96,7 @@ def main():
         require('Install Pi dependencies' in first, 'Fresh setup must install dependencies')
         require(run(*runtime, 'node', '--version').strip().startswith('v24.'), 'Expected Node 24')
         pi = repo / 'pi/.pi/agent/extensions'
-        run(*runtime, 'npm', 'ls', '--prefix', str(pi), '--depth=0')
+        run(*runtime, 'npm', 'ls', '--prefix', str(pi), '--depth=0', '--include=dev')
         run(*runtime, 'node', '--input-type=module', '-e',
             'const {createRequire} = await import("node:module"); '
             'const require = createRequire(process.argv[1]); '
@@ -121,12 +121,28 @@ def main():
             'command -q brew; or exit 1; command -q fnm; or exit 1; '
             'node --version; npm --version')
 
+        env['NODE_ENV'] = 'production'
         before = {str(path): snapshot(path) for path in (home, pi / 'node_modules')}
         second = run('bash', 'scripts/bootstrap.sh', 'stow') + run('just', 'bootstrap', 'pi')
         require('→' not in second, 'Second run unexpectedly performed setup work')
         require('Pi dependencies already installed' in second, 'Second run did not reuse dependencies')
         for path, state in before.items():
             require(snapshot(Path(path)) == state, f'Rerun changed installed state: {path}')
+
+        missing_dependency = pi / 'node_modules/typebox'
+        stamp = pi / 'node_modules/.dots-install'
+        original_stamp = stamp.read_bytes()
+        shutil.rmtree(missing_dependency)
+        require(stamp.read_bytes() == original_stamp, 'Regression needs an unchanged install stamp')
+        run(*runtime, 'npm', 'ls', '--prefix', str(pi), '--depth=0', '--include=dev', success=False)
+        repaired = run('just', 'bootstrap', 'pi')
+        require('Install Pi dependencies' in repaired, 'Production mode hid a missing dev dependency')
+        require((missing_dependency / 'package.json').is_file(), 'Missing dependency was not restored')
+        run(*runtime, 'npm', 'ls', '--prefix', str(pi), '--depth=0', '--include=dev')
+        repaired_state = snapshot(pi / 'node_modules')
+        require('→' not in run('just', 'bootstrap', 'pi'), 'Repaired dependencies were reinstalled')
+        require(snapshot(pi / 'node_modules') == repaired_state, 'Repaired dependencies changed on rerun')
+        print('✓ Missing dev dependency repaired under NODE_ENV=production; rerun unchanged.', flush=True)
 
         conflict_home = base / 'conflicting home'
         config = conflict_home / '.config/fish/config.fish'

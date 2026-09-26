@@ -130,7 +130,7 @@ bootstrap_pi() {
   stamp="$dir/node_modules/.dots-install"
   fingerprint=$(cat "$dir/package.json" "$dir/package-lock.json" | cksum)
   fingerprint="$fingerprint $("${runtime[@]}" node --version) $("${runtime[@]}" npm --version) $(uname -sm)"
-  if [[ -f "$stamp" && "$(cat "$stamp")" == "$fingerprint" ]] && "${runtime[@]}" npm ls --prefix "$dir" --depth=0 >/dev/null 2>&1; then
+  if [[ -f "$stamp" && "$(cat "$stamp")" == "$fingerprint" ]] && "${runtime[@]}" npm ls --prefix "$dir" --depth=0 --include=dev >/dev/null 2>&1; then
     ok 'Pi dependencies already installed (manifests and runtime unchanged)'
   else
     run 'Install Pi dependencies' "${runtime[@]}" npm ci --prefix "$dir" --include=dev --no-audit --no-fund
