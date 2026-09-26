@@ -26,4 +26,4 @@ stow:
   @bash scripts/init.sh stow
 
 test:
-  @python3 -m unittest discover -s tests -v
+  @python3 tests/integration.py

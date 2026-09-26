@@ -8,9 +8,11 @@ permissions:
 jobs:
   test:
     runs-on: macos-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
-      - name: Install test dependencies (disposable runner only)
-        run: brew install stow shellcheck fish fnm
+      - name: Install test dependencies
+        run: brew install just stow shellcheck fish fnm
       - run: bash -n scripts/init.sh && shellcheck scripts/init.sh
-      - run: python3 -m unittest discover -s tests -v
+      - name: Test real setup and reruns in a disposable home
+        run: just test
