@@ -107,7 +107,9 @@ end
 
 source ~/.orbstack/shell/init.fish 2>/dev/null || :
 
-zoxide init fish | source
+if command -q zoxide
+    zoxide init fish | source
+end
 alias j="z"
 
 source ~/.orbstack/shell/init2.fish 2>/dev/null || :
@@ -128,7 +130,9 @@ end
 yes | fish_config theme save None
 
 function fnm_clean_up --on-event fish_exit
-    rm -r $FNM_MULTISHELL_PATH
+    if set -q FNM_MULTISHELL_PATH; and test -d "$FNM_MULTISHELL_PATH"
+        rm -r -- "$FNM_MULTISHELL_PATH"
+    end
 end
 
 function __source_local_config --on-variable PWD --description 'Source config.local.fish if present in current directory'
