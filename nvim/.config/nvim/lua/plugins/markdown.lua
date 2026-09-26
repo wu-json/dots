@@ -25,6 +25,11 @@ return {
     opts = {
       image = {
         enabled = true,
+        -- Notes also use ![](YouTube URL) as video embeds. Give Snacks the
+        -- thumbnail instead of trying to decode the watch page as an image.
+        resolve = function(_, src)
+          return require("config.link-preview.metadata").youtube(src)
+        end,
         -- Show images at the cursor without rendering them inline while scrolling.
         doc = { inline = false, float = true },
         math = { enabled = false },

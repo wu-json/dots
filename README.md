@@ -32,6 +32,8 @@ Twitter image fallback; YouTube watch, short, live, and embed URLs use thumbnail
 Pages without an image show their title instead. Broken images also fall back to
 the title with an unavailable message. Moving away closes the popup.
 Markdown image syntax keeps using Snacks' existing image hover.
+YouTube embeds written as `![](https://www.youtube.com/watch?v=...)` are also
+supported: Snacks resolves them to the video thumbnail.
 
 The local module `nvim/.config/nvim/lua/config/link-preview.lua` exposes
 `setup({ delay = 200, ttl = 3600, max_width = 60, max_height = 20 })`.

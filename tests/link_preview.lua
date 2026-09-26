@@ -59,6 +59,23 @@ for _, url in ipairs({
 end
 assert(metadata.youtube("https://youtube.com.evil.org/watch?v=dQw4w9WgXcQ") == nil)
 assert(metadata.youtube("https://youtube.com/watch?v=bad") == nil)
+local image_resolver
+for _, plugin in ipairs(dofile("nvim/.config/nvim/lua/plugins/markdown.lua")) do
+  if plugin[1] == "folke/snacks.nvim" then
+    image_resolver = plugin.opts.image.resolve
+  end
+end
+assert(image_resolver, "YouTube image embeds need a Snacks resolver")
+for _, url in ipairs({
+  "https://www.youtube.com/watch?v=7IUshdNnzuw",
+  "https://www.youtube.com/watch?v=JAo99RBfmT4&list=PLvd5bo3J-_kq4FcYVCOK6ZR87dCGDqrSH&index=3",
+  "https://www.youtube.com/watch?v=t2SahnNVULA&t=12s",
+}) do
+  local id = url:match("[?&]v=([^&]+)")
+  assert(image_resolver("recipe.md", url) == "https://i.ytimg.com/vi/" .. id .. "/hqdefault.jpg")
+end
+assert(image_resolver("recipe.md", "images/dish.png") == nil, "local images must retain default resolution")
+assert(image_resolver("recipe.md", "https://example.org/image.png") == nil)
 local function buffer(lines, row, col)
   vim.cmd.enew()
   vim.bo.filetype = "markdown"
@@ -69,6 +86,7 @@ end
 for _, case in ipairs({
   { "[note](https://note.com/example)", 2, "https://note.com/example" },
   { "![image](https://example.org/image.png)", 18, false },
+  { "![](https://www.youtube.com/watch?v=7IUshdNnzuw)", 18, false },
   { "`https://example.org/code`", 8, false },
   { "<https://example.org/auto>", 8, "https://example.org/auto" },
   { "See https://example.org/a_(b).", 12, "https://example.org/a_(b)" },
