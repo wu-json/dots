@@ -3,6 +3,10 @@
 
 local map = vim.keymap.set
 
+map("n", "<leader>gd", function()
+  Snacks.terminal({ "gh", "dash" }, { win = { position = "float" } })
+end, { desc = "GitHub Dashboard" })
+
 map("n", "<leader>E", "<cmd>Explore<cr>", { desc = "Open netrw explorer" })
 map("n", "<leader>bo", "<cmd>BufOnly<cr>", { desc = "Delete all other buffers" })
 map("n", "<leader>yp", "<cmd>let @+ = expand('%:p')<cr>", { desc = "Copy absolute path to clipboard" })
