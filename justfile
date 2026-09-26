@@ -1,29 +1,29 @@
 brew:
-  @bash scripts/init.sh brew
+  @bash scripts/bootstrap.sh brew
 
 init:
-  @bash scripts/init.sh init
+  @bash scripts/bootstrap.sh init
 
 init-gh-extensions:
-  @bash scripts/init.sh gh
+  @bash scripts/bootstrap.sh gh
 
 init-insomnia:
-  @bash scripts/init.sh insomnia
+  @bash scripts/bootstrap.sh insomnia
 
 init-fish:
-  @bash scripts/init.sh fish
+  @bash scripts/bootstrap.sh fish
 
 init-obscura:
-  @bash scripts/init.sh obscura
+  @bash scripts/bootstrap.sh obscura
 
 init-pi-extensions:
-  @bash scripts/init.sh pi
+  @bash scripts/bootstrap.sh pi
 
 init-tailscale-cli:
-  @bash scripts/init.sh tailscale
+  @bash scripts/bootstrap.sh tailscale
 
 stow:
-  @bash scripts/init.sh stow
+  @bash scripts/bootstrap.sh stow
 
 test:
   @python3 tests/integration.py

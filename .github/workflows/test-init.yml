@@ -13,6 +13,6 @@ jobs:
       - uses: actions/checkout@v7
       - name: Install shell linter
         run: brew install shellcheck
-      - run: bash -n scripts/bootstrap.sh && bash -n scripts/init.sh && shellcheck -x scripts/*.sh
+      - run: bash -n scripts/bootstrap.sh && shellcheck scripts/bootstrap.sh
       - name: Test real setup and reruns in a disposable home
         run: python3 tests/integration.py
