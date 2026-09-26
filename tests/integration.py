@@ -82,7 +82,7 @@ def main():
         if shutil.which('fnm'):
             run(*runtime, 'node', '--version', success=False)
         run('bash', 'scripts/bootstrap.sh', 'stow')
-        first = run('just', 'init-pi-extensions')
+        first = run('just', 'bootstrap-pi-extensions')
         require('Install Node 24 with fnm' in first, 'Fresh setup must install Node')
         require('Install Pi dependencies' in first, 'Fresh setup must install dependencies')
         require(run(*runtime, 'node', '--version').strip().startswith('v24.'), 'Expected Node 24')
@@ -101,7 +101,7 @@ def main():
 
         account_shell = run('dscl', '.', '-read', '/Users/' + run('id', '-un').strip(), 'UserShell')
         shells = Path('/etc/shells').read_bytes()
-        run('just', 'init-fish')
+        run('just', 'bootstrap-fish')
         require(run('dscl', '.', '-read', '/Users/' + run('id', '-un').strip(), 'UserShell') == account_shell,
                 'Noninteractive setup changed the account shell')
         require(Path('/etc/shells').read_bytes() == shells, 'Noninteractive setup changed /etc/shells')
@@ -113,7 +113,7 @@ def main():
             'node --version; npm --version')
 
         before = {str(path): snapshot(path) for path in (home, pi / 'node_modules')}
-        second = run('bash', 'scripts/bootstrap.sh', 'stow') + run('just', 'init-pi-extensions')
+        second = run('bash', 'scripts/bootstrap.sh', 'stow') + run('just', 'bootstrap-pi-extensions')
         require('→' not in second, 'Second run unexpectedly performed setup work')
         require('Pi dependencies already installed' in second, 'Second run did not reuse dependencies')
         for path, state in before.items():

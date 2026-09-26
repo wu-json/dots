@@ -65,7 +65,7 @@ require_tool() {
     need "$1" "Homebrew installed $2 but $1 is not on PATH; check brew shellenv."
   fi
 }
-init_brew() {
+bootstrap_brew() {
   section 'Packages'
   ensure_brew
   if brew bundle check --no-upgrade --file="$ROOT/homebrew/Brewfile" >/dev/null 2>&1; then
@@ -93,14 +93,14 @@ link_configs() {
     ok "Configs already linked ($*)"
   fi
 }
-init_stow() { section 'Dotfiles'; link_configs fish gh-dash nvim pi wezterm yazi; }
-init_gh() {
+bootstrap_stow() { section 'Dotfiles'; link_configs fish gh-dash nvim pi wezterm yazi; }
+bootstrap_gh() {
   section 'GitHub extensions'
   require_tool gh gh
   require_tool git git
   link_configs gh-dash
   if ! gh auth status --hostname github.com >/dev/null 2>&1; then
-    warn 'GitHub extensions skipped: run gh auth login, then just init-gh-extensions'
+    warn 'GitHub extensions skipped: run gh auth login, then just bootstrap-gh-extensions'
     return
   fi
   local extensions extension
@@ -113,7 +113,7 @@ init_gh() {
     fi
   done
 }
-init_pi() {
+bootstrap_pi() {
   section 'Pi extensions'
   require_tool fnm fnm
   local dir fingerprint stamp
@@ -124,7 +124,7 @@ init_pi() {
     run 'Install Node 24 with fnm (retry with fnm install 24 if needed)' fnm install 24
   fi
   if ! "${runtime[@]}" npm --version >/dev/null 2>&1; then
-    fail 'Node 24/npm is unavailable through fnm. Repair it with fnm install 24, then rerun just init-pi-extensions.'
+    fail 'Node 24/npm is unavailable through fnm. Repair it with fnm install 24, then rerun just bootstrap-pi-extensions.'
   fi
   dir="$ROOT/pi/.pi/agent/extensions"
   stamp="$dir/node_modules/.dots-install"
@@ -138,7 +138,7 @@ init_pi() {
   fi
   link_configs pi
 }
-init_fish() {
+bootstrap_fish() {
   section 'Login shell'
   require_tool fish fish
   local fish_path current_shell username
@@ -159,7 +159,7 @@ init_fish() {
     return
   fi
   if [[ ! -t 0 || "${DOTS_NONINTERACTIVE:-0}" == 1 ]]; then
-    warn 'Login shell change skipped: run just init-fish in an interactive terminal'
+    warn 'Login shell change skipped: run just bootstrap-fish in an interactive terminal'
     return
   fi
   need chsh 'Install chsh or change your login shell through system settings.'
@@ -173,7 +173,7 @@ init_fish() {
     ok 'Login shell changed to Fish (takes effect on next login)'
   fi
 }
-init_insomnia() {
+bootstrap_insomnia() {
   section 'SwiftBar / Insomnia'
   if [[ "$(uname -s)" != Darwin ]]; then warn 'SwiftBar skipped: macOS only'; return; fi
   ensure_brew
@@ -196,7 +196,7 @@ init_insomnia() {
     ok 'SwiftBar plugin directory already configured'
   fi
   if ! launchctl print "$domain" >/dev/null 2>&1; then
-    warn 'SwiftBar launch skipped: no GUI session; rerun just init-insomnia from the desktop'
+    warn 'SwiftBar launch skipped: no GUI session; rerun just bootstrap-insomnia from the desktop'
     return
   fi
   if ! launchctl print "$domain/com.wu-json.swiftbar-login" >/dev/null 2>&1; then
@@ -213,7 +213,7 @@ init_insomnia() {
     ok 'SwiftBar already running'
   fi
 }
-init_obscura() {
+bootstrap_obscura() {
   section 'Obscura'
   local version=0.1.8 os arch asset tmp
   if [[ -x "$HOME/.local/bin/obscura" && -x "$HOME/.local/bin/obscura-worker" ]] &&
@@ -221,8 +221,8 @@ init_obscura() {
     ok "Obscura $version already installed"
     return
   fi
-  need curl 'Install curl, then rerun just init-obscura.'
-  need tar 'Install tar, then rerun just init-obscura.'
+  need curl 'Install curl, then rerun just bootstrap-obscura.'
+  need tar 'Install tar, then rerun just bootstrap-obscura.'
   case "$(uname -s)" in Darwin) os=macos ;; Linux) os=linux ;; *) fail 'Unsupported OS' ;; esac
   case "$(uname -m)" in arm64|aarch64) arch=aarch64 ;; x86_64) arch=x86_64 ;; *) fail 'Unsupported architecture' ;; esac
   asset="obscura-${arch}-${os}.tar.gz"
@@ -235,11 +235,11 @@ init_obscura() {
   rm -rf "$tmp"
   trap - EXIT
 }
-init_tailscale() {
+bootstrap_tailscale() {
   section 'Tailscale CLI'
   if [[ "$(uname -s)" != Darwin ]]; then warn 'Tailscale app integration skipped: macOS only'; return; fi
   if [[ ! -x /Applications/Tailscale.app/Contents/MacOS/Tailscale ]]; then
-    warn 'Tailscale CLI skipped: install Tailscale.app, then rerun just init-tailscale-cli'
+    warn 'Tailscale CLI skipped: install Tailscale.app, then rerun just bootstrap-tailscale-cli'
     return
   fi
   require_tool fish fish
@@ -251,10 +251,10 @@ init_tailscale() {
 }
 require_tool just just
 
-case "${1:-init}" in
-  init) init_brew; init_stow; init_gh; init_pi; init_fish; init_insomnia ;;
-  brew) init_brew ;; stow) init_stow ;; gh) init_gh ;; pi) init_pi ;;
-  fish) init_fish ;; insomnia) init_insomnia ;; obscura) init_obscura ;; tailscale) init_tailscale ;;
+case "${1:-bootstrap}" in
+  bootstrap) bootstrap_brew; bootstrap_stow; bootstrap_gh; bootstrap_pi; bootstrap_fish; bootstrap_insomnia ;;
+  brew) bootstrap_brew ;; stow) bootstrap_stow ;; gh) bootstrap_gh ;; pi) bootstrap_pi ;;
+  fish) bootstrap_fish ;; insomnia) bootstrap_insomnia ;; obscura) bootstrap_obscura ;; tailscale) bootstrap_tailscale ;;
   *) fail "Unknown setup task: $1" ;;
 esac
 printf '\n'

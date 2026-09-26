@@ -1,25 +1,25 @@
 brew:
   @bash scripts/bootstrap.sh brew
 
-init:
-  @bash scripts/bootstrap.sh init
+bootstrap:
+  @bash scripts/bootstrap.sh bootstrap
 
-init-gh-extensions:
+bootstrap-gh-extensions:
   @bash scripts/bootstrap.sh gh
 
-init-insomnia:
+bootstrap-insomnia:
   @bash scripts/bootstrap.sh insomnia
 
-init-fish:
+bootstrap-fish:
   @bash scripts/bootstrap.sh fish
 
-init-obscura:
+bootstrap-obscura:
   @bash scripts/bootstrap.sh obscura
 
-init-pi-extensions:
+bootstrap-pi-extensions:
   @bash scripts/bootstrap.sh pi
 
-init-tailscale-cli:
+bootstrap-tailscale-cli:
   @bash scripts/bootstrap.sh tailscale
 
 stow:
