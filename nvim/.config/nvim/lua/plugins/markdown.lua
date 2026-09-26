@@ -29,6 +29,18 @@ return {
   {
     "folke/snacks.nvim",
     opts = {
+      styles = {
+        snacks_image = {
+          -- Keep the float and terminal image together as the cursor moves.
+          relative = "editor",
+          row = function(win)
+            return math.max(0, math.min(vim.fn.screenrow(), vim.o.lines - vim.o.cmdheight - win.opts.height - 2))
+          end,
+          col = function(win)
+            return math.max(0, math.min(vim.fn.screencol(), vim.o.columns - win.opts.width - 2))
+          end,
+        },
+      },
       image = {
         enabled = true,
         resolve = function(_, src)
