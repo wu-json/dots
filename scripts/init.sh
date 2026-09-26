@@ -249,8 +249,11 @@ init_tailscale() {
     run 'Add Tailscale app directory to Fish PATH' fish --no-config -c 'fish_add_path -U /Applications/Tailscale.app/Contents/MacOS'
   fi
 }
+if [[ "${BASH_SOURCE[0]}" != "$0" ]]; then
+  return
+fi
+
 case "${1:-init}" in
-  bootstrap) ensure_brew; require_tool just just; exec just --justfile "$ROOT/justfile" "${2:-init}" ;;
   init) init_brew; init_stow; init_gh; init_pi; init_fish; init_insomnia ;;
   brew) init_brew ;; stow) init_stow ;; gh) init_gh ;; pi) init_pi ;;
   fish) init_fish ;; insomnia) init_insomnia ;; obscura) init_obscura ;; tailscale) init_tailscale ;;

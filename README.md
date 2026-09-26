@@ -20,5 +20,5 @@ This is where I tweak config files till 4am like a goblin. It's pretty cozy in h
 ## Setup
 
 ```bash
-bash scripts/init.sh bootstrap
+bash scripts/bootstrap.sh
 ```

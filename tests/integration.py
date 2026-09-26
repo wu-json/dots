@@ -81,7 +81,7 @@ def main():
         require(not Path(env['FNM_DIR']).exists(), 'fnm must start empty')
         if shutil.which('fnm'):
             run(*runtime, 'node', '--version', success=False)
-        run('bash', 'scripts/init.sh', 'bootstrap', 'stow')
+        run('bash', 'scripts/bootstrap.sh', 'stow')
         first = run('just', 'init-pi-extensions')
         require('Install Node 24 with fnm' in first, 'Fresh setup must install Node')
         require('Install Pi dependencies' in first, 'Fresh setup must install dependencies')
@@ -113,7 +113,7 @@ def main():
             'node --version; npm --version')
 
         before = {str(path): snapshot(path) for path in (home, pi / 'node_modules')}
-        second = run('bash', 'scripts/init.sh', 'bootstrap', 'stow') + run('just', 'init-pi-extensions')
+        second = run('bash', 'scripts/bootstrap.sh', 'stow') + run('just', 'init-pi-extensions')
         require('→' not in second, 'Second run unexpectedly performed setup work')
         require('Pi dependencies already installed' in second, 'Second run did not reuse dependencies')
         for path, state in before.items():
