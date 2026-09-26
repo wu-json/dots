@@ -2,6 +2,31 @@ local wezterm = require("wezterm")
 
 local module = {}
 
+wezterm.on("update-status", function(window)
+	local tab = window:active_tab()
+	local zoomed = false
+	if tab then
+		for _, pane in ipairs(tab:panes_with_info()) do
+			if pane.is_zoomed then
+				zoomed = true
+				break
+			end
+		end
+	end
+
+	window:set_right_status(zoomed and wezterm.format({
+		{ Foreground = { AnsiColor = "Blue" } },
+		{ Text = " zoom " },
+	}) or "")
+
+	local overrides = window:get_config_overrides() or {}
+	local hide_tab_bar = not zoomed
+	if overrides.hide_tab_bar_if_only_one_tab ~= hide_tab_bar then
+		overrides.hide_tab_bar_if_only_one_tab = hide_tab_bar
+		window:set_config_overrides(overrides)
+	end
+end)
+
 wezterm.on("format-tab-title", function(tab, tabs, panes, config)
 	local title = tab.tab_title
 	if not title or title == "" then
@@ -19,6 +44,7 @@ end)
 function module.apply_to_config(config)
 	config.color_scheme = "carbonfox"
 	config.enable_tab_bar = true
+	config.status_update_interval = 200
 	config.show_new_tab_button_in_tab_bar = false
 	config.show_close_tab_button_in_tabs = false
 	config.show_tab_index_in_tab_bar = true
