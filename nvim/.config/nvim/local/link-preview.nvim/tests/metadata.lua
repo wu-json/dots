@@ -66,6 +66,12 @@ for _, case in ipairs({
   { "../../../../cover.jpg", "https://example.org/cover.jpg" },
   { "/img/a%20b.jpg?size=2#image", "https://example.org/img/a%20b.jpg?size=2#image" },
   { "./assets/../cover.jpg", "https://example.org/articles/cover.jpg" },
+  { "images//cover.jpg", "https://example.org/articles/images//cover.jpg" },
+  { "images//../cover.jpg", "https://example.org/articles/images/cover.jpg" },
+  { "images//./cover.jpg", "https://example.org/articles/images//cover.jpg" },
+  { "images//", "https://example.org/articles/images//" },
+  { "images/.", "https://example.org/articles/images/" },
+  { "images/..", "https://example.org/articles/" },
   { "?size=2", "https://example.org/articles/page?size=2" },
   { "#image", "https://example.org/articles/page?lang=en#image" },
   { "", "https://example.org/articles/page?lang=en" },
@@ -86,6 +92,10 @@ for _, case in ipairs({
 end
 for _, case in ipairs({
   { "<meta property=og:image content=/cover.jpg>", "https://example.org/cover.jpg" },
+  {
+    '<meta property="og:image" content="/cdn-cgi/image/width=1200/https://images.example.org/cover.jpg">',
+    "https://example.org/cdn-cgi/image/width=1200/https://images.example.org/cover.jpg",
+  },
   {
     '<meta property="og:image" content=""><meta name="twitter:image" content="/fallback.jpg"/>',
     "https://example.org/fallback.jpg",

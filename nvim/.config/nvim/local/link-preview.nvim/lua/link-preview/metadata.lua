@@ -38,15 +38,19 @@ function M.absolute(base, value)
   local joined = value:sub(1, 1) == "/" and value or (path:match("^(.*)/") or "") .. "/" .. value
   local pathname, suffix = joined:match("^([^?#]*)(.*)$")
   local parts = {}
-  for part in pathname:gmatch("[^/]+") do
+  -- Empty segments are significant (for example, an image proxy's embedded URL).
+  local segments = vim.split(pathname:sub(2), "/", { plain = true, trimempty = false })
+  for i, part in ipairs(segments) do
     if part == ".." then
       table.remove(parts)
     elseif part ~= "." then
       parts[#parts + 1] = part
     end
+    if i == #segments and (part == "." or part == "..") then
+      parts[#parts + 1] = ""
+    end
   end
-  local trailing = pathname:sub(-1) == "/" and #parts > 0 and "/" or ""
-  return scheme .. "://" .. authority .. "/" .. table.concat(parts, "/") .. trailing .. suffix
+  return scheme .. "://" .. authority .. "/" .. table.concat(parts, "/") .. suffix
 end
 
 function M.youtube(url)

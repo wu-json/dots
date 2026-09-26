@@ -38,6 +38,7 @@ local function resolve(url, callback)
   pending[url] = { callback }
   vim.system({
     "curl",
+    "--globoff",
     "--silent",
     "--show-error",
     "--fail",

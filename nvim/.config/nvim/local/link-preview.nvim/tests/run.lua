@@ -14,6 +14,7 @@ for i = 1, 5 do
   disk_cache.put(cache_dir, cache_url .. i, { data = { title = tostring(i) }, expires = os.time() + 60 }, 2)
 end
 assert(#vim.fn.glob(cache_dir .. "/*.json", false, true) == 2, "disk cache exceeded entry limit")
+dofile(root .. "/tests/fetch.lua")
 dofile(root .. "/tests/metadata.lua")
 local image_resolver = preview.resolve_image
 assert(image_resolver, "YouTube image embeds need a Snacks resolver")
