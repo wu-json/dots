@@ -20,6 +20,17 @@ end
 return {
   { "bullets-vim/bullets.vim" },
   {
+    "folke/snacks.nvim",
+    opts = {
+      image = {
+        enabled = true,
+        -- Inline in Kitty/Ghostty; cursor-triggered floating previews in WezTerm.
+        doc = { inline = true, float = true },
+        math = { enabled = false },
+      },
+    },
+  },
+  {
     "MeanderingProgrammer/render-markdown.nvim",
     init = function()
       markdown_highlights()
