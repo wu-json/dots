@@ -29,3 +29,8 @@ nvim --headless -u NONE -l tests/run.lua
 The tests require the Tree-sitter parsers above. Rendering is stubbed; check actual
 image display in a supported terminal. This directory can be moved into its own
 repository; the dots integration only supplies the local plugin path and options.
+
+CI runs this suite on pull requests and pushes to `main` when plugin code/tests,
+the Markdown configuration, the Neovim lockfile, or the CI workflow/setup script change.
+It uses one Linux job with pinned Neovim and parser versions and cancels superseded
+runs. Documentation-only changes do not trigger it.

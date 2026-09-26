@@ -1,0 +1,41 @@
+name: Test link previews
+
+on:
+  pull_request:
+    paths:
+      - 'nvim/.config/nvim/local/link-preview.nvim/lua/**'
+      - 'nvim/.config/nvim/local/link-preview.nvim/tests/**'
+      - 'nvim/.config/nvim/lua/plugins/markdown.lua'
+      - 'nvim/.config/nvim/lazy-lock.json'
+      - '.github/workflows/test-link-preview.yml'
+      - '.github/scripts/setup-link-preview-tests.sh'
+  push:
+    branches: [main]
+    paths:
+      - 'nvim/.config/nvim/local/link-preview.nvim/lua/**'
+      - 'nvim/.config/nvim/local/link-preview.nvim/tests/**'
+      - 'nvim/.config/nvim/lua/plugins/markdown.lua'
+      - 'nvim/.config/nvim/lazy-lock.json'
+      - '.github/workflows/test-link-preview.yml'
+      - '.github/scripts/setup-link-preview-tests.sh'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: link-preview-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install test dependencies
+        run: |
+          bash .github/scripts/setup-link-preview-tests.sh "$RUNNER_TEMP/link-preview"
+          echo "$RUNNER_TEMP/link-preview/nvim/bin" >> "$GITHUB_PATH"
+      - name: Run offline Lua tests
+        working-directory: nvim/.config/nvim/local/link-preview.nvim
+        run: nvim --headless -u NONE -l tests/run.lua
