@@ -21,11 +21,10 @@ init-fish:
   grep -qxF "{{brew_prefix}}/bin/fish" /etc/shells || echo "{{brew_prefix}}/bin/fish" | sudo tee -a /etc/shells
   chsh -s {{brew_prefix}}/bin/fish
 
-# Obscura (headless browser) ships prebuilt binaries but isn't on Homebrew, so fetch the release tarball into ~/.local/bin.
-obscura_version := "0.1.8"
 init-obscura:
   #!/usr/bin/env bash
   set -euo pipefail
+  obscura_version="0.1.8"
   case "$(uname -s)" in
     Darwin) os=macos ;;
     Linux)  os=linux ;;
@@ -37,7 +36,7 @@ init-obscura:
     *) echo "unsupported arch: $(uname -m)"; exit 1 ;;
   esac
   asset="obscura-${arch}-${os}.tar.gz"
-  url="https://github.com/h4ckf0r0day/obscura/releases/download/v{{obscura_version}}/${asset}"
+  url="https://github.com/h4ckf0r0day/obscura/releases/download/v${obscura_version}/${asset}"
   mkdir -p ~/.local/bin
   tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
   echo "downloading $asset ..."
@@ -51,7 +50,6 @@ init-obscura:
 init-pi-extensions: stow
   npm ci --prefix pi/.pi/agent/extensions
 
-# macOS: App Store Tailscale ships no CLI launcher, so add the app's MacOS dir to fish's universal PATH. (Symlinks break Tailscale's bundle-identity check, hence PATH over symlink.)
 init-tailscale-cli:
   #!/usr/bin/env bash
   set -euo pipefail
