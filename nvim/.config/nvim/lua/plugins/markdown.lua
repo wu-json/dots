@@ -20,6 +20,17 @@ end
 return {
   { "bullets-vim/bullets.vim" },
   {
+    "folke/snacks.nvim",
+    opts = {
+      image = {
+        enabled = true,
+        -- Show images at the cursor without rendering them inline while scrolling.
+        doc = { inline = false, float = true },
+        math = { enabled = false },
+      },
+    },
+  },
+  {
     "MeanderingProgrammer/render-markdown.nvim",
     init = function()
       markdown_highlights()
