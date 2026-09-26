@@ -66,17 +66,18 @@ def main():
         def run(*args, success=True, show_output=True):
             print('→ ' + ' '.join(args), flush=True)
             result = subprocess.run(args, cwd=repo, env=env, stdin=subprocess.DEVNULL,
-                                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                     text=True, timeout=600)
+            output = result.stdout + result.stderr
             if (result.returncode == 0) != success:
-                print(result.stdout, flush=True)
+                print(output, flush=True)
                 raise AssertionError(f'Unexpected exit {result.returncode}: {args}')
             if success:
                 if show_output:
-                    print(result.stdout, flush=True)
+                    print(output, flush=True)
             else:
                 print('✓ Command refused as expected; checking the resulting state.', flush=True)
-            return result.stdout
+            return result.stdout if success else output
 
         formulae = run('brew', 'bundle', 'list', '--formula',
                        '--file=homebrew/Brewfile', show_output=False).splitlines()
