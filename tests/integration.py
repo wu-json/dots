@@ -68,9 +68,13 @@ def main():
             result = subprocess.run(args, cwd=repo, env=env, stdin=subprocess.DEVNULL,
                                     stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                     text=True, timeout=600)
-            print(result.stdout, flush=True)
-            require((result.returncode == 0) == success,
-                    f'Unexpected exit {result.returncode}: {args}')
+            if (result.returncode == 0) != success:
+                print(result.stdout, flush=True)
+                raise AssertionError(f'Unexpected exit {result.returncode}: {args}')
+            if success:
+                print(result.stdout, flush=True)
+            else:
+                print('✓ Command refused as expected; checking the resulting state.', flush=True)
             return result.stdout
 
         runtime = ('fnm', 'exec', '--using', '24')
@@ -124,6 +128,7 @@ def main():
         require('move or back up' in output, 'Conflict lacked recovery instructions')
         require(config.read_text() == 'keep this existing config\n', 'Existing config was overwritten')
         require(not (conflict_home / '.pi').exists(), 'Conflict preflight partially linked configs')
+        print('✓ Existing dotfile preserved; no partial links created.', flush=True)
         print('Real setup integration passed: install, startup, rerun, and conflict preservation.', flush=True)
 
 
