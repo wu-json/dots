@@ -22,6 +22,22 @@ def done(code=0, output=''):
 
 if state.get('fail') == name:
     done(1, 'simulated dependency failure')
+if name == 'fnm':
+    if args == ['env', '--use-on-cd', '--shell', 'fish']:
+        done()
+    if args == ['install', '24']:
+        if state.get('fail_fnm_install'):
+            done(1, 'simulated fnm download failure')
+        state['fnm_node'] = True
+        done()
+    if args[:3] == ['exec', '--using', '24']:
+        if not state.get('fnm_node'):
+            done(1, 'Node 24 is not installed')
+        name, args = args[3], args[4:]
+        with (state_dir / 'calls.jsonl').open('a') as log:
+            log.write(json.dumps([name, *args]) + '\n')
+        if state.get('fail') == name:
+            done(1, 'simulated dependency failure')
 if name == 'curl' and state.get('install_homebrew'):
     installer = Path(args[args.index('-o') + 1])
     installer.write_text('ln -s "$TEST_STATE/driver" "$PATH/brew"\n')
@@ -42,7 +58,7 @@ if name == 'brew':
         if package == 'swiftbar':
             state['swiftbar'] = True
         else:
-            for tool in (['node', 'npm'] if package == 'node' else [package]):
+            for tool in [package]:
                 destination = Path(os.environ['PATH']) / tool
                 if not destination.exists():
                     destination.symlink_to(state_dir / 'driver')
@@ -99,6 +115,8 @@ if name == 'npm':
     if args == ['--version']:
         done(output='11.0.0')
     if args[0] == 'ci':
+        if state.get('fail_npm_ci'):
+            done(1, 'simulated dependency failure')
         (Path(args[args.index('--prefix')+1]) / 'node_modules').mkdir(exist_ok=True)
         state['npm'] = True
         done()

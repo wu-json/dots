@@ -39,8 +39,9 @@ before shell setup, and its actual executable path and account login shell are c
 Run `just init-fish` in a terminal to allow any required `sudo`/`chsh` prompts.
 
 Individual `init-*` recipes also install their missing tool dependencies.
-Pi requires Node 22.19 or newer; an older active runtime produces a warning with
-a follow-up command instead of attempting an incompatible install.
+Pi uses Node 24 through `fnm`, installing that runtime only when missing.
+Setup runs npm through `fnm exec`, so it works without an initialized interactive
+shell and preserves an existing default Node version.
 `just init-obscura` and `just init-tailscale-cli` remain optional.
 Use `NO_COLOR=1 just init` for plain output, or `DOTS_NONINTERACTIVE=1 just init`
 to explicitly defer login-shell changes. Failures retain command diagnostics;
@@ -63,6 +64,8 @@ paths in the copied script are redirected into the fixture too. They exercise
 fresh setup, repeated runs, missing prerequisites, and failures without touching
 your packages, login shell, preferences, or running apps. A separate integration
 test uses real GNU Stow when available, targeting only the disposable home.
+Real Fish startup and `fnm exec` are also checked when installed; the fnm check
+uses a disposable fake runtime and blocks installation commands.
 CI runs the same tests on macOS.
 
 These tests validate orchestration, not live Homebrew downloads or macOS privilege

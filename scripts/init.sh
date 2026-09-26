@@ -120,22 +120,28 @@ init_gh() {
 }
 init_pi() {
   section 'Pi extensions'
-  require_tool node node
-  require_tool npm node
-  # Minimum required by the locked Pi coding-agent dependency.
-  if ! node -e 'const [major, minor] = process.versions.node.split(".").map(Number); process.exit(major > 22 || (major === 22 && minor >= 19) ? 0 : 1)'; then
-    warn 'Pi extensions skipped: Node >=22.19 is required. Run brew upgrade node (or select a newer runtime with fnm), then just init-pi-extensions'
-    return
-  fi
+  require_tool fnm fnm
   local dir fingerprint stamp
+  local runtime=(fnm exec --using 24)
+  # Reuse an installed Node 24 without resolving/downloading updates each run.
+  # fnm exec works in this noninteractive Bash process without sourcing Fish
+  # startup or changing the user's active/default Node version.
+  if "${runtime[@]}" node --version >/dev/null 2>&1; then
+    ok 'Node 24 already available through fnm'
+  else
+    run 'Install Node 24 with fnm (retry with fnm install 24 if needed)' fnm install 24
+  fi
+  if ! "${runtime[@]}" npm --version >/dev/null 2>&1; then
+    fail 'Node 24/npm is unavailable through fnm. Repair it with fnm install 24, then rerun just init-pi-extensions.'
+  fi
   dir="$ROOT/pi/.pi/agent/extensions"
   stamp="$dir/node_modules/.dots-install"
   fingerprint=$(cat "$dir/package.json" "$dir/package-lock.json" | cksum)
-  fingerprint="$fingerprint $(node --version) $(npm --version) $(uname -sm)"
-  if [[ -f "$stamp" && "$(cat "$stamp")" == "$fingerprint" ]] && npm ls --prefix "$dir" --depth=0 >/dev/null 2>&1; then
+  fingerprint="$fingerprint $("${runtime[@]}" node --version) $("${runtime[@]}" npm --version) $(uname -sm)"
+  if [[ -f "$stamp" && "$(cat "$stamp")" == "$fingerprint" ]] && "${runtime[@]}" npm ls --prefix "$dir" --depth=0 >/dev/null 2>&1; then
     ok 'Pi dependencies already installed (manifests and runtime unchanged)'
   else
-    run 'Install Pi dependencies' npm ci --prefix "$dir" --include=dev --no-audit --no-fund
+    run 'Install Pi dependencies' "${runtime[@]}" npm ci --prefix "$dir" --include=dev --no-audit --no-fund
     printf '%s\n' "$fingerprint" > "$stamp"
   fi
   link_configs pi

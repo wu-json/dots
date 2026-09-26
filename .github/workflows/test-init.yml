@@ -10,6 +10,6 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: Install test dependencies (disposable runner only)
-        run: brew install stow shellcheck fish
+        run: brew install stow shellcheck fish fnm
       - run: bash -n scripts/init.sh && shellcheck scripts/init.sh
       - run: python3 -m unittest discover -s tests -v

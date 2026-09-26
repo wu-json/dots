@@ -9,7 +9,7 @@ import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
-TOOLS = 'brew uname id dscl getent grep sudo chsh gh git stow node npm defaults launchctl pgrep osascript open fish just curl'.split()
+TOOLS = 'brew uname id dscl getent grep sudo chsh gh git stow fnm node npm defaults launchctl pgrep osascript open fish just curl'.split()
 
 
 class SetupTests(unittest.TestCase):
@@ -84,7 +84,7 @@ class SetupTests(unittest.TestCase):
         forbidden = {'sudo', 'chsh', 'open', 'osascript'}
         for call in self.calls()[before:]:
             self.assertNotIn(call[0], forbidden, call)
-            self.assertFalse(call[:2] in [['npm', 'ci'], ['brew', 'install'], ['defaults', 'write'], ['launchctl', 'bootstrap']], call)
+            self.assertFalse(call[:2] in [['npm', 'ci'], ['fnm', 'install'], ['brew', 'install'], ['defaults', 'write'], ['launchctl', 'bootstrap']], call)
             self.assertNotEqual(call[:3], ['gh', 'extension', 'install'])
             if call[0] == 'stow':
                 self.assertIn('--simulate', call)
@@ -112,18 +112,31 @@ class SetupTests(unittest.TestCase):
         self.assertTrue(self.state()['npm'])
         self.assertFalse(any(c[0] in ('sudo', 'chsh', 'open') for c in self.calls()))
 
-    def test_old_node_warns_without_attempting_npm_install(self):
-        self.state(old_node=True)
-        output = self.run_setup('pi')
-        self.assertIn('Node >=22.19', output)
-        self.assertIn('just init-pi-extensions', output)
-        self.assertFalse(any(c[:2] == ['npm', 'ci'] for c in self.calls()))
-
-    def test_missing_node_installed_for_standalone_pi(self):
-        (self.bin / 'node').unlink()
-        (self.bin / 'npm').unlink()
+    def test_fnm_runtime_reused_despite_old_ambient_node(self):
+        self.state(old_node=True, fnm_node=True)
         self.run_setup('pi')
-        self.assertIn(['brew', 'install', 'node'], self.calls())
+        self.assertNotIn(['fnm', 'install', '24'], self.calls())
+        self.assertTrue(self.state()['npm'])
+        self.assertFalse(any(c[:2] in (['fnm', 'use'], ['fnm', 'default']) for c in self.calls()))
+
+    def test_missing_runtime_and_fnm_installed_for_standalone_pi(self):
+        for tool in ('node', 'npm', 'fnm'):
+            (self.bin / tool).unlink()
+        self.run_setup('pi')
+        self.assertIn(['brew', 'install', 'fnm'], self.calls())
+        self.assertIn(['fnm', 'install', '24'], self.calls())
+        self.assertNotIn(['brew', 'install', 'node'], self.calls())
+        self.assertTrue(any(c[:5] == ['fnm', 'exec', '--using', '24', 'npm'] for c in self.calls()))
+
+    def test_fnm_install_failure_can_be_retried(self):
+        self.state(fail_fnm_install=True)
+        output = self.run_setup('pi', success=False)
+        self.assertIn('simulated fnm download failure', output)
+        self.assertIn('fnm install 24', output)
+        self.assertFalse(any(c[:2] == ['npm', 'ci'] for c in self.calls()))
+        self.state(fail_fnm_install=False)
+        self.run_setup('pi')
+        self.assertTrue(self.state()['npm'])
 
     def test_pi_manifest_change_and_missing_dependencies_reinstall(self):
         self.run_setup('pi')
@@ -135,11 +148,11 @@ class SetupTests(unittest.TestCase):
         self.assertEqual(sum(c[:2] == ['npm', 'ci'] for c in self.calls()), 3)
 
     def test_failure_reports_diagnostics_and_can_retry(self):
-        self.state(fail='npm')
+        self.state(fail_npm_ci=True)
         output = self.run_setup('pi', success=False)
         self.assertIn('simulated dependency failure', output)
         self.assertFalse((self.repo / 'pi/.pi/agent/extensions/node_modules/.dots-install').exists())
-        self.state(fail=None)
+        self.state(fail_npm_ci=False)
         self.run_setup('pi')
 
     def test_conflict_preserves_files_and_stops(self):
@@ -192,8 +205,30 @@ class SetupTests(unittest.TestCase):
         self.assertIn('already installed', self.run_setup('obscura'))
         self.assertFalse(any(c[0] == 'curl' for c in self.calls()))
 
+    @unittest.skipUnless(shutil.which('fnm'), 'Install fnm to test real runtime selection')
+    def test_real_fnm_exec_with_disposable_runtime(self):
+        runtime_dir = self.base / 'fnm'
+        runtime_bin = runtime_dir / 'node-versions/v24.0.0/installation/bin'
+        runtime_bin.mkdir(parents=True)
+        for tool in ('node', 'npm'):
+            (runtime_bin / tool).symlink_to(self.base / 'driver')
+            (self.bin / tool).unlink()
+        self.env['FNM_DIR'] = str(runtime_dir)
+        # Only exec may reach the real fnm: any attempted install fails closed.
+        real_fnm = shutil.which('fnm')
+        (self.bin / 'fnm').unlink()
+        (self.bin / 'fnm').write_text(
+            f'#!{sys.executable}\nimport os, sys\n'
+            'if sys.argv[1:4] != ["exec", "--using", "24"]: sys.exit(97)\n'
+            f'os.execv({real_fnm!r}, [{real_fnm!r}, *sys.argv[1:]])\n')
+        (self.bin / 'fnm').chmod(0o755)
+        self.run_setup('pi')
+        self.assertIn('already installed', self.run_setup('pi'))
+        self.assertEqual(sum(c[:2] == ['npm', 'ci'] for c in self.calls()), 1)
+
     @unittest.skipUnless(shutil.which('fish'), 'Install Fish to test startup prerequisites')
     def test_fish_startup_with_missing_optional_tools(self):
+        (self.bin / 'fnm').unlink()
         config_dir = ROOT / 'fish/.config/fish/conf.d'
         result = subprocess.run(
             [shutil.which('fish'), '--no-config', '-c',
