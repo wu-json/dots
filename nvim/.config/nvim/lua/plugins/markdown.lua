@@ -20,7 +20,6 @@ end
 return {
   {
     "wu-json/link-preview.nvim",
-    main = "link-preview",
     event = "VeryLazy",
     dependencies = { "folke/snacks.nvim" },
     opts = {},
