@@ -100,7 +100,7 @@ bootstrap_gh() {
   require_tool git git
   link_configs gh-dash
   if ! gh auth status --hostname github.com >/dev/null 2>&1; then
-    warn 'GitHub extensions skipped: run gh auth login, then just bootstrap-gh-extensions'
+    warn 'GitHub extensions skipped: run gh auth login, then just bootstrap gh'
     return
   fi
   local extensions extension
@@ -124,7 +124,7 @@ bootstrap_pi() {
     run 'Install Node 24 with fnm (retry with fnm install 24 if needed)' fnm install 24
   fi
   if ! "${runtime[@]}" npm --version >/dev/null 2>&1; then
-    fail 'Node 24/npm is unavailable through fnm. Repair it with fnm install 24, then rerun just bootstrap-pi-extensions.'
+    fail 'Node 24/npm is unavailable through fnm. Repair it with fnm install 24, then rerun just bootstrap pi.'
   fi
   dir="$ROOT/pi/.pi/agent/extensions"
   stamp="$dir/node_modules/.dots-install"
@@ -159,7 +159,7 @@ bootstrap_fish() {
     return
   fi
   if [[ ! -t 0 || "${DOTS_NONINTERACTIVE:-0}" == 1 ]]; then
-    warn 'Login shell change skipped: run just bootstrap-fish in an interactive terminal'
+    warn 'Login shell change skipped: run just bootstrap fish in an interactive terminal'
     return
   fi
   need chsh 'Install chsh or change your login shell through system settings.'
@@ -196,7 +196,7 @@ bootstrap_insomnia() {
     ok 'SwiftBar plugin directory already configured'
   fi
   if ! launchctl print "$domain" >/dev/null 2>&1; then
-    warn 'SwiftBar launch skipped: no GUI session; rerun just bootstrap-insomnia from the desktop'
+    warn 'SwiftBar launch skipped: no GUI session; rerun just bootstrap insomnia from the desktop'
     return
   fi
   if ! launchctl print "$domain/com.wu-json.swiftbar-login" >/dev/null 2>&1; then
@@ -221,8 +221,8 @@ bootstrap_obscura() {
     ok "Obscura $version already installed"
     return
   fi
-  need curl 'Install curl, then rerun just bootstrap-obscura.'
-  need tar 'Install tar, then rerun just bootstrap-obscura.'
+  need curl 'Install curl, then rerun just bootstrap obscura.'
+  need tar 'Install tar, then rerun just bootstrap obscura.'
   case "$(uname -s)" in Darwin) os=macos ;; Linux) os=linux ;; *) fail 'Unsupported OS' ;; esac
   case "$(uname -m)" in arm64|aarch64) arch=aarch64 ;; x86_64) arch=x86_64 ;; *) fail 'Unsupported architecture' ;; esac
   asset="obscura-${arch}-${os}.tar.gz"
@@ -239,7 +239,7 @@ bootstrap_tailscale() {
   section 'Tailscale CLI'
   if [[ "$(uname -s)" != Darwin ]]; then warn 'Tailscale app integration skipped: macOS only'; return; fi
   if [[ ! -x /Applications/Tailscale.app/Contents/MacOS/Tailscale ]]; then
-    warn 'Tailscale CLI skipped: install Tailscale.app, then rerun just bootstrap-tailscale-cli'
+    warn 'Tailscale CLI skipped: install Tailscale.app, then rerun just bootstrap tailscale'
     return
   fi
   require_tool fish fish
@@ -251,11 +251,11 @@ bootstrap_tailscale() {
 }
 require_tool just just
 
-case "${1:-bootstrap}" in
-  bootstrap) bootstrap_brew; bootstrap_stow; bootstrap_gh; bootstrap_pi; bootstrap_fish; bootstrap_insomnia ;;
+case "${1:-all}" in
+  all) bootstrap_brew; bootstrap_stow; bootstrap_gh; bootstrap_pi; bootstrap_fish; bootstrap_insomnia ;;
   brew) bootstrap_brew ;; stow) bootstrap_stow ;; gh) bootstrap_gh ;; pi) bootstrap_pi ;;
   fish) bootstrap_fish ;; insomnia) bootstrap_insomnia ;; obscura) bootstrap_obscura ;; tailscale) bootstrap_tailscale ;;
-  *) fail "Unknown setup task: $1" ;;
+  *) fail "Unknown setup target: $1. Use all, brew, stow, gh, pi, fish, insomnia, obscura, or tailscale." ;;
 esac
 printf '\n'
 if [[ "$skipped" -gt 0 ]]; then
