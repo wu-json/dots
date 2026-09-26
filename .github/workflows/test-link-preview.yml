@@ -1,4 +1,4 @@
-name: Test link previews
+name: Test Neovim plugins
 
 on:
   pull_request:
@@ -6,6 +6,9 @@ on:
       - 'nvim/.config/nvim/local/link-preview.nvim/lua/**'
       - 'nvim/.config/nvim/local/link-preview.nvim/tests/**'
       - 'nvim/.config/nvim/lua/plugins/markdown.lua'
+      - 'nvim/.config/nvim/lua/config/keymaps.lua'
+      - 'nvim/.config/nvim/lua/config/prose.lua'
+      - 'tests/daily-note.lua'
       - 'nvim/.config/nvim/lazy-lock.json'
       - '.github/workflows/test-link-preview.yml'
       - '.github/scripts/setup-link-preview-tests.sh'
@@ -15,6 +18,9 @@ on:
       - 'nvim/.config/nvim/local/link-preview.nvim/lua/**'
       - 'nvim/.config/nvim/local/link-preview.nvim/tests/**'
       - 'nvim/.config/nvim/lua/plugins/markdown.lua'
+      - 'nvim/.config/nvim/lua/config/keymaps.lua'
+      - 'nvim/.config/nvim/lua/config/prose.lua'
+      - 'tests/daily-note.lua'
       - 'nvim/.config/nvim/lazy-lock.json'
       - '.github/workflows/test-link-preview.yml'
       - '.github/scripts/setup-link-preview-tests.sh'
@@ -41,3 +47,5 @@ jobs:
         run: |
           nvim --headless -u NONE -l tests/run.lua
           SNACKS_TEST_DIR="$RUNNER_TEMP/link-preview/snacks.nvim" nvim --headless -u NONE -l tests/retry.lua
+      - name: Test daily note editor state
+        run: SNACKS_TEST_DIR="$RUNNER_TEMP/link-preview/snacks.nvim" nvim --headless -u NONE -l tests/daily-note.lua

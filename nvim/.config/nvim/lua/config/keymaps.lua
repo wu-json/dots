@@ -21,7 +21,9 @@ map("n", "<leader>nd", function()
 
   local path = vim.fs.joinpath(directory, os.date(format))
   vim.fn.mkdir(vim.fs.dirname(path), "p")
-  vim.api.nvim_cmd({ cmd = "edit", args = { path }, magic = { file = false, bar = false } }, {})
+  if vim.fn.bufnr(path) ~= vim.api.nvim_get_current_buf() then
+    vim.api.nvim_cmd({ cmd = "edit", args = { path }, magic = { file = false, bar = false } }, {})
+  end
   require("config.prose").enable()
 end, { desc = "Open Daily Note" })
 

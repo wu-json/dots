@@ -1,7 +1,8 @@
 local M = {}
+local prose_win
 
 function M.toggle()
-  Snacks.zen({
+  prose_win = Snacks.zen({
     toggles = { dim = false, git_signs = false, mini_diff_signs = false },
     win = {
       width = 90,
@@ -23,9 +24,14 @@ function M.toggle()
 end
 
 function M.enable()
-  if not (Snacks.zen.win and Snacks.zen.win:valid()) then
-    M.toggle()
+  local win = Snacks.zen.win
+  if win and win:valid() then
+    if win == prose_win then
+      return
+    end
+    win:close()
   end
+  M.toggle()
 end
 
 return M
