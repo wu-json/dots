@@ -14,6 +14,13 @@ return {
   },
   {
     "folke/snacks.nvim",
+    keys = function(_, keys)
+      for _, key in ipairs(keys) do
+        if key[1] == "<leader>n" then
+          key[1] = "<leader>nh"
+        end
+      end
+    end,
     opts = {
       dashboard = {
         sections = {

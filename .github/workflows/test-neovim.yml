@@ -5,6 +5,7 @@ on:
     paths:
       - 'nvim/.config/nvim/init.lua'
       - 'nvim/.config/nvim/lua/config/**'
+      - 'nvim/.config/nvim/lua/plugins/aesthetics.lua'
       - 'nvim/.config/nvim/lazy-lock.json'
       - 'tests/daily-note.lua'
       - '.github/workflows/test-neovim.yml'
@@ -14,6 +15,7 @@ on:
     paths:
       - 'nvim/.config/nvim/init.lua'
       - 'nvim/.config/nvim/lua/config/**'
+      - 'nvim/.config/nvim/lua/plugins/aesthetics.lua'
       - 'nvim/.config/nvim/lazy-lock.json'
       - 'tests/daily-note.lua'
       - '.github/workflows/test-neovim.yml'
