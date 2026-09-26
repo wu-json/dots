@@ -30,13 +30,13 @@ buffers, including the banner above, without moving the cursor onto the image.
 It reserves space for the image and updates it as you scroll.
 
 Run `just bootstrap brew` to install ImageMagick, reload your WezTerm configuration,
-then restart Neovim and let Lazy install image.nvim. WezTerm's Kitty graphics
-support is enabled in this repo; the plugin uses normal placements rather than
-Unicode placeholders. Snacks' image module is disabled to avoid competing renderers.
+then restart Neovim and let Lazy install image.nvim. Images use WezTerm's Sixel
+support; Snacks' image module is disabled to avoid competing renderers.
 
-WezTerm support is best-effort: image.nvim's maintainers note incomplete protocol
-support and performance limitations. `<leader>cp` still opens the full Markdown
-preview in a browser if terminal rendering misbehaves.
+Sixel redraws the image scene rather than relying on Kitty placements, which left
+image strips behind text when scrolling in WezTerm. This is a mitigation pending
+visual confirmation; Sixel can be slower during scrolling. `<leader>cp` still
+opens the full Markdown preview in a browser if terminal rendering misbehaves.
 
 If images do not appear, ensure `magick` is on PATH
 and install the Markdown parsers with `:TSInstall markdown markdown_inline`.

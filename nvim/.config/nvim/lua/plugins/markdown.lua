@@ -28,9 +28,8 @@ return {
     ft = { "markdown", "markdown.mdx" },
     build = false,
     opts = {
-      backend = "kitty",
-      -- WezTerm supports normal placements, but not Unicode placeholders.
-      kitty_method = "normal",
+      -- Avoid stale Kitty placements breaking into strips when WezTerm scrolls.
+      backend = "sixel",
       processor = "magick_cli",
       integrations = {
         markdown = {
