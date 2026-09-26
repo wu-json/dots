@@ -1,7 +1,8 @@
 {
   "extras": [
     "lazyvim.plugins.extras.coding.mini-surround",
-    "lazyvim.plugins.extras.formatting.prettier"
+    "lazyvim.plugins.extras.formatting.prettier",
+    "lazyvim.plugins.extras.lang.markdown"
   ],
   "install_version": 7,
   "news": {
