@@ -7,7 +7,7 @@ local config = {}
 
 config = wezterm.config_builder()
 
--- Used by Snacks image previews in Neovim.
+-- Used by image.nvim for inline Markdown images.
 config.enable_kitty_graphics = true
 
 keymaps.apply_to_config(config)

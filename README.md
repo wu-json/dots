@@ -25,15 +25,18 @@ bash scripts/bootstrap.sh
 
 ## Markdown images in Neovim
 
-[Snacks image](https://github.com/folke/snacks.nvim/blob/main/docs/image.md) displays
-Markdown images using the existing Snacks plugin. Run `just bootstrap brew` to
-install ImageMagick, then restart Neovim and reload your WezTerm configuration.
+[image.nvim](https://github.com/3rd/image.nvim) displays images inline in Markdown
+buffers, including the banner above, without moving the cursor onto the image.
+It reserves space for the image and updates it as you scroll.
 
-- **WezTerm:** move the cursor onto an image line (like `banner` above) to see a
-  floating image preview. WezTerm does not support Snacks' inline images.
-- **Kitty / Ghostty:** images appear inline in the document automatically.
-- **Browser:** `<leader>cp` toggles the existing full Markdown preview, including
-  images, regardless of terminal support.
+Run `just bootstrap brew` to install ImageMagick, reload your WezTerm configuration,
+then restart Neovim and let Lazy install image.nvim. WezTerm's Kitty graphics
+support is enabled in this repo; the plugin uses normal placements rather than
+Unicode placeholders. Snacks' image module is disabled to avoid competing renderers.
 
-If images do not appear, run `:checkhealth snacks`. The `markdown` and
-`markdown_inline` Tree-sitter parsers must be installed (`:TSInstall markdown markdown_inline`).
+WezTerm support is best-effort: image.nvim's maintainers note incomplete protocol
+support and performance limitations. `<leader>cp` still opens the full Markdown
+preview in a browser if terminal rendering misbehaves.
+
+If images do not appear, ensure `magick` is on PATH
+and install the Markdown parsers with `:TSInstall markdown markdown_inline`.
