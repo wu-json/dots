@@ -11,3 +11,6 @@ pi/.pi/agent/*
 !pi/.pi/agent/settings.json
 !pi/.pi/agent/themes
 pi/.pi/agent/extensions/node_modules/
+
+# Python setup-test bytecode
+__pycache__/

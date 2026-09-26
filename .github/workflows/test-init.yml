@@ -1,0 +1,18 @@
+name: Test setup
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install shell linter
+        run: brew install shellcheck
+      - run: bash -n scripts/bootstrap.sh && shellcheck scripts/bootstrap.sh
+      - name: Test real setup and reruns in a disposable home
+        run: python3 tests/integration.py
