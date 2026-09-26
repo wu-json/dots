@@ -31,7 +31,7 @@ return {
           return require("config.link-preview.metadata").youtube(src)
         end,
         -- Show images at the cursor without rendering them inline while scrolling.
-        doc = { inline = false, float = true },
+        doc = { inline = false, float = true, max_width = 40, max_height = 12 },
         math = { enabled = false },
       },
     },

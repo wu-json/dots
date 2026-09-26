@@ -36,7 +36,9 @@ YouTube embeds written as `![](https://www.youtube.com/watch?v=...)` are also
 supported: Snacks resolves them to the video thumbnail.
 
 The local module `nvim/.config/nvim/lua/config/link-preview.lua` exposes
-`setup({ delay = 200, ttl = 3600, max_width = 60, max_height = 20 })`.
+`setup({ delay = 200, ttl = 3600, max_width = 40, max_height = 12 })`.
+Link previews and ordinary image hovers are limited to 40 columns by 12 rows,
+preserving the image's aspect ratio.
 It uses asynchronous curl requests and Neovim's HTML Tree-sitter parser for
 metadata, and Snacks/WezTerm for image rendering. Hovering fetches the URL and its
 preview image; metadata is cached in memory and in a per-user directory under

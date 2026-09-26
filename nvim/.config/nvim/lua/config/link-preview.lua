@@ -6,8 +6,8 @@ local options = {
   ttl = 3600,
   failure_ttl = 60,
   max_entries = 128,
-  max_width = 60,
-  max_height = 20,
+  max_width = 40,
+  max_height = 12,
   cache_dir = disk_cache.directory(),
 }
 local cache, pending = {}, {}
