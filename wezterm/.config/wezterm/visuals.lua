@@ -16,7 +16,7 @@ wezterm.on("update-status", function(window)
 
 	window:set_right_status(zoomed and wezterm.format({
 		{ Foreground = { AnsiColor = "Blue" } },
-		{ Text = " zoom " },
+		{ Text = " " .. wezterm.nerdfonts.md_arrow_expand_all .. " " },
 	}) or "")
 
 	local overrides = window:get_config_overrides() or {}
