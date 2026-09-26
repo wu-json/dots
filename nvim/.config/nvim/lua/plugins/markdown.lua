@@ -18,6 +18,7 @@ local function markdown_highlights()
 end
 
 return {
+  { "nvim-treesitter/nvim-treesitter", opts = { ensure_installed = { "html", "markdown", "markdown_inline" } } },
   { "bullets-vim/bullets.vim" },
   {
     "folke/snacks.nvim",

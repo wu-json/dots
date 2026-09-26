@@ -22,3 +22,23 @@ This is where I tweak config files till 4am like a goblin. It's pretty cozy in h
 ```bash
 bash scripts/bootstrap.sh
 ```
+
+## Markdown link previews
+
+In Neovim, rest the cursor on a Markdown link label, URL, or YouTube iframe URL
+for half a second to preview its image. Webpages use Open Graph images with a
+Twitter image fallback; YouTube watch, short, live, and embed URLs use thumbnails.
+Pages without an image show their title instead. Moving away closes the popup.
+Markdown image syntax keeps using Snacks' existing image hover.
+
+The local module `nvim/.config/nvim/lua/config/link-preview.lua` exposes
+`setup({ delay = 500, ttl = 3600, max_width = 60, max_height = 20 })`.
+It uses asynchronous curl requests and Neovim's HTML Tree-sitter parser for
+metadata, and Snacks/WezTerm for image rendering. Hovering fetches the URL and its
+preview image; metadata is cached in memory for an hour, failures for a minute.
+Private or fetch-blocked pages show an unavailable message. Reference-style
+Markdown link labels are not currently resolved.
+
+Offline checks: `nvim --headless -u NONE -l tests/link_preview.lua` (requires
+installed HTML and Markdown Tree-sitter parsers). Actual image rendering requires
+a graphics-capable terminal.
