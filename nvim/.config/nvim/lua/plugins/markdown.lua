@@ -18,6 +18,7 @@ local function markdown_highlights()
 end
 
 return {
+  { "bullets-vim/bullets.vim" },
   {
     "MeanderingProgrammer/render-markdown.nvim",
     init = function()
