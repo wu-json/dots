@@ -80,13 +80,9 @@ function M.youtube(url)
 end
 
 function M.parse(html, url)
-  local _, head_end = html:find("</[Hh][Ee][Aa][Dd]%s*>")
-  if head_end then
-    html = html:sub(1, head_end)
-  end
   local parser = vim.treesitter.get_string_parser(html, "html")
   local root = parser:parse()[1]:root()
-  local query = vim.treesitter.query.parse("html", "[(start_tag) (self_closing_tag)] @tag")
+  local query = vim.treesitter.query.parse("html", "[(start_tag) (self_closing_tag) (end_tag)] @tag")
   local meta, title, base = {}, nil, url
   local has_base = false
   for _, node in query:iter_captures(root, html) do
@@ -110,7 +106,11 @@ function M.parse(html, url)
         end
       end
     end
-    if tag == "meta" then
+    if node:type() == "end_tag" then
+      if tag == "head" then
+        break
+      end
+    elseif tag == "meta" then
       local key = (attrs.property or attrs.name or ""):lower()
       attrs.content = attrs.content and vim.trim(attrs.content)
       if attrs.content and attrs.content ~= "" then

@@ -27,6 +27,22 @@ data = metadata.parse(
   "https://example.org"
 )
 assert(data.title == "Head only" and data.image == nil, "metadata parsing must stop at the end of the head")
+for _, literal in ipairs({
+  [[<script>const closing = "</head>";</script>]],
+  [[<!-- </head><meta property="og:image" content="bad.jpg"> -->]],
+  [[<style>body::after { content: "</head>"; }</style>]],
+  [[<meta name="description" content="The </head> tag">]],
+}) do
+  data = metadata.parse(
+    "<html><head>"
+      .. literal
+      .. '<title>Actual title</title><meta property="og:image" content="/cover.jpg">'
+      .. '</HEAD><body><meta property="twitter:image" content="/body.jpg"></body></html>',
+    "https://example.org"
+  )
+  assert(data.title == "Actual title", "literal closing head tag hid the title: " .. literal)
+  assert(data.image == "https://example.org/cover.jpg", "literal closing head tag hid the image: " .. literal)
+end
 assert(metadata.decode("&#65;&#x42;&quot;") == 'AB"')
 assert(
   metadata.absolute("https://example.org/a/page", "//cdn.example.org/image.jpg") == "https://cdn.example.org/image.jpg"

@@ -46,3 +46,24 @@ buffer({ "```lua", 'local url = "https://example.org/code"', "```" }, 2, 20)
 assert(preview.url_at_cursor() == nil)
 buffer({ "[a label", "with a newline](https://example.org/multiline)" }, 1, 3)
 assert(preview.url_at_cursor() == "https://example.org/multiline")
+
+for _, delimiter in ipairs({ "*", "**", "***", "_", "__", "~~" }) do
+  local url = "https://example.org/article"
+  local line = delimiter .. url .. delimiter
+  for col = #delimiter, #delimiter + #url - 1 do
+    buffer({ line }, 1, col)
+    assert(preview.url_at_cursor() == url, line .. " at column " .. col)
+  end
+  buffer({ line }, 1, #delimiter + #url)
+  assert(preview.url_at_cursor() == nil, "closing formatting delimiter must not be part of the URL")
+end
+for _, url in ipairs({ "https://example.org/a_b_", "https://example.org/a*", "https://example.org/a~" }) do
+  buffer({ url }, 1, 10)
+  assert(preview.url_at_cursor() == url, "literal URL punctuation must be preserved: " .. url)
+end
+buffer({ "**https://example.org/article**after" }, 1, 10)
+assert(preview.url_at_cursor() == "https://example.org/article")
+buffer({ "**https://example.org/article**after" }, 1, 31)
+assert(preview.url_at_cursor() == nil, "text after a formatted URL must not trigger a preview")
+buffer({ "**a multiline", "https://example.org/article**" }, 2, 10)
+assert(preview.url_at_cursor() == "https://example.org/article")

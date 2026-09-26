@@ -19,7 +19,7 @@ function M.at_cursor()
     block = block:parent()
   end
   local ok, node = pcall(vim.treesitter.get_node, { ignore_injections = false })
-  local url
+  local url, inline
   while ok and node do
     local kind = node:type()
     if kind == "image" or kind == "code_span" or kind == "fenced_code_block" or kind == "indented_code_block" then
@@ -33,6 +33,8 @@ function M.at_cursor()
       end
     elseif kind == "uri_autolink" then
       url = vim.treesitter.get_node_text(node, 0):gsub("^<", ""):gsub(">$", "")
+    elseif kind == "inline" then
+      inline = node
     end
     node = node:parent()
   end
@@ -40,6 +42,14 @@ function M.at_cursor()
     return http(metadata.decode((url:gsub("\\([%p])", "%1"))))
   end
   local line, col = vim.api.nvim_get_current_line(), vim.api.nvim_win_get_cursor(0)[2] + 1
+  if inline then
+    local row = vim.api.nvim_win_get_cursor(0)[1] - 1
+    local query = vim.treesitter.query.parse("markdown_inline", "(emphasis_delimiter) @delimiter")
+    for _, delimiter in query:iter_captures(inline, 0, row, row + 1) do
+      local _, first, _, last = delimiter:range()
+      line = line:sub(1, first) .. string.rep(" ", last - first) .. line:sub(last + 1)
+    end
+  end
   local start = 1
   while true do
     local first, last = line:find("https?://[^%s<>\"']+", start)
