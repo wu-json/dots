@@ -77,6 +77,12 @@ end
 
 -- Reuse Neovim's HTML parser instead of matching HTML with regular expressions.
 function M.parse(html, url)
+  -- Metadata lives in the head. Avoid parsing a large application/document body
+  -- on Neovim's UI thread just to extract a handful of tags.
+  local _, head_end = html:find("</[Hh][Ee][Aa][Dd]%s*>")
+  if head_end then
+    html = html:sub(1, head_end)
+  end
   local parser = vim.treesitter.get_string_parser(html, "html")
   local root = parser:parse()[1]:root()
   local query = vim.treesitter.query.parse("html", "[(start_tag) (self_closing_tag)] @tag")

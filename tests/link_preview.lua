@@ -26,6 +26,11 @@ data = metadata.parse(
 )
 assert(data.image == "https://cdn.example.org/assets/cover.jpg")
 assert(metadata.parse("<title>A &amp; B</title>", "https://example.org").title == "A & B")
+data = metadata.parse(
+  '<html><head><title>Head only</title></head><body><meta property="og:image" content="body.jpg"></body></html>',
+  "https://example.org"
+)
+assert(data.title == "Head only" and data.image == nil, "metadata parsing must stop at the end of the head")
 assert(metadata.decode("&#65;&#x42;&quot;") == 'AB"')
 assert(
   metadata.absolute("https://example.org/a/page", "//cdn.example.org/image.jpg") == "https://cdn.example.org/image.jpg"
@@ -129,6 +134,7 @@ assert(
 preview.close()
 -- Verify the image popup sizes once, cleans up its placement, and ignores late updates.
 local update, image_closed, image_shown = nil, 0, 0
+local placement_options
 local image_win = {
   buf = 123,
   opts = {},
@@ -140,7 +146,8 @@ local image_win = {
 }
 package.loaded.snacks = {
   win = setmetatable({
-    resolve = function()
+    resolve = function(_, _, opts)
+      assert(opts.relative == "editor" and opts.anchor == "NW", "image float must use stable screen coordinates")
       return {}
     end,
   }, {
@@ -157,11 +164,12 @@ package.loaded.snacks = {
     },
     placement = {
       new = function(_, src, opts)
+        placement_options = opts
         assert(src == "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg")
         update = opts.on_update_pre
         return {
           state = function()
-            return { loc = { width = 40, height = 15 } }
+            return { loc = { width = math.min(40, opts.max_width), height = math.min(15, opts.max_height) } }
           end,
           close = function()
             image_closed = image_closed + 1
@@ -182,5 +190,24 @@ assert(image_shown == 1 and image_win.opts.width == 40 and image_win.opts.height
 preview.close()
 update()
 assert(image_closed == 1 and image_shown == 1)
+-- A narrow split must contain both the border and the image, even near its edge.
+vim.cmd("vsplit")
+buffer({ "https://youtu.be/dQw4w9WgXcQ" }, 1, 24)
+vim.cmd("redraw")
+update = nil
+preview.schedule()
+assert(vim.wait(300, function()
+  return update ~= nil
+end))
+update()
+local source_pos = vim.api.nvim_win_get_position(0)
+local source_width = vim.api.nvim_win_get_width(0)
+local source_height = vim.api.nvim_win_get_height(0)
+assert(placement_options.max_width <= source_width - 2)
+assert(image_win.opts.col >= source_pos[2])
+assert(image_win.opts.col + image_win.opts.width + 2 <= source_pos[2] + source_width)
+assert(image_win.opts.row >= source_pos[1])
+assert(image_win.opts.row + image_win.opts.height + 2 <= source_pos[1] + source_height)
+preview.close()
 print("Link preview detection, lifecycle, and cache tests passed")
 vim.cmd("qa!")

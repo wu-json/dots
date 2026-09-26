@@ -1,6 +1,6 @@
 local M = {}
 local metadata = require("config.link-preview.metadata")
-local options = { delay = 500, ttl = 3600, max_entries = 128, max_width = 60, max_height = 20 }
+local options = { delay = 200, ttl = 3600, max_entries = 128, max_width = 60, max_height = 20 }
 local cache, pending = {}, {}
 local generation = 0
 local hover
@@ -13,7 +13,8 @@ end
 function M.url_at_cursor()
   local parsed, parser = pcall(vim.treesitter.get_parser, 0)
   if parsed and parser then
-    parser:parse(true)
+    local row = vim.api.nvim_win_get_cursor(0)[1]
+    parser:parse({ row - 1, row })
   end
   local block_ok, block = pcall(vim.treesitter.get_node, { ignore_injections = true })
   while block_ok and block do
@@ -88,6 +89,7 @@ local function resolve(url, callback)
     "--show-error",
     "--fail",
     "--location",
+    "--compressed",
     "--max-redirs",
     "5",
     "--max-time",
@@ -159,7 +161,27 @@ local function show(data)
     })
     return
   end
+  -- Cursor-relative floats can be shifted by Neovim at the screen edge after
+  -- Snacks has positioned the terminal image. Use explicit, bounded coordinates.
+  local source = vim.api.nvim_get_current_win()
+  local origin = vim.api.nvim_win_get_position(source)
+  local cursor = vim.api.nvim_win_get_cursor(source)
+  local screen = vim.fn.screenpos(source, cursor[1], cursor[2] + 1)
+  local top, left = origin[1], origin[2]
+  local bottom = math.min(top + vim.api.nvim_win_get_height(source), vim.o.lines - vim.o.cmdheight)
+  local right = math.min(left + vim.api.nvim_win_get_width(source), vim.o.columns)
+  local row = math.max(top, math.min(bottom - 1, screen.row - 1))
+  local col = math.max(left, screen.col - 1)
+  local below, above = bottom - row - 1, row - top
+  local available = math.max(below, above)
+  if right - left < 3 or available < 3 then
+    hover = nil
+    return
+  end
   local win = snacks.win(snacks.win.resolve(snacks.image.config.doc, "snacks_image", {
+    relative = "editor",
+    anchor = "NW",
+    border = "rounded",
     show = false,
     enter = false,
     focusable = false,
@@ -170,13 +192,15 @@ local function show(data)
   local updated = false
   current.img = snacks.image.placement.new(win.buf, data.image, {
     inline = false,
-    max_width = options.max_width,
-    max_height = options.max_height,
+    max_width = math.min(options.max_width, right - left - 2),
+    max_height = math.min(options.max_height, available - 2),
     on_update_pre = function()
       if hover == current and current.img and not updated then
         updated = true
         local loc = current.img:state().loc
         win.opts.width, win.opts.height = loc.width, loc.height
+        win.opts.col = math.max(left, math.min(col + 1, right - loc.width - 2))
+        win.opts.row = below >= loc.height + 2 and row + 1 or row - loc.height - 2
         win:show()
       end
     end,
@@ -222,10 +246,13 @@ function M.setup(opts)
     vim.notify("Link previews require curl", vim.log.levels.WARN)
     return
   end
-  vim.api.nvim_create_autocmd({ "CursorMoved", "BufEnter", "WinEnter", "ModeChanged", "TextChanged" }, {
-    group = group,
-    callback = M.schedule,
-  })
+  vim.api.nvim_create_autocmd(
+    { "CursorMoved", "BufEnter", "WinEnter", "ModeChanged", "TextChanged", "VimResized", "WinResized" },
+    {
+      group = group,
+      callback = M.schedule,
+    }
+  )
   vim.api.nvim_create_autocmd({ "BufLeave", "WinLeave", "VimLeavePre" }, {
     group = group,
     callback = M.close,
