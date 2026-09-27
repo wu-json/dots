@@ -1,13 +1,10 @@
 return {
-  -- {
-  --   "wu-json/chainsaw.nvim",
-  -- },
   {
-    "wu-json/yuki.nvim",
+    "wu-json/perfect-blue.nvim",
   },
   {
     "LazyVim/LazyVim",
-    opts = { colorscheme = "yuki" },
+    opts = { colorscheme = "perfect-blue" },
   },
   {
     "j-hui/fidget.nvim",
