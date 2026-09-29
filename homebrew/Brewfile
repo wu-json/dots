@@ -37,14 +37,16 @@ brew "yt-dlp"
 brew "zoxide"
 
 if OS.mac?
+  tap "abue-ammar/tinycast"
+
   cask "audacity"
   cask "claude-code@latest"
   cask "codex"
   cask "handy"
   cask "orbstack"
-  cask "raycast"
   cask "swiftbar"
   cask "tamnd/tap/kage"
+  cask "tinycast"
   cask "vlc"
   cask "wezterm@nightly"
 end
