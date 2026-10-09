@@ -242,8 +242,9 @@ bootstrap_tinycast() {
     fi
   fi
   run 'Apply Tinycast launcher shortcut' defaults write com.tinycast.app hotkey.togglePalette -string "$(jq -c .launcher "$shortcuts")"
-  run 'Apply Tinycast app shortcut index' defaults write com.tinycast.app boundAppBundleIDs -array "${app_ids[@]}"
-  for bundle_id in "${app_ids[@]}"; do
+  # Bash 3.2 treats empty arrays as unset under nounset; expand only populated arrays.
+  run 'Apply Tinycast app shortcut index' defaults write com.tinycast.app boundAppBundleIDs -array ${app_ids[@]+"${app_ids[@]}"}
+  for bundle_id in ${app_ids[@]+"${app_ids[@]}"}; do
     run "Apply $bundle_id shortcut" defaults write com.tinycast.app "hotkey.app.$bundle_id" -string \
       "$(jq -c --arg id "$bundle_id" '.apps[$id]' "$shortcuts")"
   done
