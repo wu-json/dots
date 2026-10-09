@@ -40,7 +40,7 @@ def main():
         repo = base / 'repo with spaces'
         home = base / 'home'
         home.mkdir()
-        for directory in ('scripts', 'homebrew', 'fish', 'gh-dash', 'nvim', 'pi', 'wezterm', 'yazi', 'swiftbar'):
+        for directory in ('scripts', 'homebrew', 'fish', 'gh-dash', 'nvim', 'pi', 'wezterm', 'yazi', 'swiftbar', 'tinycast'):
             shutil.copytree(ROOT / directory, repo / directory,
                             ignore=shutil.ignore_patterns('node_modules', '__pycache__'))
         shutil.copy2(ROOT / 'justfile', repo / 'justfile')
@@ -102,7 +102,9 @@ def main():
             'const require = createRequire(process.argv[1]); '
             'await import(require.resolve("typebox")); console.log("Pi dependency import passed")',
             str(pi / 'package.json'))
-        for source in (repo / 'fish/.config/fish/config.fish', pi / 'package.json',
+        for source in (repo / 'fish/.config/fish/config.fish',
+                       repo / 'tinycast/.config/tinycast/settings.json',
+                       repo / 'tinycast/.config/tinycast/shortcuts.json', pi / 'package.json',
                        pi / 'node_modules/typebox/package.json'):
             package = source.relative_to(repo).parts[0]
             target = home / source.relative_to(repo / package)

@@ -96,7 +96,7 @@ link_configs() {
     ok "Configs already linked ($*)"
   fi
 }
-bootstrap_stow() { section 'Dotfiles'; link_configs fish gh-dash nvim pi wezterm yazi; }
+bootstrap_stow() { section 'Dotfiles'; link_configs fish gh-dash nvim pi tinycast wezterm yazi; }
 bootstrap_gh() {
   section 'GitHub extensions'
   require_tool gh gh
@@ -216,6 +216,43 @@ bootstrap_insomnia() {
     ok 'SwiftBar already running'
   fi
 }
+bootstrap_tinycast() {
+  section 'Tinycast'
+  if [[ "$(uname -s)" != Darwin ]]; then warn 'Tinycast skipped: macOS only'; return; fi
+  local restart=0 shortcuts bundle_id
+  local app_ids=()
+  need defaults 'Run this recipe on macOS.'
+  require_tool jq jq
+  link_configs tinycast
+  shortcuts="$ROOT/tinycast/.config/tinycast/shortcuts.json"
+  jq -e '.launcher | type == "object"' "$shortcuts" >/dev/null
+  jq -e '.apps | type == "object"' "$shortcuts" >/dev/null
+  while IFS= read -r bundle_id; do app_ids+=("$bundle_id"); done < <(jq -r '.apps | keys[]' "$shortcuts")
+  if pgrep -x Tinycast >/dev/null 2>&1; then
+    run 'Quit Tinycast to apply settings' osascript -e 'tell application "Tinycast" to quit'
+    restart=1
+    # Wait for shutdown so a final preference save cannot overwrite the config.
+    local attempt
+    for ((attempt = 0; attempt < 50; attempt++)); do
+      if ! pgrep -x Tinycast >/dev/null 2>&1; then break; fi
+      sleep 0.1
+    done
+    if pgrep -x Tinycast >/dev/null 2>&1; then
+      fail 'Tinycast is still running. Quit it, then rerun just bootstrap tinycast.'
+    fi
+  fi
+  run 'Apply Tinycast launcher shortcut' defaults write com.tinycast.app hotkey.togglePalette -string "$(jq -c .launcher "$shortcuts")"
+  # Bash 3.2 treats empty arrays as unset under nounset; expand only populated arrays.
+  run 'Apply Tinycast app shortcut index' defaults write com.tinycast.app boundAppBundleIDs -array ${app_ids[@]+"${app_ids[@]}"}
+  for bundle_id in ${app_ids[@]+"${app_ids[@]}"}; do
+    run "Apply $bundle_id shortcut" defaults write com.tinycast.app "hotkey.app.$bundle_id" -string \
+      "$(jq -c --arg id "$bundle_id" '.apps[$id]' "$shortcuts")"
+  done
+  if [[ "$(defaults read com.tinycast.app settingsFileEnabled 2>/dev/null || true)" != 1 ]]; then
+    warn 'Enable Settings → Backup → Settings File in Tinycast and choose Import to load the linked settings.json'
+  fi
+  if [[ "$restart" == 1 ]]; then run 'Restart Tinycast' open -a Tinycast; fi
+}
 bootstrap_obscura() {
   section 'Obscura'
   local version=0.1.8 os arch asset tmp
@@ -255,10 +292,11 @@ bootstrap_tailscale() {
 require_tool just just
 
 case "${1:-all}" in
-  all) bootstrap_brew; bootstrap_stow; bootstrap_gh; bootstrap_pi; bootstrap_fish; bootstrap_insomnia ;;
+  all) bootstrap_brew; bootstrap_stow; bootstrap_gh; bootstrap_pi; bootstrap_fish; bootstrap_insomnia; bootstrap_tinycast ;;
   brew) bootstrap_brew ;; stow) bootstrap_stow ;; gh) bootstrap_gh ;; pi) bootstrap_pi ;;
   fish) bootstrap_fish ;; insomnia) bootstrap_insomnia ;; obscura) bootstrap_obscura ;; tailscale) bootstrap_tailscale ;;
-  *) fail "Unknown setup target: $1. Use all, brew, stow, gh, pi, fish, insomnia, obscura, or tailscale." ;;
+  tinycast) bootstrap_tinycast ;;
+  *) fail "Unknown setup target: $1. Use all, brew, stow, gh, pi, fish, insomnia, tinycast, obscura, or tailscale." ;;
 esac
 printf '\n'
 if [[ "$skipped" -gt 0 ]]; then

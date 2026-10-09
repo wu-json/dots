@@ -1,0 +1,24 @@
+{
+  "launcher": {
+    "combo": {
+      "_0": { "carbonKeyCode": 49, "carbonModifiers": 256 }
+    }
+  },
+  "apps": {
+    "com.github.wez.wezterm": {
+      "combo": {
+        "_0": { "carbonKeyCode": 13, "carbonModifiers": 2048 }
+      }
+    },
+    "com.linear": {
+      "combo": {
+        "_0": { "carbonKeyCode": 37, "carbonModifiers": 2048 }
+      }
+    },
+    "net.imput.helium": {
+      "combo": {
+        "_0": { "carbonKeyCode": 4, "carbonModifiers": 2048 }
+      }
+    }
+  }
+}
