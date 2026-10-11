@@ -176,46 +176,6 @@ bootstrap_fish() {
     ok 'Login shell changed to Fish (takes effect on next login)'
   fi
 }
-bootstrap_insomnia() {
-  section 'SwiftBar / Insomnia'
-  if [[ "$(uname -s)" != Darwin ]]; then warn 'SwiftBar skipped: macOS only'; return; fi
-  ensure_brew
-  if ! brew list --cask swiftbar >/dev/null 2>&1; then
-    run 'Install SwiftBar' brew install --cask swiftbar
-  else
-    ok 'SwiftBar already installed'
-  fi
-  link_configs swiftbar
-  local plugins domain plist reload=0
-  plugins="$HOME/.config/swiftbar/plugins"
-  domain="gui/$(id -u)"
-  plist="$HOME/Library/LaunchAgents/com.wu-json.swiftbar-login.plist"
-  need defaults 'Run this recipe on macOS.'
-  need launchctl 'Run this recipe in a macOS desktop session.'
-  if [[ "$(defaults read com.ameba.SwiftBar PluginDirectory 2>/dev/null || true)" != "$plugins" ]]; then
-    run 'Set SwiftBar plugin directory' defaults write com.ameba.SwiftBar PluginDirectory -string "$plugins"
-    reload=1
-  else
-    ok 'SwiftBar plugin directory already configured'
-  fi
-  if ! launchctl print "$domain" >/dev/null 2>&1; then
-    warn 'SwiftBar launch skipped: no GUI session; rerun just bootstrap insomnia from the desktop'
-    return
-  fi
-  if ! launchctl print "$domain/com.wu-json.swiftbar-login" >/dev/null 2>&1; then
-    run 'Register SwiftBar login agent' launchctl bootstrap "$domain" "$plist"
-  else
-    ok 'SwiftBar login agent already registered'
-  fi
-  if [[ "$reload" == 1 ]] && pgrep -x SwiftBar >/dev/null 2>&1; then
-    run 'Quit SwiftBar to apply its plugin directory' osascript -e 'tell application "SwiftBar" to quit'
-  fi
-  if ! pgrep -x SwiftBar >/dev/null 2>&1; then
-    run 'Start SwiftBar' open -a SwiftBar
-  else
-    ok 'SwiftBar already running'
-  fi
-}
 bootstrap_tinycast() {
   section 'Tinycast'
   if [[ "$(uname -s)" != Darwin ]]; then warn 'Tinycast skipped: macOS only'; return; fi
@@ -292,11 +252,11 @@ bootstrap_tailscale() {
 require_tool just just
 
 case "${1:-all}" in
-  all) bootstrap_brew; bootstrap_stow; bootstrap_gh; bootstrap_pi; bootstrap_fish; bootstrap_insomnia; bootstrap_tinycast ;;
+  all) bootstrap_brew; bootstrap_stow; bootstrap_gh; bootstrap_pi; bootstrap_fish; bootstrap_tinycast ;;
   brew) bootstrap_brew ;; stow) bootstrap_stow ;; gh) bootstrap_gh ;; pi) bootstrap_pi ;;
-  fish) bootstrap_fish ;; insomnia) bootstrap_insomnia ;; obscura) bootstrap_obscura ;; tailscale) bootstrap_tailscale ;;
+  fish) bootstrap_fish ;; obscura) bootstrap_obscura ;; tailscale) bootstrap_tailscale ;;
   tinycast) bootstrap_tinycast ;;
-  *) fail "Unknown setup target: $1. Use all, brew, stow, gh, pi, fish, insomnia, tinycast, obscura, or tailscale." ;;
+  *) fail "Unknown setup target: $1. Use all, brew, stow, gh, pi, fish, tinycast, obscura, or tailscale." ;;
 esac
 printf '\n'
 if [[ "$skipped" -gt 0 ]]; then
