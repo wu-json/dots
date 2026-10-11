@@ -14,7 +14,6 @@ This is where I tweak config files till 4am like a goblin. It's pretty cozy in h
 - **[pi](https://github.com/badlogic/pi-mono)**
 - **[wezterm](https://wezterm.org/index.html)**
 - **[stow](https://www.gnu.org/software/stow/)**
-- **[SwiftBar](https://github.com/swiftbar/SwiftBar)**
 - **[Tinycast](https://github.com/abue-ammar/tinycast)**
 - **[yazi](https://yazi-rs.github.io/)**
 

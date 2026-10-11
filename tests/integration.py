@@ -40,7 +40,7 @@ def main():
         repo = base / 'repo with spaces'
         home = base / 'home'
         home.mkdir()
-        for directory in ('scripts', 'homebrew', 'fish', 'gh-dash', 'nvim', 'pi', 'wezterm', 'yazi', 'swiftbar', 'tinycast'):
+        for directory in ('scripts', 'homebrew', 'fish', 'gh-dash', 'nvim', 'pi', 'wezterm', 'yazi', 'tinycast'):
             shutil.copytree(ROOT / directory, repo / directory,
                             ignore=shutil.ignore_patterns('node_modules', '__pycache__'))
         shutil.copy2(ROOT / 'justfile', repo / 'justfile')

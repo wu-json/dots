@@ -44,7 +44,6 @@ if OS.mac?
   cask "codex"
   cask "handy"
   cask "orbstack"
-  cask "swiftbar"
   cask "tamnd/tap/kage"
   cask "tinycast"
   cask "vlc"
