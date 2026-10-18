@@ -2,6 +2,20 @@ local wezterm = require("wezterm")
 
 local module = {}
 
+-- Prefer the hostname the remote shell reports via OSC 7, then the ssh_domains address.
+local function remote_host(window, pane, domain)
+	local cwd = pane:get_current_working_dir()
+	if cwd and cwd.host and cwd.host ~= "" then
+		return (cwd.host:gsub("%..*$", ""))
+	end
+	for _, d in ipairs(window:effective_config().ssh_domains or {}) do
+		if d.name == domain and d.remote_address then
+			return (d.remote_address:gsub(":%d+$", ""))
+		end
+	end
+	return domain
+end
+
 wezterm.on("update-status", function(window)
 	local tab = window:active_tab()
 	local zoomed = false
@@ -14,13 +28,28 @@ wezterm.on("update-status", function(window)
 		end
 	end
 
-	window:set_right_status(zoomed and wezterm.format({
-		{ Foreground = { AnsiColor = "Blue" } },
-		{ Text = " " .. wezterm.nerdfonts.md_arrow_expand_all .. " " },
-	}) or "")
+	-- Panes attached via `wezterm connect <domain>` report that domain instead of "local".
+	local pane = window:active_pane()
+	local domain = pane and pane:get_domain_name() or "local"
+	local remote = domain ~= "local"
+	local host = remote and remote_host(window, pane, domain)
+
+	local status = {}
+	if zoomed then
+		table.insert(status, { Foreground = { AnsiColor = "Blue" } })
+		table.insert(status, { Text = " " .. wezterm.nerdfonts.md_arrow_expand_all .. " " })
+	end
+	if remote then
+		-- perfect-blue.nvim's `night` text on its `blue` background.
+		table.insert(status, { Background = { Color = "#4993ba" } })
+		table.insert(status, { Foreground = { Color = "#080b16" } })
+		table.insert(status, { Text = " " .. wezterm.nerdfonts.md_server .. " " .. host .. " " })
+	end
+	window:set_right_status(wezterm.format(status))
 
 	local overrides = window:get_config_overrides() or {}
-	local hide_tab_bar = not zoomed
+	-- Keep the tab bar visible for remote windows so the banner always shows.
+	local hide_tab_bar = not zoomed and not remote
 	if overrides.hide_tab_bar_if_only_one_tab ~= hide_tab_bar then
 		overrides.hide_tab_bar_if_only_one_tab = hide_tab_bar
 		window:set_config_overrides(overrides)
