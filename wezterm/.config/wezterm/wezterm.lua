@@ -14,4 +14,10 @@ keymaps.apply_to_config(config)
 shell.apply_to_config(config)
 visuals.apply_to_config(config)
 
+-- Machine-specific settings (ssh_domains, etc.) live in the untracked wezterm.local.lua.
+local local_config = wezterm.config_dir .. "/wezterm.local.lua"
+if io.open(local_config) then
+	dofile(local_config)(config)
+end
+
 return config
