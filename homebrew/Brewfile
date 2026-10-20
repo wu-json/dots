@@ -1,3 +1,4 @@
+brew "agent-browser"
 brew "aqua"
 brew "oven-sh/bun/bun"
 brew "cloudflared"
