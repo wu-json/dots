@@ -11,6 +11,24 @@ return {
   },
   {
     "folke/snacks.nvim",
+    init = function()
+      -- The dashboard window is nowrap, so when a sidebar (e.g. neo-tree)
+      -- squeezes it, vim scrolls it horizontally to keep the cursor visible.
+      -- Snacks re-renders on resize but never resets the scroll, leaving the
+      -- dashboard shifted left once the sidebar closes.
+      vim.api.nvim_create_autocmd("User", {
+        pattern = "SnacksDashboardUpdatePost",
+        callback = function()
+          for _, win in ipairs(vim.api.nvim_list_wins()) do
+            if vim.bo[vim.api.nvim_win_get_buf(win)].filetype == "snacks_dashboard" then
+              vim.api.nvim_win_call(win, function()
+                vim.fn.winrestview({ leftcol = 0 })
+              end)
+            end
+          end
+        end,
+      })
+    end,
     keys = function(_, keys)
       for _, key in ipairs(keys) do
         if key[1] == "<leader>n" then
