@@ -91,6 +91,16 @@ local keymaps = {
 		action = wezterm.action.MoveTabRelative(1),
 	},
 	{
+		key = "LeftArrow",
+		mods = "CMD|ALT",
+		action = act.RotatePanes("CounterClockwise"),
+	},
+	{
+		key = "RightArrow",
+		mods = "CMD|ALT",
+		action = act.RotatePanes("Clockwise"),
+	},
+	{
 		key = "z",
 		mods = "CMD",
 		action = act.TogglePaneZoomState,
