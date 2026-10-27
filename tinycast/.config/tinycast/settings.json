@@ -58,6 +58,11 @@
         "alias": null,
         "showInLauncher": false
       },
+      "com.linear": {
+        "shortcut": "option+l",
+        "alias": null,
+        "showInLauncher": true
+      },
       "net.imput.helium": {
         "shortcut": "option+h",
         "alias": null,
