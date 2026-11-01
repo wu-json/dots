@@ -83,6 +83,9 @@ def main():
                        '--file=homebrew/Brewfile', show_output=False).splitlines()
         for tap in sorted({name.rsplit('/', 1)[0] for name in formulae if '/' in name}):
             run('brew', 'tap', tap)
+        tapped = [name for name in formulae if name.count('/') == 2]
+        if tapped:
+            run('brew', 'trust', '--formula', *tapped)
         run('brew', 'info', '--formula', '--json=v2', *formulae, show_output=False)
         print('✓ Brewfile formula names resolve in Homebrew.', flush=True)
 

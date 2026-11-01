@@ -71,6 +71,14 @@ bootstrap_brew() {
   if [[ "$(uname -s)" == Darwin ]]; then
     run 'Trust Tinycast cask' brew trust --cask abue-ammar/tinycast/tinycast
   fi
+  # Homebrew refuses to load formulae from untrusted third-party taps.
+  local formula tapped=()
+  while IFS= read -r formula; do
+    if [[ "$formula" == */*/* ]]; then tapped+=("$formula"); fi
+  done < <(brew bundle list --formula --file="$ROOT/homebrew/Brewfile")
+  if ((${#tapped[@]})); then
+    run 'Trust third-party Brewfile formulae' brew trust --formula "${tapped[@]}"
+  fi
   if brew bundle check --no-upgrade --file="$ROOT/homebrew/Brewfile" >/dev/null 2>&1; then
     ok 'All Brewfile packages already installed'
   else
