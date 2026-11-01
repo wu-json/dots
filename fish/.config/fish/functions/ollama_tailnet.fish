@@ -1,10 +1,25 @@
 # Serves the host's Ollama at https://ollama.<tailnet>.ts.net. A Tailscale
 # container joins the tailnet as its own "ollama" node and proxies to the host.
 # Its login is saved in the ts-ollama-state volume, so you only log in once.
-function ollama_tailnet --description "Serve Ollama on the tailnet as ollama.<tailnet>.ts.net — ctrl-c to stop"
+#
+#   ollama_tailnet          run in the foreground, ctrl-c to stop
+#   ollama_tailnet up -d    run in the background, restarting with Docker
+#   ollama_tailnet down     stop
+#   ollama_tailnet status
+function ollama_tailnet --description "Serve Ollama on the tailnet as ollama.<tailnet>.ts.net"
+    set -l detach false
+    set -l args
+    for arg in $argv
+        switch $arg
+            case -d --detach
+                set detach true
+            case '*'
+                set -a args $arg
+        end
+    end
     set -l cmd up
-    if test (count $argv) -gt 0
-        set cmd $argv[1]
+    if set -q args[1]
+        set cmd $args[1]
     end
 
     set -l ctr ts-ollama
@@ -58,14 +73,14 @@ function ollama_tailnet --description "Serve Ollama on the tailnet as ollama.<ta
             end
 
             # The Tailscale container applies this on startup:
-            # HTTPS on 443 -> Caddy on :8080 -> host Ollama.
+            # HTTPS on 443 -> Caddy -> host Ollama.
             set -l cfgdir ~/.config/ollama-tailnet
             mkdir -p $cfgdir
             echo '{
   "TCP": { "443": { "HTTPS": true } },
   "Web": {
     "${TS_CERT_DOMAIN}:443": {
-      "Handlers": { "/": { "Proxy": "http://127.0.0.1:8080" } }
+      "Handlers": { "/": { "Proxy": "http://ts-ollama-proxy:8080" } }
     }
   }
 }' >$cfgdir/serve.json
@@ -84,12 +99,35 @@ function ollama_tailnet --description "Serve Ollama on the tailnet as ollama.<ta
             # Safe to replace: the node's identity lives in the volume.
             docker rm -f $ctr $ctr-proxy >/dev/null 2>&1
 
+            # A shared network (rather than one container's network) lets
+            # each container restart on its own in background mode.
+            if not docker network inspect $ctr >/dev/null 2>&1
+                docker network create $ctr >/dev/null
+                or return
+            end
+
+            set -l lifecycle --rm
+            if test $detach = true
+                set lifecycle --restart unless-stopped
+            end
+
+            # Ollama bound to 127.0.0.1 rejects requests whose Host header isn't
+            # localhost-like, and Tailscale Serve forwards the original
+            # ollama.<tailnet>.ts.net Host. Caddy rewrites it.
+            set -l proxy (docker run -d $lifecycle --name $ctr-proxy \
+                --network $ctr \
+                $caddy_image \
+                caddy reverse-proxy --from :8080 \
+                    --to host.docker.internal:11434 --change-host-header)
+            or return
+
             set -l authkey_args
             if set -q TS_AUTHKEY
                 set authkey_args -e "TS_AUTHKEY=$TS_AUTHKEY"
             end
 
-            set -l id (docker run -d --rm --name $ctr \
+            set -l id (docker run -d $lifecycle --name $ctr \
+                --network $ctr \
                 -e TS_HOSTNAME=ollama \
                 -e TS_STATE_DIR=/var/lib/tailscale \
                 -e TS_SERVE_CONFIG=/config/serve.json \
@@ -97,20 +135,18 @@ function ollama_tailnet --description "Serve Ollama on the tailnet as ollama.<ta
                 -v ts-ollama-state:/var/lib/tailscale \
                 -v $cfgdir:/config \
                 $image)
-            or return
-
-            # Ollama bound to 127.0.0.1 rejects requests whose Host header isn't
-            # localhost-like, and Tailscale Serve forwards the original
-            # ollama.<tailnet>.ts.net Host. Caddy rewrites it. It shares the
-            # Tailscale container's network, so Serve reaches it on 127.0.0.1.
-            set -l proxy (docker run -d --rm --name $ctr-proxy \
-                --network container:$id \
-                $caddy_image \
-                caddy reverse-proxy --from :8080 \
-                    --to host.docker.internal:11434 --change-host-header)
             or begin
-                docker rm -f $id >/dev/null 2>&1
+                docker rm -f $proxy >/dev/null 2>&1
                 return 1
+            end
+
+            if test $detach = true
+                ollama_tailnet __wait $id $proxy true
+                or return
+                if command -q orbctl; and orbctl config get app.start_at_login 2>/dev/null | string match -q false
+                    __ollama_tailnet_say "OrbStack doesn't start at login, so this won't come back after a reboot. To fix: orbctl config set app.start_at_login true"
+                end
+                return
             end
 
             # Ctrl-c goes to the foreground process, not to fish, so a fish
@@ -118,10 +154,10 @@ function ollama_tailnet --description "Serve Ollama on the tailnet as ollama.<ta
             # the foreground from the start and forwards ctrl-c to the
             # container, which exits and is removed by --rm. The startup
             # checks run in a separate background process meanwhile.
-            # Everything uses the container ID, not the name, so a second
-            # `up` in another terminal can't be removed by this one's cleanup.
-            fish --no-config -c 'source $argv[1]; ollama_tailnet __wait $argv[2]' \
-                (functions --details ollama_tailnet) $id &
+            # Cleanup uses container IDs, not names, so it can't remove
+            # containers started by another `up`.
+            fish --no-config -c 'source $argv[1]; ollama_tailnet __wait $argv[2..]' \
+                (functions --details ollama_tailnet) $id $proxy false &
             set -l waiter $last_pid
             disown $waiter
 
@@ -130,10 +166,12 @@ function ollama_tailnet --description "Serve Ollama on the tailnet as ollama.<ta
             docker rm -f $id $proxy >/dev/null 2>&1
             __ollama_tailnet_say "proxy stopped (ollama still running locally — pkill -x ollama to stop it)"
         case __wait
-            # Internal: startup checks for `up`, given the container ID. On
-            # failure, removing the container ends `up`'s docker attach.
-            set -l id $argv[2]
-            if test -z "$id"
+            # Internal: startup checks for `up`, given the container IDs. On
+            # failure, removing the containers also ends `up`'s docker attach.
+            set -l id $args[2]
+            set -l proxy $args[3]
+            set -l detached $args[4]
+            if test -z "$proxy"
                 __ollama_tailnet_say "__wait is internal to ollama_tailnet up" >&2
                 return 1
             end
@@ -141,7 +179,7 @@ function ollama_tailnet --description "Serve Ollama on the tailnet as ollama.<ta
             function __ollama_tailnet_fail -S -a msg
                 __ollama_tailnet_say $msg >&2
                 docker logs --tail 5 $id 2>&1 | sed 's/^/    /' >&2
-                docker rm -f $id >/dev/null 2>&1
+                docker rm -f $id $proxy >/dev/null 2>&1
             end
 
             set -l state ""
@@ -186,14 +224,21 @@ function ollama_tailnet --description "Serve Ollama on the tailnet as ollama.<ta
 
             # Tailscale renames the node (e.g. ollama-1) if "ollama" is taken.
             set -l dns (string match -rg '"DNSName":\s*"([^"]+?)\.?"' -- $self)[1]
-            __ollama_tailnet_say "serving https://$dns/v1 — ctrl-c to stop"
+            if test "$detached" = true
+                __ollama_tailnet_say "serving https://$dns/v1 in the background — ollama_tailnet down to stop"
+            else
+                __ollama_tailnet_say "serving https://$dns/v1 — ctrl-c to stop"
+            end
         case down
             docker rm -f $ctr $ctr-proxy >/dev/null 2>&1
+            docker network rm $ctr >/dev/null 2>&1
             __ollama_tailnet_say "proxy stopped (ollama still running locally — pkill -x ollama to stop it)"
         case status
-            docker exec $ctr tailscale serve status
+            if not docker exec $ctr tailscale serve status 2>/dev/null
+                __ollama_tailnet_say "not running"
+            end
         case '*'
-            __ollama_tailnet_say "usage: ollama_tailnet [up|down|status]" >&2
+            __ollama_tailnet_say "usage: ollama_tailnet [up [-d]|down|status]" >&2
             return 1
     end
 end
