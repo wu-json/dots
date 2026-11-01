@@ -8,7 +8,6 @@ This is where I tweak config files till 4am like a goblin. It's pretty cozy in h
 
 - **[claude](https://code.claude.com/)**
 - **[fish](https://fishshell.com/)**
-- **[gh-dash](https://www.gh-dash.dev/)**
 - **[homebrew](https://brew.sh/)**
 - **[neovim](https://neovim.io/)**
 - **[pi](https://github.com/badlogic/pi-mono)**

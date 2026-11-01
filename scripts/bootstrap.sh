@@ -104,25 +104,21 @@ link_configs() {
     ok "Configs already linked ($*)"
   fi
 }
-bootstrap_stow() { section 'Dotfiles'; link_configs fish gh-dash nvim pi tinycast wezterm yazi; }
+bootstrap_stow() { section 'Dotfiles'; link_configs fish nvim pi tinycast wezterm yazi; }
 bootstrap_gh() {
   section 'GitHub extensions'
   require_tool gh gh
   require_tool git git
-  link_configs gh-dash
   if ! gh auth status --hostname github.com >/dev/null 2>&1; then
     warn 'GitHub extensions skipped: run gh auth login, then just bootstrap gh'
     return
   fi
-  local extensions extension
-  extensions=$(gh extension list)
-  for extension in dlvhdr/gh-dash github/gh-stack; do
-    if printf '%s\n' "$extensions" | grep -qE "(^|[[:space:]])${extension}([[:space:]]|$)"; then
-      ok "$extension already installed"
-    else
-      run "Install $extension" gh extension install "$extension"
-    fi
-  done
+  local extension=github/gh-stack
+  if gh extension list | grep -qE "(^|[[:space:]])${extension}([[:space:]]|$)"; then
+    ok "$extension already installed"
+  else
+    run "Install $extension" gh extension install "$extension"
+  fi
 }
 bootstrap_pi() {
   section 'Pi extensions'
