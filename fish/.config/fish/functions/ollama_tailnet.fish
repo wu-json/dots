@@ -55,7 +55,9 @@ function ollama_tailnet --description "Serve Ollama on the tailnet as ollama.<ta
                 end
             end
 
+            set -l started_ollama false
             if not curl -sf --max-time 2 http://127.0.0.1:11434/api/version >/dev/null
+                set started_ollama true
                 __ollama_tailnet_say "starting ollama serve (logs: /tmp/ollama-serve.log)"
                 # OrbStack containers can reach the host's localhost, so Ollama
                 # doesn't need to be exposed to the LAN.
@@ -143,8 +145,13 @@ function ollama_tailnet --description "Serve Ollama on the tailnet as ollama.<ta
             if test $detach = true
                 ollama_tailnet __wait $id $proxy true
                 or return
+                # After a reboot, the containers only come back if OrbStack
+                # starts at login, and they need Ollama running too.
                 if command -q orbctl; and orbctl config get app.start_at_login 2>/dev/null | string match -q false
-                    __ollama_tailnet_say "OrbStack doesn't start at login, so this won't come back after a reboot. To fix: orbctl config set app.start_at_login true"
+                    __ollama_tailnet_say "OrbStack doesn't start at login, so the proxy won't come back after a reboot. To fix: orbctl config set app.start_at_login true"
+                end
+                if test $started_ollama = true
+                    __ollama_tailnet_say "ollama was started by this command and won't come back after a reboot. Run the Ollama app with launch at login on, or start ollama yourself after rebooting."
                 end
                 return
             end
