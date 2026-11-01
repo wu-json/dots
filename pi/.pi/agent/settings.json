@@ -7,6 +7,7 @@
   "lastChangelogVersion": "1.1.0",
   "defaultThinkingLevel": "high",
   "enabledModels": [
-    "ollama/*"
+    "ollama/*",
+    "ollama-tailnet/*"
   ]
 }
