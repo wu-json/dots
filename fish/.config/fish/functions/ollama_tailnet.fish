@@ -85,14 +85,14 @@ function ollama_tailnet --description "Serve Ollama on the tailnet as ollama.<ta
                 set authkey_args -e "TS_AUTHKEY=$TS_AUTHKEY"
             end
 
-            docker run -d --rm --name $ctr \
+            set -l id (docker run -d --rm --name $ctr \
                 -e TS_HOSTNAME=ollama \
                 -e TS_STATE_DIR=/var/lib/tailscale \
                 -e TS_SERVE_CONFIG=/config/serve.json \
                 $authkey_args \
                 -v ts-ollama-state:/var/lib/tailscale \
                 -v $cfgdir:/config \
-                $image >/dev/null
+                $image)
             or return
 
             # Ctrl-c goes to the foreground process, not to fish, so a fish
@@ -100,26 +100,40 @@ function ollama_tailnet --description "Serve Ollama on the tailnet as ollama.<ta
             # the foreground from the start and forwards ctrl-c to the
             # container, which exits and is removed by --rm. The startup
             # checks run in a separate background process meanwhile.
-            fish --no-config -c 'source $argv[1]; ollama_tailnet __wait' \
-                (functions --details ollama_tailnet) &
+            # Everything uses the container ID, not the name, so a second
+            # `up` in another terminal can't be removed by this one's cleanup.
+            fish --no-config -c 'source $argv[1]; ollama_tailnet __wait $argv[2]' \
+                (functions --details ollama_tailnet) $id &
             set -l waiter $last_pid
             disown $waiter
 
-            docker attach --sig-proxy=true $ctr >/dev/null 2>&1
+            docker attach --sig-proxy=true $id >/dev/null 2>&1
             kill $waiter 2>/dev/null
-            docker rm -f $ctr >/dev/null 2>&1
+            docker rm -f $id >/dev/null 2>&1
             __ollama_tailnet_say "proxy stopped (ollama still running locally — pkill -x ollama to stop it)"
         case __wait
-            # Internal: startup checks for `up`. On failure, removing the
-            # container ends `up`'s docker attach.
+            # Internal: startup checks for `up`, given the container ID. On
+            # failure, removing the container ends `up`'s docker attach.
+            set -l id $argv[2]
+            if test -z "$id"
+                __ollama_tailnet_say "__wait is internal to ollama_tailnet up" >&2
+                return 1
+            end
+
+            function __ollama_tailnet_fail -S -a msg
+                __ollama_tailnet_say $msg >&2
+                docker logs --tail 5 $id 2>&1 | sed 's/^/    /' >&2
+                docker rm -f $id >/dev/null 2>&1
+            end
+
             set -l state ""
             set -l shown_login false
             for i in (seq 120)
-                set state (docker exec $ctr tailscale status --json 2>/dev/null | string match -rg '"BackendState":\s*"([^"]+)"')[1]
+                set state (docker exec $id tailscale status --json 2>/dev/null | string match -rg '"BackendState":\s*"([^"]+)"')[1]
                 test "$state" = Running
                 and break
                 if test "$state" = NeedsLogin; and test $shown_login = false
-                    set -l url (docker logs $ctr 2>&1 | string match -r 'https://login\.tailscale\.com/\S+' | tail -1)
+                    set -l url (docker logs $id 2>&1 | string match -r 'https://login\.tailscale\.com/\S+' | tail -1)
                     if test -n "$url"
                         __ollama_tailnet_say "one-time login needed: $url"
                         set shown_login true
@@ -128,29 +142,27 @@ function ollama_tailnet --description "Serve Ollama on the tailnet as ollama.<ta
                 sleep 1
             end
             if test "$state" != Running
-                __ollama_tailnet_say "container never came up (check: docker logs $ctr)" >&2
-                docker rm -f $ctr >/dev/null 2>&1
+                __ollama_tailnet_fail "container never came up. Last log lines:"
                 return 1
             end
 
-            set -l self (docker exec $ctr tailscale status --json --peers=false 2>/dev/null | string collect)
-            if not string match -q '*"CertDomains"*' -- $self
-                __ollama_tailnet_say "HTTPS certificates are off for this tailnet. Enable them in the Tailscale admin console (DNS page), then rerun." >&2
-                docker rm -f $ctr >/dev/null 2>&1
+            # CertDomains is null, not missing, when HTTPS is disabled.
+            set -l self (docker exec $id tailscale status --json --peers=false 2>/dev/null | string collect)
+            if not string match -rq '"CertDomains":\s*\[\s*"' -- $self
+                __ollama_tailnet_fail "HTTPS certificates are off for this tailnet. Enable them in the Tailscale admin console (DNS page), then rerun."
                 return 1
             end
 
             set -l served false
             for i in (seq 10)
-                if docker exec $ctr tailscale serve status --json 2>/dev/null | string match -q '*"Web"*'
+                if docker exec $id tailscale serve status --json 2>/dev/null | string match -q '*"Web"*'
                     set served true
                     break
                 end
                 sleep 1
             end
             if test $served = false
-                __ollama_tailnet_say "serve config was not applied (check: docker logs $ctr)" >&2
-                docker rm -f $ctr >/dev/null 2>&1
+                __ollama_tailnet_fail "serve config was not applied. Last log lines:"
                 return 1
             end
 
