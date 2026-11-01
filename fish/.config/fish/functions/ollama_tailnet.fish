@@ -42,7 +42,9 @@ function ollama_tailnet --description "Serve Ollama on the tailnet as ollama.<ta
 
             if not curl -sf --max-time 2 http://127.0.0.1:11434/api/version >/dev/null
                 __ollama_tailnet_say "starting ollama serve (logs: /tmp/ollama-serve.log)"
-                OLLAMA_HOST=0.0.0.0:11434 nohup ollama serve >/tmp/ollama-serve.log 2>&1 &
+                # OrbStack containers can reach the host's localhost, so Ollama
+                # doesn't need to be exposed to the LAN.
+                OLLAMA_HOST=127.0.0.1:11434 nohup ollama serve >/tmp/ollama-serve.log 2>&1 &
                 disown
                 for i in (seq 20)
                     curl -sf --max-time 2 http://127.0.0.1:11434/api/version >/dev/null
@@ -93,6 +95,23 @@ function ollama_tailnet --description "Serve Ollama on the tailnet as ollama.<ta
                 $image >/dev/null
             or return
 
+            # Ctrl-c goes to the foreground process, not to fish, so a fish
+            # signal handler would never run. Instead, docker attach stays in
+            # the foreground from the start and forwards ctrl-c to the
+            # container, which exits and is removed by --rm. The startup
+            # checks run in a separate background process meanwhile.
+            fish --no-config -c 'source $argv[1]; ollama_tailnet __wait' \
+                (functions --details ollama_tailnet) &
+            set -l waiter $last_pid
+            disown $waiter
+
+            docker attach --sig-proxy=true $ctr >/dev/null 2>&1
+            kill $waiter 2>/dev/null
+            docker rm -f $ctr >/dev/null 2>&1
+            __ollama_tailnet_say "proxy stopped (ollama still running locally — pkill -x ollama to stop it)"
+        case __wait
+            # Internal: startup checks for `up`. On failure, removing the
+            # container ends `up`'s docker attach.
             set -l state ""
             set -l shown_login false
             for i in (seq 120)
@@ -109,24 +128,35 @@ function ollama_tailnet --description "Serve Ollama on the tailnet as ollama.<ta
                 sleep 1
             end
             if test "$state" != Running
-                __ollama_tailnet_say "sidecar never came up (docker logs $ctr)" >&2
+                __ollama_tailnet_say "container never came up (check: docker logs $ctr)" >&2
                 docker rm -f $ctr >/dev/null 2>&1
                 return 1
             end
 
-            set -l suffix (docker exec $ctr tailscale status --json 2>/dev/null | string match -rg '"MagicDNSSuffix":\s*"([^"]+)"')[1]
-            if test -n "$suffix"
-                __ollama_tailnet_say "serving https://ollama.$suffix/v1 — ctrl-c to stop"
-            else
-                __ollama_tailnet_say "serving on tailnet node 'ollama' — ctrl-c to stop"
+            set -l self (docker exec $ctr tailscale status --json --peers=false 2>/dev/null | string collect)
+            if not string match -q '*"CertDomains"*' -- $self
+                __ollama_tailnet_say "HTTPS certificates are off for this tailnet. Enable them in the Tailscale admin console (DNS page), then rerun." >&2
+                docker rm -f $ctr >/dev/null 2>&1
+                return 1
             end
 
-            # Ctrl-c goes to the foreground process, not to fish, so a fish
-            # signal handler would never run. docker attach forwards it to the
-            # container, which exits and is removed by --rm.
-            docker attach --sig-proxy=true $ctr >/dev/null 2>&1
-            docker rm -f $ctr >/dev/null 2>&1
-            __ollama_tailnet_say "proxy stopped (ollama still running locally — pkill -x ollama to stop it)"
+            set -l served false
+            for i in (seq 10)
+                if docker exec $ctr tailscale serve status --json 2>/dev/null | string match -q '*"Web"*'
+                    set served true
+                    break
+                end
+                sleep 1
+            end
+            if test $served = false
+                __ollama_tailnet_say "serve config was not applied (check: docker logs $ctr)" >&2
+                docker rm -f $ctr >/dev/null 2>&1
+                return 1
+            end
+
+            # Tailscale renames the node (e.g. ollama-1) if "ollama" is taken.
+            set -l dns (string match -rg '"DNSName":\s*"([^"]+?)\.?"' -- $self)[1]
+            __ollama_tailnet_say "serving https://$dns/v1 — ctrl-c to stop"
         case down
             docker rm -f $ctr >/dev/null 2>&1
             __ollama_tailnet_say "proxy stopped (ollama still running locally — pkill -x ollama to stop it)"
