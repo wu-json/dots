@@ -57,28 +57,32 @@ function ollama_tailnet --description "Serve Ollama on the tailnet as ollama.<ta
                 end
             end
 
-            # The container applies this on startup: HTTPS on 443 -> host Ollama.
+            # The Tailscale container applies this on startup:
+            # HTTPS on 443 -> Caddy on :8080 -> host Ollama.
             set -l cfgdir ~/.config/ollama-tailnet
             mkdir -p $cfgdir
             echo '{
   "TCP": { "443": { "HTTPS": true } },
   "Web": {
     "${TS_CERT_DOMAIN}:443": {
-      "Handlers": { "/": { "Proxy": "http://host.docker.internal:11434" } }
+      "Handlers": { "/": { "Proxy": "http://127.0.0.1:8080" } }
     }
   }
 }' >$cfgdir/serve.json
 
-            # Docker never updates :latest on its own. If the pull fails
+            # Docker never updates :latest on its own. If a pull fails
             # (e.g. offline), the cached image is used.
             set -l image tailscale/tailscale:latest
-            __ollama_tailnet_say "checking for tailscale image updates"
-            if not docker pull --quiet $image >/dev/null 2>&1
-                __ollama_tailnet_say "pull failed, using cached image" >&2
+            set -l caddy_image caddy:2
+            __ollama_tailnet_say "checking for image updates"
+            for img in $image $caddy_image
+                if not docker pull --quiet $img >/dev/null 2>&1
+                    __ollama_tailnet_say "pull of $img failed, using cached image" >&2
+                end
             end
 
             # Safe to replace: the node's identity lives in the volume.
-            docker rm -f $ctr >/dev/null 2>&1
+            docker rm -f $ctr $ctr-proxy >/dev/null 2>&1
 
             set -l authkey_args
             if set -q TS_AUTHKEY
@@ -95,6 +99,20 @@ function ollama_tailnet --description "Serve Ollama on the tailnet as ollama.<ta
                 $image)
             or return
 
+            # Ollama bound to 127.0.0.1 rejects requests whose Host header isn't
+            # localhost-like, and Tailscale Serve forwards the original
+            # ollama.<tailnet>.ts.net Host. Caddy rewrites it. It shares the
+            # Tailscale container's network, so Serve reaches it on 127.0.0.1.
+            set -l proxy (docker run -d --rm --name $ctr-proxy \
+                --network container:$id \
+                $caddy_image \
+                caddy reverse-proxy --from :8080 \
+                    --to host.docker.internal:11434 --change-host-header)
+            or begin
+                docker rm -f $id >/dev/null 2>&1
+                return 1
+            end
+
             # Ctrl-c goes to the foreground process, not to fish, so a fish
             # signal handler would never run. Instead, docker attach stays in
             # the foreground from the start and forwards ctrl-c to the
@@ -109,7 +127,7 @@ function ollama_tailnet --description "Serve Ollama on the tailnet as ollama.<ta
 
             docker attach --sig-proxy=true $id >/dev/null 2>&1
             kill $waiter 2>/dev/null
-            docker rm -f $id >/dev/null 2>&1
+            docker rm -f $id $proxy >/dev/null 2>&1
             __ollama_tailnet_say "proxy stopped (ollama still running locally — pkill -x ollama to stop it)"
         case __wait
             # Internal: startup checks for `up`, given the container ID. On
@@ -170,7 +188,7 @@ function ollama_tailnet --description "Serve Ollama on the tailnet as ollama.<ta
             set -l dns (string match -rg '"DNSName":\s*"([^"]+?)\.?"' -- $self)[1]
             __ollama_tailnet_say "serving https://$dns/v1 — ctrl-c to stop"
         case down
-            docker rm -f $ctr >/dev/null 2>&1
+            docker rm -f $ctr $ctr-proxy >/dev/null 2>&1
             __ollama_tailnet_say "proxy stopped (ollama still running locally — pkill -x ollama to stop it)"
         case status
             docker exec $ctr tailscale serve status
