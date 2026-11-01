@@ -113,15 +113,12 @@ bootstrap_gh() {
     warn 'GitHub extensions skipped: run gh auth login, then just bootstrap gh'
     return
   fi
-  local extensions extension
-  extensions=$(gh extension list)
-  for extension in github/gh-stack; do
-    if printf '%s\n' "$extensions" | grep -qE "(^|[[:space:]])${extension}([[:space:]]|$)"; then
-      ok "$extension already installed"
-    else
-      run "Install $extension" gh extension install "$extension"
-    fi
-  done
+  local extension=github/gh-stack
+  if gh extension list | grep -qE "(^|[[:space:]])${extension}([[:space:]]|$)"; then
+    ok "$extension already installed"
+  else
+    run "Install $extension" gh extension install "$extension"
+  fi
 }
 bootstrap_pi() {
   section 'Pi extensions'
