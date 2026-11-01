@@ -1,6 +1,8 @@
+import { execFile } from "node:child_process";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import * as path from "node:path";
+import { promisify } from "node:util";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 interface LocalModel {
@@ -35,6 +37,40 @@ const HOSTS: OllamaHost[] = [
 		],
 	},
 ];
+
+// Heavy models served by whichever host runs `ollama_tailnet up`, which
+// starts a tailscale sidecar container that joins the tailnet as the
+// "ollama" node and proxies ollama.<tailnet>.ts.net to the host's Ollama.
+// The tailnet name is resolved at runtime so it never lands in this repo.
+const TAILNET_FALLBACK: LocalModel[] = [
+	{
+		id: "qwen3.8:27b-mlx",
+		name: "Qwen3.8 27B (mlx)",
+		contextWindow: 256000,
+		maxTokens: 4096,
+		reasoning: true,
+	},
+];
+
+const TAILSCALE_BINS = ["tailscale", "/Applications/Tailscale.app/Contents/MacOS/tailscale"];
+
+async function tailnetBaseUrl(): Promise<string | undefined> {
+	const override = process.env.OLLAMA_TAILNET_URL;
+	if (override) return override.replace(/\/+$/, "");
+	for (const bin of TAILSCALE_BINS) {
+		try {
+			const { stdout } = await promisify(execFile)(bin, ["status", "--json"], { timeout: 2000 });
+			const status = JSON.parse(stdout) as {
+				MagicDNSSuffix?: string;
+				CurrentTailnet?: { MagicDNSSuffix?: string };
+			};
+			const suffix = (status.MagicDNSSuffix || status.CurrentTailnet?.MagicDNSSuffix)?.replace(/\.$/, "");
+			if (suffix) return `https://ollama.${suffix}`;
+		} catch {
+		}
+	}
+	return undefined;
+}
 
 const CACHE_FILE = path.join(homedir(), ".cache", "pi", "ollama-models.json");
 const DEFAULT_CONTEXT_WINDOW = 128000;
@@ -143,8 +179,19 @@ export default async function (pi: ExtensionAPI) {
 		writeCache(host.provider, models);
 	};
 
+	const hosts = [...HOSTS];
+	const tailnetUrl = await tailnetBaseUrl();
+	if (tailnetUrl) {
+		hosts.push({
+			provider: "ollama-tailnet",
+			baseUrl: tailnetUrl,
+			timeoutMs: 3000,
+			fallback: TAILNET_FALLBACK,
+		});
+	}
+
 	const cache = readCache();
-	for (const host of HOSTS) {
+	for (const host of hosts) {
 		const cached = cache[host.provider];
 		register(host, cached?.models?.length ? cached.models : host.fallback);
 		void refresh(host).catch(() => {});
